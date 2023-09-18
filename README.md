@@ -23,7 +23,7 @@ Laravel, Nginx, and MySQL with Docker Compose
 
 ```bash
 $ git clone git@github.com:PBL6-Software-Engineering/BE.git
-$ cd BE folder 
+$ cd BE  
 $ docker compose build
 $ docker compose up -d
 $ docker compose exec app composer install
@@ -51,7 +51,7 @@ http://localhost:99
 
 ```bash
 $ git clone git@github.com:PBL6-Software-Engineering/BE.git
-$ cd BE folder 
+$ cd BE  
 $ make install
 ```
 
