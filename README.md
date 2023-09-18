@@ -11,7 +11,7 @@
 
 ## Introduction
 
-Build a simple laravel development environment with docker-compose. Compatible with Windows(WSL2), macOS(M1) and Linux.
+Laravel, Nginx, and MySQL with Docker Compose
 
 ## Usage
 
