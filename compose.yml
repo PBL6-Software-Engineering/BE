@@ -1,0 +1,83 @@
+volumes:
+  db-store:
+  psysh-store:
+
+configs:
+  db-config:
+    file: ./infra/docker/mysql/my.cnf
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./infra/docker/php/Dockerfile
+      target: ${APP_BUILD_TARGET:-development}
+    volumes:
+      - type: bind
+        source: ./src
+        target: /workspace
+      - type: volume
+        source: psysh-store
+        target: /root/.config/psysh
+        volume:
+          nocopy: true
+    environment:
+      - APP_DEBUG=${APP_DEBUG:-true}
+      - APP_ENV=${APP_ENV:-local}
+      - APP_URL=${APP_URL:-http://localhost}
+      - LOG_CHANNEL=${LOG_CHANNEL:-stderr}
+      - LOG_STDERR_FORMATTER=${LOG_STDERR_FORMATTER:-Monolog\Formatter\JsonFormatter}
+      - DB_CONNECTION=${DB_CONNECTION:-mysql}
+      - DB_HOST=${DB_HOST:-db}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_DATABASE=${DB_DATABASE:-pbl6}
+      - DB_USERNAME=${DB_USERNAME:-hivanmanh}
+      - DB_PASSWORD=${DB_PASSWORD:-hivanmanh}
+
+  web:
+    build:
+      context: .
+      dockerfile: ./infra/docker/nginx/Dockerfile
+    ports:
+      - target: 80 
+        published: ${WEB_PUBLISHED_PORT:-99} # http://localhost:99 
+        protocol: tcp
+        mode: host
+    volumes:
+      - type: bind
+        source: ./src
+        target: /workspace
+
+  db:
+    build:
+      context: .
+      dockerfile: ./infra/docker/mysql/Dockerfile
+    ports:
+      - target: 3306  
+        published: ${DB_PUBLISHED_PORT:-3306} # 3306 
+        protocol: tcp
+        mode: host
+    configs:
+      - source: db-config
+        target: /etc/my.cnf
+    volumes:
+      - type: volume
+        source: db-store
+        target: /var/lib/mysql
+        volume:
+          nocopy: true
+    environment:
+      MYSQL_DATABASE: pbl6
+      MYSQL_USER: hivanmanh
+      MYSQL_PASSWORD: hivanmanh
+      MYSQL_ROOT_PASSWORD: hivanmanh
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - target: 8025
+        published: ${MAILPIT_PUBLISHED_PORT:-8025}
+        protocol: tcp
+        mode: host
