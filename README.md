@@ -40,6 +40,7 @@ http://localhost:99
 ```bash
   Host     : 127.0.0.1 
   Port     : 3306 
+  Database : pbl6 
   Username : hivanmanh
   Password : hivanmanh 
 ```
