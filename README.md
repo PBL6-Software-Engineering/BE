@@ -9,6 +9,7 @@
   <img alt="Laravel" src="https://img.shields.io/badge/-Laravel-FF2D20?style=flat-square&logo=laravel&logoColor=white" />
   <img alt="Docker" src="https://img.shields.io/badge/-Docker-46a2f1?style=flat-square&logo=docker&logoColor=white" />
   <img alt="Nginx" src="https://img.shields.io/badge/-Nginx-009639?style=flat-square&logo=nginx&logoColor=white" />
+  <img alt="Node.js" src="https://img.shields.io/badge/-Node.js-339933?style=flat-square&logo=Node.js&logoColor=white" />
   <img alt="NPM" src="https://img.shields.io/badge/-NPM-CB3837?style=flat-square&logo=npm&logoColor=white" />
   <img alt="Composer" src="https://img.shields.io/badge/-Composer-885630?style=flat-square&logo=composer&logoColor=white" />
   <img src="https://img.shields.io/github/license/ucan-lab/docker-laravel" alt="License">
@@ -73,6 +74,7 @@ http://localhost:99
 - Base image
   - [php](https://hub.docker.com/_/php):8-fpm-alpine
   - [composer](https://hub.docker.com/_/composer):2.6.3
+  - [node.js](https://hub.docker.com/_/node/):18.14.2
 
 ### web container
 
