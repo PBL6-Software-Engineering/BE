@@ -1,20 +1,22 @@
 install:
-	@make build
-	@make up
-	docker compose exec app composer install
-	docker compose exec app cp .env.example .env
-	docker compose exec app php artisan key:generate
-	docker compose exec app php artisan storage:link
-	docker compose exec app chmod -R 777 storage bootstrap/cache
+	docker-compose up -d --build app
+	docker-compose exec app cp /var/www/html/.env.example /var/www/html/.env
+	docker compose run --rm composer install
+	docker compose run --rm npm install 
+	docker compose run --rm artisan key:generate
+	docker-compose run --rm artisan storage:link
+	docker-compose run --rm artisan optimize:clear
+	docker-compose run --rm artisan optimize
 	@make fresh
+	
 create-project:
 	mkdir -p src
 	docker compose build
 	docker compose up -d
-	docker compose exec app composer create-project --prefer-dist laravel/laravel .
-	docker compose exec app php artisan key:generate
-	docker compose exec app php artisan storage:link
-	docker compose exec app chmod -R 777 storage bootstrap/cache
+	docker compose run --rm composer create-project --prefer-dist laravel/laravel .
+	docker compose run --rm artisan key:generate
+	docker compose run --rm artisan storage:link
+	docker-compose run --rm chmod -R 777 storage bootstrap/cache
 	@make fresh
 up:
 	docker compose up -d
@@ -57,33 +59,33 @@ web:
 app:
 	docker compose exec app bash
 migrate:
-	docker compose exec app php artisan migrate
+	docker compose run --rm artisan migrate
 fresh:
-	docker compose exec app php artisan migrate:fresh --seed
+	docker compose run --rm artisan migrate:fresh --seed
 seed:
-	docker compose exec app php artisan db:seed
+	docker compose run --rm artisan db:seed
 dacapo:
-	docker compose exec app php artisan dacapo
+	docker compose run --rm artisan dacapo
 rollback-test:
-	docker compose exec app php artisan migrate:fresh
-	docker compose exec app php artisan migrate:refresh
+	docker compose run --rm artisan migrate:fresh
+	docker compose run --rm artisan migrate:refresh
 tinker:
-	docker compose exec app php artisan tinker
+	docker compose run --rm artisan tinker
 test:
-	docker compose exec app php artisan test
+	docker compose run --rm artisan test
 optimize:
-	docker compose exec app php artisan optimize
+	docker compose run --rm artisan optimize
 optimize-clear:
-	docker compose exec app php artisan optimize:clear
+	docker compose run --rm artisan optimize:clear
 cache:
-	docker compose exec app composer dump-autoload -o
+	docker compose run --rm composer dump-autoload -o
 	@make optimize
-	docker compose exec app php artisan event:cache
-	docker compose exec app php artisan view:cache
+	docker compose run --rm artisan event:cache
+	docker compose run --rm artisan view:cache
 cache-clear:
-	docker compose exec app composer clear-cache
+	docker compose run --rm composer clear-cache
 	@make optimize-clear
-	docker compose exec app php artisan event:clear
+	docker compose run --rm artisan event:clear
 db:
 	docker compose exec db bash
 sql:
@@ -91,7 +93,7 @@ sql:
 redis:
 	docker compose exec redis redis-cli
 ide-helper:
-	docker compose exec app php artisan clear-compiled
-	docker compose exec app php artisan ide-helper:generate
-	docker compose exec app php artisan ide-helper:meta
-	docker compose exec app php artisan ide-helper:models --nowrite
+	docker compose run --rm artisan clear-compiled
+	docker compose run --rm artisan ide-helper:generate
+	docker compose run --rm artisan ide-helper:meta
+	docker compose run --rm artisan ide-helper:models --nowrite

@@ -9,13 +9,14 @@
   <img alt="Laravel" src="https://img.shields.io/badge/-Laravel-FF2D20?style=flat-square&logo=laravel&logoColor=white" />
   <img alt="Docker" src="https://img.shields.io/badge/-Docker-46a2f1?style=flat-square&logo=docker&logoColor=white" />
   <img alt="Nginx" src="https://img.shields.io/badge/-Nginx-009639?style=flat-square&logo=nginx&logoColor=white" />
+  <img alt="NPM" src="https://img.shields.io/badge/-NPM-CB3837?style=flat-square&logo=npm&logoColor=white" />
   <img alt="Composer" src="https://img.shields.io/badge/-Composer-885630?style=flat-square&logo=composer&logoColor=white" />
   <img src="https://img.shields.io/github/license/ucan-lab/docker-laravel" alt="License">
 </p>
 
 ## Introduction
 
-Laravel, Nginx, and MySQL with Docker Compose
+Laravel:9.0, PHP:8.0, Nginx:stable-alpine, NPM:Nodejs-18.14.2 and MySQL:8.0 with Docker Compose
 
 ## Usage
 
@@ -24,13 +25,15 @@ Laravel, Nginx, and MySQL with Docker Compose
 ```bash
 $ git clone git@github.com:PBL6-Software-Engineering/BE.git
 $ cd BE  
-$ docker compose build
-$ docker compose up -d
-$ docker compose exec app composer install
-$ docker compose exec app php artisan key:generate
-$ docker compose exec app php artisan storage:link
-$ docker compose exec app chmod -R 777 storage bootstrap/cache
-$ docker compose exec app php artisan migrate
+$ docker-compose up -d --build app
+$ docker-compose exec app cp /var/www/html/.env.example /var/www/html/.env
+$ docker compose run --rm composer install
+$ docker compose run --rm npm install 
+$ docker compose run --rm artisan key:generate
+$ docker-compose run --rm artisan storage:link
+$ docker-compose run --rm artisan optimize:clear
+$ docker-compose run --rm artisan optimize
+$ docker-compose run --rm artisan migrate:fresh  --seed
 ```
 
 http://localhost:99
@@ -38,7 +41,7 @@ http://localhost:99
 ### Connect Database 
 ```bash
   Host     : 127.0.0.1 
-  Port     : 3306 
+  Port     : 3309
   Database : pbl6 
   Username : hivanmanh
   Password : hivanmanh 
@@ -68,13 +71,13 @@ http://localhost:99
 ### app container
 
 - Base image
-  - [php](https://hub.docker.com/_/php):8.2-fpm-bullseye
-  - [composer](https://hub.docker.com/_/composer):2.6
+  - [php](https://hub.docker.com/_/php):8-fpm-alpine
+  - [composer](https://hub.docker.com/_/composer):2.6.3
 
 ### web container
 
 - Base image
-  - [nginx](https://hub.docker.com/_/nginx):1.25
+  - [nginx](https://hub.docker.com/_/nginx):stable-alpine
 
 ### db container
 
