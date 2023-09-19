@@ -3,6 +3,7 @@ install:
 	docker-compose exec app cp /var/www/html/.env.example /var/www/html/.env
 	docker compose run --rm composer install
 	docker compose run --rm npm install 
+	docker-compose exec app chmod 777 /var/www/html
 	docker compose run --rm artisan key:generate
 	docker-compose run --rm artisan storage:link
 	docker-compose run --rm artisan optimize:clear
