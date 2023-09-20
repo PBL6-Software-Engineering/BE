@@ -26,6 +26,7 @@ return new class extends Migration
             $table->json('location')->nullable();
             $table->integer('search_number')->nullable();
             $table->string('role')->default('hospital');
+            $table->rememberToken();
             $table->timestamps();
         });
     }

@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class HealthInsuranceHospital extends Model
+{
+    use HasFactory;
+    protected $fillable = [
+        'id',
+        'id_hospital',
+        'id_health_insurance',
+    ];
+
+    public function hospital() {
+        return $this->belongsTo(Hospital::class);
+    }
+
+    public function healthInsurances() {
+        return $this->belongsTo(HealthInsurances::class);
+    }
+
+}

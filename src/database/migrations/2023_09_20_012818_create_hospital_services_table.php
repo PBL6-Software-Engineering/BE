@@ -13,19 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('products', function (Blueprint $table) {
+        Schema::create('hospital_services', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('id_hospital');
+            $table->unsignedBigInteger('id_department');
             $table->string('name');
-            $table->integer('quantity'); 
-            $table->date('warranty_period');
-            $table->longText('description');
-            $table->foreignId('category_id')->nullable();
+            $table->integer('time_advise');
             $table->float('price');
-            $table->string('material');
-            $table->string('dimension');
-            $table->string('uri')->unique();
-            $table->json('images')->nullable();
+            $table->json('infor');
             $table->timestamps();
+
+            $table->foreign('id_hospital')->references('id')->on('hospitals')->onDelete('cascade');
+            $table->foreign('id_department')->references('id')->on('departments')->onDelete('cascade');
         });
     }
 
@@ -36,6 +35,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('hospital_services');
     }
 };

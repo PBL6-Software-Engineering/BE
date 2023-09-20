@@ -5,13 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PasswordReset extends Model
+class Notify extends Model
 {
     use HasFactory;
-
-    protected $table = 'password_resets';
-
     protected $fillable = [
-        'id', 'email', 'token', 'type_user',
+        'id',
+        'id_user',
+        'title',
+        'content',
     ];
+
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
 }

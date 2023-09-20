@@ -5,18 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Category extends Model
+class Article extends Model
 {
     use HasFactory;
     protected $fillable = [
         'id',
-        'name',
-        'search_number'
+        'id_doctor',
+        'title',
+        'content'
     ];
-    
-    public function products()
-    {
-        return $this->hasMany(Product::class);
+
+    public function doctor() {
+        return $this->belongsTo(Doctor::class);
     }
 
     public function articleCategories()

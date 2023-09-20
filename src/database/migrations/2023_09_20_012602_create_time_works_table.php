@@ -13,16 +13,17 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('password_resets', function (Blueprint $table) {
+        Schema::create('time_works', function (Blueprint $table) {
             $table->id();
-            $table->string('email')->index();
-            $table->string('token');
-            $table->string('type_user');
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
+            $table->unsignedBigInteger('id_hospital');
+            $table->json('times');
+            $table->boolean('enable')->default(true);
+            $table->text('note');
+            $table->timestamps();
+
+            $table->foreign('id_hospital')->references('id')->on('hospitals')->onDelete('cascade');
         });
     }
-
     /**
      * Reverse the migrations.
      *
@@ -30,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('password_resets');
+        Schema::dropIfExists('time_works');
     }
 };

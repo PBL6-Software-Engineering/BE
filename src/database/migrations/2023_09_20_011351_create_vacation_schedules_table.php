@@ -13,11 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('vacation_schedules', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->integer('search_number');
+            $table->unsignedBigInteger('id_doctor')->nullable();
+            $table->timestamp('date');
+            $table->integer('shift_off');
+            $table->boolean('is_accept')->default(false);
             $table->timestamps();
+
+            $table->foreign('id_doctor')->references('id')->on('doctors')->onDelete('cascade');
         });
     }
 
@@ -28,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('vacation_schedules');
     }
 };
