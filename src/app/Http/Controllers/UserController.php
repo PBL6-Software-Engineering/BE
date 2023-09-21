@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Session;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -60,6 +61,7 @@ class UserController extends Controller
     }
 
     public function saveAvatar(Request $request){
+        // $pathToFile = $request->file('avatar')->store('image/avatars','public');
         if ($request->hasFile('avatar')) {
             $image = $request->file('avatar');
             $filename =  pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME) . '_' . time() . '.' . $image->getClientOriginalExtension();

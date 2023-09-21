@@ -24,7 +24,7 @@ return new class extends Migration
             $table->date('date_of_birth')->nullable();
             $table->string('avatar')->nullable();
             $table->string('google_id')->nullable();
-            $table->boolean('gender')->nullable();
+            $table->integer('gender')->nullable();
             $table->boolean('is_accept')->nullable();
             $table->string('role')->default('user'); 
             $table->timestamp('email_verified_at')->nullable();

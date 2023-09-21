@@ -26,7 +26,7 @@ return new class extends Migration
             $table->date('date_of_birth')->nullable();
             $table->integer('experience')->nullable();
             $table->string('avatar')->nullable();
-            $table->boolean('gender')->nullable();
+            $table->integer('gender')->nullable();
             $table->boolean('is_accept');
             $table->integer('search_number')->nullable();
             $table->string('role')->default('doctor');
