@@ -21,6 +21,7 @@ use App\Http\Requests\RequestLogin;
 use App\Http\Requests\RequestUpdateInfor;
 use App\Http\Requests\RequestUpdateUser;
 use App\Jobs\SendForgotPasswordEmail;
+use App\Models\InforUser;
 use App\Models\PasswordReset;
 use App\Rules\ReCaptcha;
 use App\Services\UserService;
@@ -34,145 +35,15 @@ use Illuminate\Support\Facades\Storage;
 class UserController extends Controller
 {
 
-    public function login(Request $request)
-    {
-        
-        $u = User::where('email',$request->email)->first();
-        if(empty($u)){
-            return response()->json(['error' => 'Email is incorrect !'], 401);
-        }
-        else {
-            $status = $u->status;
-            if($status == 0){
-                return response()->json(['error' => 'Your account has been locked !'], 401);
-            } 
-        }
 
-        $credentials = request(['email', 'password']);
-        $user = User::where('email',$request->email)->first();
-        if (!$token = auth()->guard('user_api')->attempt($credentials)) {
-            return response()->json(['error' => 'Either email or password is wrong. !'], 401);
-        }
-
-        return response()->json([
-            'user' => $user,
-            'message'=>$this->respondWithToken($token)
-        ]);
-    }
-
-    public function saveAvatar(Request $request){
-        // $pathToFile = $request->file('avatar')->store('image/avatars','public');
-        if ($request->hasFile('avatar')) {
-            $image = $request->file('avatar');
-            $filename =  pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME) . '_' . time() . '.' . $image->getClientOriginalExtension();
-            $image->storeAs('public/image/avatars', $filename);
-            return 'storage/image/avatars/' . $filename;
-        }
-    }
-
-    public function register(RequestCreateUser $request)
-    {
-        $userEmail = User::where('email', $request->email)->first();
-        if($userEmail){
-            if($userEmail['password']){
-                return response()->json(['error' => 'Account already exists !'], 401);
-            }
-            else { 
-                $avatar = $this->saveAvatar($request);
-                $userEmail->update(array_merge(
-                    $request->all(),
-                    ['password' => Hash::make($request->password),'status'=> "1",'avatar' => $avatar]
-                ));
-                return response()->json([
-                    'message' => 'User successfully registered',
-                    'user' => $userEmail
-                ], 201);
-            }
-        }
-        else {
-            $avatar = $this->saveAvatar($request);
-            $user = User::create(array_merge(
-                $request->all(),
-                ['password' => Hash::make($request->password),'status'=> "1", 'avatar' => $avatar]
-            ));
-            return response()->json([
-                'message' => 'User successfully registered',
-                'user' => $user
-            ], 201);
-        }
-    }
-
-    /**
-     * redirectToGoogle
-     *
-     * @return object
-     */
-    public function redirectToGoogle()
-    {
-        return Socialite::driver('google')->stateless()->redirect();
-    }
-
-    /**
-     * handleGoogleCallback
-     *
-     * @return object
-     */
-    public function handleGoogleCallback()
-    {
-        try {
-            $user = Socialite::driver('google')->stateless()->user();
-            $ggUser = User::where('google_id',$user->id)->first();
-            if ($ggUser) {
-                if ($ggUser->status == 0) {
-                    return response()->json(['error' => 'Your account has been locked or not approved !'], 401);
-                } else {
-                    Auth::login($ggUser);
-                    $this->token = auth()->guard('user_api')->login($ggUser);
-                    $ggUser->access_token = $this->respondWithToken($this->token)->getData()->access_token;
-                    return response()->json([
-                        'message' => 'Login by Google successfully !',
-                        'user' => $ggUser,
-                    ], 201);
-                }
-            } else {
-                $findEmail = User::where('email',$user->email)->first();
-                if ($findEmail) {
-                    $findEmail->update([
-                        'google_id' => $user->id
-                    ]);
-                    return response()->json([
-                        'message' => 'Login by Google successfully !',
-                        'user' => $findEmail
-                    ], 201);
-                } else {
-                    $newUser = User::create([
-                        'name' => $user->name,
-                        'email' => $user->email,
-                        'google_id' => $user->id,
-                        'username' => 'user_' . $user->id,
-                        'avatar' => $user->avatar,
-                        'status' => 1
-                    ]);
-                    $user = User::find($newUser->id);
-                }
-                return response()->json([
-                    'message' => 'User successfully registered',
-                    'user' => $user
-                ], 201);
-            }
-        } catch (Exception $e) {
-            return response()->json(['error' => $e], 401);
-        }
-    }
-
-    /**
-     * Get the authenticated User.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function profile()
     {
-        return response()->json(auth('user_api')->user());
+        $user = User::find(auth('user_api')->user()->id);
+        $inforUser = InforUser::where('id_user', $user->id)->first();
+
+        return response()->json([
+            'user' => array_merge($user->toArray(), $inforUser->toArray()),
+        ]);
     }
 
     public function updateProfile(RequestUpdateUser $request, $id_user)

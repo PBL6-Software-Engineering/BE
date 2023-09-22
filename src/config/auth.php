@@ -47,15 +47,7 @@ return [
         'admin_api' => [
             'driver'   => 'jwt',
             'provider' => 'admins',
-        ],
-        'doctor_api' => [
-            'driver'   => 'jwt',
-            'provider' => 'doctors',
-        ],
-        'hospital_api' => [
-            'driver'   => 'jwt',
-            'provider' => 'hospitals',
-        ],
+        ]
     ],
 
     'providers' => [
@@ -66,15 +58,7 @@ return [
         'admins' => [
             'driver' => 'eloquent',
             'model' => App\Models\Admin::class,
-        ],
-        'doctors' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\Doctor::class,
-        ],
-        'hospitals' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\Hospital::class,
-        ],
+        ]
     ],
 
     /*

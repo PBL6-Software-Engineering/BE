@@ -20,8 +20,8 @@ class HospitalDepartment extends Model
         return $this->belongsTo(Department::class);
     }
 
-    public function hospital() {
-        return $this->belongsTo(Hospital::class);
+    public function inforHospital() {
+        return $this->belongsTo(InforHospital::class);
     }
 
 }

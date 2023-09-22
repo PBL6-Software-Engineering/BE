@@ -23,7 +23,7 @@ return new class extends Migration
             $table->json('infor');
             $table->timestamps();
 
-            $table->foreign('id_hospital')->references('id')->on('hospitals')->onDelete('cascade');
+            $table->foreign('id_hospital')->references('id_hospital')->on('infor_hospitals')->onDelete('cascade');
             $table->foreign('id_department')->references('id')->on('departments')->onDelete('cascade');
         });
     }

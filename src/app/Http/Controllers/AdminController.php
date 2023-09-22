@@ -54,7 +54,7 @@ class AdminController extends Controller
         }
 
         return response()->json([
-            'user' => $user,
+            'admin' => $user,
             'message'=>$this->respondWithToken($token)
         ]);
     }
@@ -213,7 +213,7 @@ class AdminController extends Controller
         $fakeImageUrl = $faker->imageUrl(200, 200, 'admins'); 
         $imageContent = file_get_contents($fakeImageUrl);
         $imageName = 'avatar_admin_' . time() . '.jpg'; 
-        Storage::put('public/image/avatars/' . $imageName, $imageContent);
+        Storage::put('public/image/avatars/admins/' . $imageName, $imageContent);
 
         $new_password = Str::random(10);
 
@@ -221,8 +221,8 @@ class AdminController extends Controller
             'email' => $request->email,
             'name' => $request->name,
             'password' => Hash::make($new_password),
-            'role' => 0,
-            'avatar' => 'storage/image/avatars/' . $imageName,
+            'role' => 'admin',
+            'avatar' => 'storage/image/avatars/admins/' . $imageName,
         ]);
         Queue::push(new SendPasswordNewAdmin($request->email, $new_password));
         return response()->json([

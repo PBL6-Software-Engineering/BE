@@ -18,8 +18,8 @@ class HospitalService extends Model
         'infor',
     ];
 
-    public function hospital() {
-        return $this->belongsTo(Hospital::class);
+    public function inforHospital() {
+        return $this->belongsTo(InforHospital::class);
     }
     
 }

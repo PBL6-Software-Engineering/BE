@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\InforHospitalController;
+use App\Http\Controllers\InforUserController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -42,19 +44,51 @@ Route::prefix('admin')->controller(AdminController::class)->group(function () {
     });
 });
 
-// Customer 
+// User 
 Route::prefix('user')->controller(UserController::class)->group(function () {
     Route::post('login', 'login');
-    Route::post('register', 'register');
 
     Route::post('forgot-pw-sendcode', 'forgotSend');
     Route::post('forgot-update', 'forgotUpdate');
 
-    // OAuth2
-    Route::get('authorized/google', [UserController::class, 'redirectToGoogle'])->name('google');
-    Route::get('authorized/google/callback', [UserController::class, 'handleGoogleCallback']);
-
     Route::middleware('auth:user_api')->group(function () {
+        Route::get('test_midle2', 'test_midle2');
+
+        Route::get('logout', 'logout');
+        Route::post('change-password', 'changePassword');
+        Route::post('create-password', 'createPassword'); 
+        Route::post('{user}', 'updateProfile');
+        Route::get('profile', 'profile');
+    });
+});
+
+// User Infor 
+Route::get('authorized/google', [InforUserController::class, 'redirectToGoogle'])->name('google');
+Route::get('authorized/google/callback', [InforUserController::class, 'handleGoogleCallback']);
+
+Route::prefix('infor-user')->controller(InforUserController::class)->group(function () {
+    Route::post('register', 'register');
+    Route::post('login', 'login');
+
+    Route::middleware(['auth:user_api','role:user'])->group(function () {
+        Route::get('test_midle', 'test_midle');
+
+        Route::get('logout', 'logout');
+        Route::post('change-password', 'changePassword');
+        Route::post('create-password', 'createPassword'); 
+        Route::post('{user}', 'updateProfile');
+        Route::get('profile', 'profile');
+    });
+});
+
+// Hospital Infor  
+Route::prefix('infor-hospital')->controller(InforHospitalController::class)->group(function () {
+    Route::post('register', 'register');
+    Route::post('login', 'login');
+
+    Route::middleware(['auth:user_api','role:hospital'])->group(function () {
+        Route::get('test_midle2', 'test_midle2');
+
         Route::get('logout', 'logout');
         Route::post('change-password', 'changePassword');
         Route::post('create-password', 'createPassword'); 

@@ -16,8 +16,8 @@ class VacationSchedule extends Model
         'is_accept'
     ];
 
-    public function doctor() {
-        return $this->belongsTo(Doctor::class);
+    public function inforDoctor() {
+        return $this->belongsTo(InforDoctor::class);
     }
 
 }

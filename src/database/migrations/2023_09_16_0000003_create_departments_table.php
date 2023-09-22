@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description');
-            $table->integer('search_number');
+            $table->integer('search_number')->default(0);
             $table->timestamps();
         });
     }

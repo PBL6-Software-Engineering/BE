@@ -15,7 +15,7 @@ class Notify extends Model
         'content',
     ];
 
-    public function user() {
-        return $this->belongsTo(User::class);
+    public function inforUser() {
+        return $this->belongsTo(InforUser::class);
     }
 }

@@ -15,9 +15,9 @@ class Department extends Model
         'search_number',
     ];
 
-    public function doctors()
+    public function inforDoctors()
     {
-        return $this->hasMany(Doctor::class);
+        return $this->hasMany(InforDoctor::class);
     }
 
     public function hospitalDepartments()

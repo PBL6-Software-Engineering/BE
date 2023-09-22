@@ -10,28 +10,22 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class Hospital extends Authenticatable implements JWTSubject
+class InforHospital extends Model
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory ;
 
     protected $fillable = [
         'id',
-        'email',
-        'username',
-        'password',
-        'is_accept',
-        'name',
-        'address',
+        'id_hospital',
         'infrastructure',
         'description',
         'location',
         'search_number',
-        'role'
     ];
 
-    public function doctors()
+    public function inforDoctors()
     {
-        return $this->hasMany(Doctor::class);
+        return $this->hasMany(InforDoctor::class);
     }
 
     public function hospitalDepartments()
@@ -53,22 +47,8 @@ class Hospital extends Authenticatable implements JWTSubject
         return $this->hasMany(HospitalService::class);
     }
 
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
-
-    public function getJWTIdentifier()
-    {
-        return $this->getKey();
+    public function user() {
+        return $this->belongsTo(User::class);
     }
-
-    public function getJWTCustomClaims()
-    {
-        return [];
-    }
+    
 }

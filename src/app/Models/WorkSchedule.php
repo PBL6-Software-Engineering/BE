@@ -17,16 +17,16 @@ class WorkSchedule extends Model
         'content'
     ];
 
-    public function user() {
-        return $this->belongsTo(User::class);
+    public function inforUser() {
+        return $this->belongsTo(InforUser::class);
     }
 
     public function rating() {
         return $this->hasOne(Rating::class);
     }
 
-    public function doctor() {
-        return $this->belongsTo(Doctor::class);
+    public function inforDoctor() {
+        return $this->belongsTo(InforDoctor::class);
     }
 
 }

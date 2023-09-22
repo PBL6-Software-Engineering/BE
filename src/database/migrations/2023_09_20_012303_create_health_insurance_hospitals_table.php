@@ -19,7 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_health_insurance');
             $table->timestamps();
 
-            $table->foreign('id_hospital')->references('id')->on('hospitals')->onDelete('cascade');
+            $table->foreign('id_hospital')->references('id_hospital')->on('infor_hospitals')->onDelete('cascade');
             $table->foreign('id_health_insurance')->references('id')->on('health_insurances')->onDelete('cascade');
         });
     }

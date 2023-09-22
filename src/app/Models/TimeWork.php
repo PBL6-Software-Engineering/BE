@@ -16,7 +16,7 @@ class TimeWork extends Model
         'note',
     ];
 
-    public function hospital() {
-        return $this->belongsTo(Hospital::class);
+    public function inforHospital() {
+        return $this->belongsTo(InforHospital::class);
     }
 }

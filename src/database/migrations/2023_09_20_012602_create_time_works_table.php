@@ -21,7 +21,7 @@ return new class extends Migration
             $table->text('note');
             $table->timestamps();
 
-            $table->foreign('id_hospital')->references('id')->on('hospitals')->onDelete('cascade');
+            $table->foreign('id_hospital')->references('id_hospital')->on('infor_hospitals')->onDelete('cascade');
         });
     }
     /**

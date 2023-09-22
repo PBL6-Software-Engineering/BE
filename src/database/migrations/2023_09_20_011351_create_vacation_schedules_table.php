@@ -21,7 +21,7 @@ return new class extends Migration
             $table->boolean('is_accept')->default(false);
             $table->timestamps();
 
-            $table->foreign('id_doctor')->references('id')->on('doctors')->onDelete('cascade');
+            $table->foreign('id_doctor')->references('id_doctor')->on('infor_doctors')->onDelete('cascade');
         });
     }
 

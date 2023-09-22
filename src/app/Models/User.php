@@ -21,10 +21,7 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'phone',
         'address',
-        'date_of_birth',
         'avatar',
-        'google_id',
-        'gender',
         'is_accept',
         'role',
     ];
@@ -37,6 +34,18 @@ class User extends Authenticatable implements JWTSubject
     public function workSchedules()
     {
         return $this->hasMany(WorkSchedule::class);
+    }
+
+    public function inforUser() {
+        return $this->hasOne(InforUser::class);
+    }
+
+    public function inforDoctor() {
+        return $this->hasOne(InforDoctor::class);
+    }
+
+    public function inforHospital() {
+        return $this->hasOne(InforHospital::class);
     }
 
     protected $hidden = [

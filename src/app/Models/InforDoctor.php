@@ -10,27 +10,19 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class Doctor extends Authenticatable implements JWTSubject
+class InforDoctor extends Model
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory;
 
     protected $fillable = [
         'id',
+        'id_doctor',
         'id_department',
         'id_hospital',
-        'email',
-        'username',
-        'password',
-        'name',
-        'phone',
-        'address',
         'date_of_birth',
         'experience',
-        'avatar',
         'gender',
-        'is_accept',
         'search_number',
-        'role'
     ];
 
     public function workSchedules()
@@ -52,26 +44,12 @@ class Doctor extends Authenticatable implements JWTSubject
         return $this->belongsTo(Department::class);
     }
 
-    public function hospital() {
-        return $this->belongsTo(Hospital::class);
+    public function inforHospital() {
+        return $this->belongsTo(InforHospital::class);
     }
 
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
-
-    public function getJWTIdentifier()
-    {
-        return $this->getKey();
+    public function user() {
+        return $this->belongsTo(User::class);
     }
 
-    public function getJWTCustomClaims()
-    {
-        return [];
-    }
 }

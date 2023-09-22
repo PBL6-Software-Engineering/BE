@@ -13,21 +13,17 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('hospitals', function (Blueprint $table) {
+        Schema::create('infor_hospitals', function (Blueprint $table) {
             $table->id();
-            $table->string('email')->unique();
-            $table->string('username')->unique()->nullable();
-            $table->string('password')->nullable();
-            $table->boolean('is_accept')->nullable();
-            $table->string('name');
-            $table->string('address')->nullable();
+            $table->unsignedBigInteger('id_hospital');
             $table->json('infrastructure')->nullable();
             $table->text('description')->nullable();
             $table->json('location')->nullable();
-            $table->integer('search_number')->nullable();
-            $table->string('role')->default('hospital');
+            $table->integer('search_number')->default(0);
             $table->rememberToken();
             $table->timestamps();
+
+            $table->foreign('id_hospital')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -38,6 +34,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('hospitals');
+        Schema::dropIfExists('infor_hospitals');
     }
 };
