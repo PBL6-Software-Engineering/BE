@@ -32,3 +32,5 @@ Route::group([
     // Other management
     // TODO: Handle route management
 });
+
+Route::get('verify-email/{token}', [UserController::class, 'verifyEmail'])->name('verify_email');

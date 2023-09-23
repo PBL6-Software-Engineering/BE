@@ -28,7 +28,7 @@ class RequestCreateInforUser extends FormRequest
     {
         return [
             'name' => 'required|string|between:2,100',
-            'email' => 'required|string|email|max:100|unique:users',
+            'email' => 'required|string|email|max:100',
             'username' => 'required|string|max:100|unique:users',
             'password' => 'required|string|confirmed|min:6',
             'address' => 'required|string|min:1',

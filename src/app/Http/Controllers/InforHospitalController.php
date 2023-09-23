@@ -58,8 +58,8 @@ class InforHospitalController extends Controller
         if ($request->hasFile('avatar')) {
             $image = $request->file('avatar');
             $filename =  pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME) . '_hospital_' . time() . '.' . $image->getClientOriginalExtension();
-            $image->storeAs('public/image/avatars/hospitals', $filename);
-            return 'storage/image/avatars/hospitals' . $filename;
+            $image->storeAs('public/image/avatars/hospitals/', $filename);
+            return 'storage/image/avatars/hospitals/' . $filename;
             // public/image/avatars/users : giả sử folder này chưa có thì nó tự động tạo folder này luôn . Mình không cần tự tạo . 
         }
     }
@@ -87,38 +87,5 @@ class InforHospitalController extends Controller
                 'hospital' => array_merge($user->toArray(), $inforUser->toArray()),
             ], 201);
         }
-    }
-
-    public function login(Request $request)
-    {
-        
-        $u = User::where('email',$request->email)->first();
-        if(empty($u)){
-            return response()->json(['error' => 'Email is incorrect !'], 401);
-        }
-        else {
-            $is_accept = $u->is_accept;
-            if($is_accept == 0){
-                return response()->json(['error' => 'Your account has been locked !'], 401);
-            } 
-        }
-
-        $credentials = request(['email', 'password']);
-        $user = User::where('email',$request->email)->first();
-        if (!$token = auth()->guard('user_api')->attempt($credentials)) {
-            return response()->json(['error' => 'Either email or password is wrong. !'], 401);
-        }
-
-        $inforUser = InforHospital::where('id_hospital', $user->id)->first();
-
-        return response()->json([
-            'hospital' => array_merge($user->toArray(), $inforUser->toArray()),
-            'message'=>$this->respondWithToken($token)
-        ]);
-    }
-
-    public function test_midle2(){
-
-        return response()->json(['test' => 'test role'.auth('user_api')->user()->role], 200);
     }
 }

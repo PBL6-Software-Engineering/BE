@@ -21,6 +21,7 @@ use App\Http\Requests\RequestLogin;
 use App\Http\Requests\RequestUpdateInfor;
 use App\Http\Requests\RequestUpdateUser;
 use App\Jobs\SendForgotPasswordEmail;
+use App\Models\InforHospital;
 use App\Models\InforUser;
 use App\Models\PasswordReset;
 use App\Rules\ReCaptcha;
@@ -31,56 +32,10 @@ use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Brian2694\Toastr\Facades\Toastr;
 
 class UserController extends Controller
 {
-
-
-    public function profile()
-    {
-        $user = User::find(auth('user_api')->user()->id);
-        $inforUser = InforUser::where('id_user', $user->id)->first();
-
-        return response()->json([
-            'user' => array_merge($user->toArray(), $inforUser->toArray()),
-        ]);
-    }
-
-    public function updateProfile(RequestUpdateUser $request, $id_user)
-    {
-        $user = User::find($id_user);
-        if($request->hasFile('avatar')) {
-            if (!Str::startsWith($user->avatar, 'http')) {
-                if ($user->avatar) {
-                    File::delete($user->avatar);
-                }
-            }
-        }
-        $avatar = $this->saveAvatar($request);
-        $user->update(array_merge($request->all(),['avatar' => $avatar]));
-        return response()->json([
-            'message' => 'User successfully updated',
-            'user' => $user
-        ], 201);
-    }
-
-    /**
-     * Log the user out (Invalidate the token).
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function logout()
-    {
-        auth('user_api')->logout();
-
-        return response()->json(['message' => 'Successfully logged out']);
-    }
-
-    /**
-     * Refresh a token.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function refresh()
     {
         return $this->respondWithToken(auth('user_api')->refresh());
@@ -94,9 +49,57 @@ class UserController extends Controller
             'expires_in' => auth()->guard('user_api')->factory()->getTTL() * 60
         ]);
     }
+
+    public function login(Request $request)
+    {
+        
+        $u = User::where('email',$request->email)->first();
+        if(empty($u)){
+            return response()->json(['error' => 'Email is incorrect !'], 401);
+        }
+        else {
+            $is_accept = $u->is_accept;
+            if($is_accept == 0){
+                return response()->json(['error' => 'Your account has not been approved or may have been locked !'], 401);
+            } 
+            if($u->email_verified_at == null){
+                return response()->json(['error' => 'This email has not been confirmed by the user, please go to your inbox to confirm this email !'], 401);
+            } 
+        }
+
+        $credentials = request(['email', 'password']);
+        $user = User::where('email',$request->email)->first();
+        if (!$token = auth()->guard('user_api')->attempt($credentials)) {
+            return response()->json(['error' => 'Either email or password is wrong. !'], 401);
+        }
+
+        $user->have_password = true;
+        if(!$user->password) $user->have_password = false; // login by gg chưa có password 
+
+        $inforUser = InforUser::where('id_user', $user->id)->first();
+        if($user->role == 'hospital') {
+            $inforUser = InforHospital::where('id_hospital', $user->id)->first();
+        }
+        if($user->role == 'doctor') {
+            $inforUser = InforHospital::where('id_doctor', $user->id)->first();
+        }
+
+        return response()->json([
+            // "$user->role" => array_merge($user->toArray(), $inforUser->toArray()),
+            "user" => array_merge($user->toArray(), $inforUser->toArray()),
+            'message'=>$this->respondWithToken($token)
+        ]);
+    }
+
+    public function logout()
+    {
+        auth('user_api')->logout();
+
+        return response()->json(['message' => 'Successfully logged out']);
+    }
     
     public function changePassword(RequestChangePassword $request) {
-        $user = User::find($request->id);
+        $user = User::find(auth('user_api')->user()->id);
         if (!(Hash::check($request->get('current_password'), $user->password))) {
             return response()->json([
                 'message' => 'Your current password does not matches with the password.',
@@ -108,30 +111,11 @@ class UserController extends Controller
         ],200);
     }
 
-    public function createPassword(RequestCreatePassword $request) {
-        $user = User::find($request->id);
-        $user->update(['password' => Hash::make($request->get('new_password'))]);
-        return response()->json([
-            'message' => "Password successfully changed ! ",
-        ],200);
-    }
-
-    /**
-     * forgotForm
-     *
-     * @return view
-     */
     public function forgotForm(Request $request)
     {
         return view('blog.auth.reset_password');
     }
     
-    /**
-     * forgotSend
-     *
-     * @param Request $request
-     * @return object
-     */
     public function forgotSend(Request $request)
     {
         try {
@@ -163,11 +147,6 @@ class UserController extends Controller
         }
     }
 
-        /**
-     * forgotUpdate
-     *
-     * @param object $filter
-     */
     public function forgotUpdate(RequestCreatePassword $request)
     {
         try {
@@ -193,4 +172,25 @@ class UserController extends Controller
         } catch (\Exception $e) {
         }
     }
+
+    // verify email
+    public function verifyEmail(Request $request, $token)
+    {
+        $user = User::where('remember_token', $token)->first();
+        if($user) {
+            $user->update([
+                'email_verified_at' => now(),
+                'remember_token' => null,
+            ]);
+            $status = true;
+            Toastr::success('Your email has been verified !');
+        } 
+        else {
+            $status = false;
+            Toastr::warning('Token has expired !');
+        }
+        return view('user.status_verify_email', ['status' => $status]);
+    }
+
+
 }

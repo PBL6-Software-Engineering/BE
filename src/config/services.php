@@ -33,7 +33,7 @@ return [
     'google' => [
         'client_id' => '1079359168744-ehm0qmfgmg4imvbk33n7d97t69sfjb87.apps.googleusercontent.com',
         'client_secret' => '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',
-        'redirect' => 'http://localhost:8000/api/user/authorized/google/callback',
+        'redirect' => 'http://localhost:99/api/infor-user/authorized/google/callback',
     ],
     
     'github' => [

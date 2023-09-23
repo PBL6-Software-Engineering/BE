@@ -52,32 +52,25 @@ Route::prefix('user')->controller(UserController::class)->group(function () {
     Route::post('forgot-update', 'forgotUpdate');
 
     Route::middleware('auth:user_api')->group(function () {
-        Route::get('test_midle2', 'test_midle2');
-
         Route::get('logout', 'logout');
         Route::post('change-password', 'changePassword');
-        Route::post('create-password', 'createPassword'); 
-        Route::post('{user}', 'updateProfile');
-        Route::get('profile', 'profile');
     });
 });
 
-// User Infor 
-Route::get('authorized/google', [InforUserController::class, 'redirectToGoogle'])->name('google');
-Route::get('authorized/google/callback', [InforUserController::class, 'handleGoogleCallback']);
 
+// User Infor 
 Route::prefix('infor-user')->controller(InforUserController::class)->group(function () {
     Route::post('register', 'register');
-    Route::post('login', 'login');
+
+    Route::get('authorized/google', [InforUserController::class, 'redirectToGoogle'])->name('google');
+    Route::get('authorized/google/callback', [InforUserController::class, 'handleGoogleCallback']);
 
     Route::middleware(['auth:user_api','role:user'])->group(function () {
-        Route::get('test_midle', 'test_midle');
-
         Route::get('logout', 'logout');
-        Route::post('change-password', 'changePassword');
         Route::post('create-password', 'createPassword'); 
         Route::post('{user}', 'updateProfile');
         Route::get('profile', 'profile');
+        Route::post('create-password', 'createPassword'); 
     });
 });
 
@@ -87,8 +80,6 @@ Route::prefix('infor-hospital')->controller(InforHospitalController::class)->gro
     Route::post('login', 'login');
 
     Route::middleware(['auth:user_api','role:hospital'])->group(function () {
-        Route::get('test_midle2', 'test_midle2');
-
         Route::get('logout', 'logout');
         Route::post('change-password', 'changePassword');
         Route::post('create-password', 'createPassword'); 

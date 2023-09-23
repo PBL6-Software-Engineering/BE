@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserEnum;
 use App\Http\Requests\RequestChangePassword;
 use App\Http\Requests\RequestCreateInforUser;
 use App\Http\Requests\RequestCreatePassword;
@@ -22,6 +23,8 @@ use App\Http\Requests\RequestLogin;
 use App\Http\Requests\RequestUpdateInfor;
 use App\Http\Requests\RequestUpdateUser;
 use App\Jobs\SendForgotPasswordEmail;
+use App\Jobs\SendMailNotify;
+use App\Jobs\SendVerifyEmail;
 use App\Models\InforUser;
 use App\Models\PasswordReset;
 use App\Rules\ReCaptcha;
@@ -55,8 +58,8 @@ class InforUserController extends Controller
         if ($request->hasFile('avatar')) {
             $image = $request->file('avatar');
             $filename =  pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME) . '_user_' . time() . '.' . $image->getClientOriginalExtension();
-            $image->storeAs('public/image/avatars/users', $filename);
-            return 'storage/image/avatars/users' . $filename;
+            $image->storeAs('public/image/avatars/users/', $filename);
+            return 'storage/image/avatars/users/' . $filename;
             // public/image/avatars/users : giả sử folder này chưa có thì nó tự động tạo folder này luôn . Mình không cần tự tạo . 
         }
     }
@@ -82,7 +85,7 @@ class InforUserController extends Controller
                 
                 return response()->json([
                     'message' => 'User successfully registered',
-                    'user' => array_merge($userEmail,$inforUser),
+                    'user' => array_merge($userEmail->toArray(),$inforUser->toArray()),
                 ], 201);
             }
         }
@@ -98,13 +101,20 @@ class InforUserController extends Controller
                 ['id_user' => $user->id]
             ));
 
+            // verify email 
+            $token = Str::random(32);
+            $url =  UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
+            Log::info("Add jobs to Queue , Email: $user->email with URL: $url");
+            Queue::push(new SendVerifyEmail($user->email, $url));
+            $user->update(['remember_token' => $token]);
+            // verify email 
+            
             return response()->json([
                 'message' => 'User successfully registered',
                 'user' => array_merge($user->toArray(), $inforUser->toArray()),
             ], 201);
         }
     }
-
 
     // Login by Google User 
     public function redirectToGoogle()
@@ -115,45 +125,70 @@ class InforUserController extends Controller
     public function handleGoogleCallback()
     {
         try {
-            $user = Socialite::driver('google')->stateless()->user();
-            $ggUser = User::where('google_id',$user->id)->first();
-            if ($ggUser) {
-                if ($ggUser->is_accept == 0) {
+            $ggUser = Socialite::driver('google')->stateless()->user();
+            $inforUser = InforUser::where('google_id',$ggUser->id)->first();
+            if ($inforUser) {
+                $user = User::find($inforUser->id_user);
+                if ($user->is_accept == 0) {
                     return response()->json(['error' => 'Your account has been locked or not approved !'], 401);
                 } else {
-                    Auth::login($ggUser);
-                    $this->token = auth()->guard('user_api')->login($ggUser);
-                    $ggUser->access_token = $this->respondWithToken($this->token)->getData()->access_token;
-                    return response()->json([
-                        'message' => 'Login by Google successfully !',
-                        'user' => $ggUser,
-                    ], 201);
+                    Auth::login($user);
+                    $this->token = auth()->guard('user_api')->login($user);
+                    $user->access_token = $token =$this->respondWithToken($this->token)->getData()->access_token;
+
+                    return view('user.oauth2gg', ['token' => $token]);
+                    // return response()->json([
+                    //     'message' => 'Login by Google successfully !',
+                    //     'user' => array_merge($user->toArray(), $inforUser->toArray()),
+                    // ], 201);
                 }
             } else {
-                $findEmail = User::where('email',$user->email)->first();
+                $findEmail = User::where('email',$ggUser->email)->where('role','user')->first();
                 if ($findEmail) {
-                    $findEmail->update([
-                        'google_id' => $user->id
-                    ]);
-                    return response()->json([
-                        'message' => 'Login by Google successfully !',
-                        'user' => $findEmail
-                    ], 201);
+                    if ($findEmail->is_accept == 0) {
+                        return response()->json(['error' => 'Your account has been locked or not approved !'], 401);
+                    } else {
+                        $inforUser = InforUser::where('id_user',$findEmail->id)->first();
+                        $inforUser->update([
+                            'google_id' => $ggUser->id
+                        ]);
+                        Auth::login($findEmail);
+                        $this->token = auth()->guard('user_api')->login($findEmail);
+                        $findEmail->access_token = $token = $this->respondWithToken($this->token)->getData()->access_token;
+    
+                        return view('user.oauth2gg', ['token' => $token]);
+                        // return response()->json([
+                        //     'message' => 'Login by Google successfully !',
+                        //     'user' => array_merge($findEmail->toArray(), $inforUser->toArray()),
+                        // ], 201);
+                    }
                 } else {
                     $newUser = User::create([
-                        'name' => $user->name,
-                        'email' => $user->email,
-                        'google_id' => $user->id,
-                        'username' => 'user_' . $user->id,
-                        'avatar' => $user->avatar,
-                        'is_accept' => 1
+                        'name' => $ggUser->name,
+                        'email' => $ggUser->email,
+                        'username' => 'user_' . $ggUser->id,
+                        'avatar' => $ggUser->avatar,
+                        'is_accept' => 1,
+                        'role' => 'user',
+                        'email_verified_at' => now()
                     ]);
-                    $user = User::find($newUser->id);
+                    Auth::login($newUser);
+                    $this->token = auth()->guard('user_api')->login($newUser);
+                    $newUser->access_token = $token = $this->respondWithToken($this->token)->getData()->access_token;
+
+                    $newInforUser = InforUser::create([
+                        'id_user' => $newUser->id,
+                        'google_id' => $ggUser->id,
+                        'gender' => 2,
+                    ]);
+
+                    return view('user.oauth2gg', ['token' => $token]);
+
+                    // return response()->json([
+                    //     'message' => 'User successfully registered',
+                    //     'user' => array_merge($newUser->toArray(), $newInforUser->toArray()),
+                    // ], 201);
                 }
-                return response()->json([
-                    'message' => 'User successfully registered',
-                    'user' => $user
-                ], 201);
             }
         } catch (Exception $e) {
             return response()->json(['error' => $e], 401);
@@ -161,38 +196,61 @@ class InforUserController extends Controller
     }
     // Login by Google User 
 
-
-    public function test_midle(){
-
-        return response()->json(['test' => 'test role'.auth('user_api')->user()->role], 200);
-    }
-
-    public function login(Request $request)
+    public function profile()
     {
-        
-        $u = User::where('email',$request->email)->first();
-        if(empty($u)){
-            return response()->json(['error' => 'Email is incorrect !'], 401);
-        }
-        else {
-            $is_accept = $u->is_accept;
-            if($is_accept == 0){
-                return response()->json(['error' => 'Your account has been locked !'], 401);
-            } 
-        }
-
-        $credentials = request(['email', 'password']);
-        $user = User::where('email',$request->email)->first();
-        if (!$token = auth()->guard('user_api')->attempt($credentials)) {
-            return response()->json(['error' => 'Either email or password is wrong. !'], 401);
-        }
-
+        $user = User::find(auth('user_api')->user()->id);
         $inforUser = InforUser::where('id_user', $user->id)->first();
 
         return response()->json([
             'user' => array_merge($user->toArray(), $inforUser->toArray()),
-            'message'=>$this->respondWithToken($token)
         ]);
+    }
+
+    public function updateProfile(RequestUpdateUser $request, $id_user)
+    {
+        $user = User::find(auth('user_api')->user()->id);
+        $oldEmail = $user->email;
+        if($request->hasFile('avatar')) {
+            if (!Str::startsWith($user->avatar, 'http')) {
+                if ($user->avatar) {
+                    File::delete($user->avatar);
+                }
+            }
+        }
+        $avatar = $this->saveAvatar($request);
+        $user->update(array_merge($request->all(),['avatar' => $avatar]));
+        $inforUser = InforUser::find($user->id);
+        $inforUser->update($request->all());
+        $message = 'User successfully updated';
+
+        // sendmail verify
+        if($oldEmail != $request->email) {
+            $token = Str::random(32);
+            $url =  UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
+            Log::info("Add jobs to Queue , Email: $user->email with URL: $url");
+            Queue::push(new SendVerifyEmail($user->email, $url));
+            $content = 'Your account has been transferred to email ' . $user->email . '. If you are not the one making the change, please contact your system administrator for assistance. ';
+            Queue::push(new SendMailNotify($oldEmail, $content));
+            $user->update([
+                'remember_token' => $token,
+                'email_verified_at' => null,
+            ]);
+            $message = 'User successfully updated . A confirmation email has been sent to this email, please check and confirm !';
+        } 
+        // sendmail verify
+
+        return response()->json([
+            'message' => $message,
+            'user' => array_merge($user->toArray(), $inforUser->toArray()),
+        ], 201);
+    }
+
+    public function createPassword(RequestCreatePassword $request) {
+        $user = User::find(auth('user_api')->user()->id);
+        $user->update(['password' => Hash::make($request->get('new_password'))]);
+        return response()->json([
+            'message' => "Password successfully changed ! ",
+        ],200);
     }
 
 
