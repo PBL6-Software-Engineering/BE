@@ -26,6 +26,7 @@ class User extends Authenticatable implements JWTSubject
         'role',
         'email_verified_at',
         'remember_token',
+        'token_verify_email',
     ];
 
     public function notifies()

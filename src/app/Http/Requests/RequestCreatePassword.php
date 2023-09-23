@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\Rule;
+use Brian2694\Toastr\Facades\Toastr;
 
 class RequestCreatePassword extends FormRequest
 {
@@ -31,21 +32,12 @@ class RequestCreatePassword extends FormRequest
         ];
     }
 
-    public function failedValidation(Validator $validator)
+    public function withValidator($validator)
     {
-        throw new HttpResponseException(response()->json([
-            'success'   => false,
-            'message'   => 'Validation errors',
-            'data'      => $validator->errors()
-        ]));
-
-    }
-
-    public function messages()
-    {
-        return [
-            'title.required' => 'Title is required',
-            'body.required' => 'Body is required'
-        ];
+        if ($validator->fails()) {
+            foreach ($validator->errors()->all() as $error) {
+                Toastr::error($error);
+            }
+        }
     }
 }

@@ -18,7 +18,7 @@
     {{-- toastr --}}
     <link rel="stylesheet" href="http://cdn.bootcss.com/toastr.js/latest/css/toastr.min.css">
 
-    <link rel="stylesheet" href="{{ asset('blog/css/master.css') }}">
+    <link rel="stylesheet" href="{{ asset('user/css/master.css') }}">
 
     {{-- icon --}}
     <link href="https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet" />
@@ -44,11 +44,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
     </script>
-
-    {{-- RichTextEditor --}}
-    <link rel="stylesheet" href="{{ asset('lib/richtexteditor/rte_theme_default.css') }} " />
-    <script type="text/javascript" src="{{ asset('lib/richtexteditor/rte.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('lib/richtexteditor/plugins/all_plugins.js') }}"></script>
 
     {{-- Capcha Gooogle --}}
     <script src='https://www.google.com/recaptcha/api.js'></script>

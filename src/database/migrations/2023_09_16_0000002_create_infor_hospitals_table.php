@@ -20,7 +20,6 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->json('location')->nullable();
             $table->integer('search_number')->default(0);
-            $table->rememberToken();
             $table->timestamps();
 
             $table->foreign('id_hospital')->references('id')->on('users')->onDelete('cascade');

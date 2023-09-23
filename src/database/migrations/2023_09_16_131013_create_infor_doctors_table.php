@@ -23,7 +23,6 @@ return new class extends Migration
             $table->integer('experience')->nullable();
             $table->integer('gender')->nullable();
             $table->integer('search_number')->default(0);
-            $table->rememberToken();
             $table->timestamps();
 
             $table->foreign('id_doctor')->references('id')->on('users')->onDelete('cascade');

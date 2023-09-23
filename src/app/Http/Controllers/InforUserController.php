@@ -106,7 +106,7 @@ class InforUserController extends Controller
             $url =  UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
             Log::info("Add jobs to Queue , Email: $user->email with URL: $url");
             Queue::push(new SendVerifyEmail($user->email, $url));
-            $user->update(['remember_token' => $token]);
+            $user->update(['token_verify_email' => $token]);
             // verify email 
             
             return response()->json([
@@ -183,7 +183,6 @@ class InforUserController extends Controller
                     ]);
 
                     return view('user.oauth2gg', ['token' => $token]);
-
                     // return response()->json([
                     //     'message' => 'User successfully registered',
                     //     'user' => array_merge($newUser->toArray(), $newInforUser->toArray()),
@@ -232,7 +231,7 @@ class InforUserController extends Controller
             $content = 'Your account has been transferred to email ' . $user->email . '. If you are not the one making the change, please contact your system administrator for assistance. ';
             Queue::push(new SendMailNotify($oldEmail, $content));
             $user->update([
-                'remember_token' => $token,
+                'token_verify_email' => $token,
                 'email_verified_at' => null,
             ]);
             $message = 'User successfully updated . A confirmation email has been sent to this email, please check and confirm !';

@@ -51,7 +51,6 @@ class InforHospitalController extends Controller
             'expires_in' => auth()->guard('user_api')->factory()->getTTL() * 60
         ]);
     }
-    
 
     public function saveAvatar(Request $request){
         // $pathToFile = $request->file('avatar')->store('image/avatars','public');

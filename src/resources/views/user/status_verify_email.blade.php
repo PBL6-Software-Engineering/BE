@@ -11,7 +11,7 @@
     </div>
     @endif
     <div style="display: flex;justify-content: center;">
-        <a href="http://localhost:3000/"><button type="button" class="btn btn-outline-primary"><i class="fa-solid fa-house mr-2"></i>Home</button></a>
+        <a href="{{ \App\Enums\UserEnum::DOMAIN_CLIENT }}"><button type="button" class="btn btn-outline-primary"><i class="fa-solid fa-house mr-2"></i>Home</button></a>
     </div>
 </div>
 @endsection

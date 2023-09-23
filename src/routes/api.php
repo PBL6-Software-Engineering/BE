@@ -49,7 +49,6 @@ Route::prefix('user')->controller(UserController::class)->group(function () {
     Route::post('login', 'login');
 
     Route::post('forgot-pw-sendcode', 'forgotSend');
-    Route::post('forgot-update', 'forgotUpdate');
 
     Route::middleware('auth:user_api')->group(function () {
         Route::get('logout', 'logout');

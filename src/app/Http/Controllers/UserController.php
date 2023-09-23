@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserEnum;
 use App\Http\Requests\RequestChangePassword;
 use App\Http\Requests\RequestCreatePassword;
 use App\Models\User;
@@ -21,6 +22,7 @@ use App\Http\Requests\RequestLogin;
 use App\Http\Requests\RequestUpdateInfor;
 use App\Http\Requests\RequestUpdateUser;
 use App\Jobs\SendForgotPasswordEmail;
+use App\Models\Admin;
 use App\Models\InforHospital;
 use App\Models\InforUser;
 use App\Models\PasswordReset;
@@ -113,7 +115,7 @@ class UserController extends Controller
 
     public function forgotForm(Request $request)
     {
-        return view('blog.auth.reset_password');
+        return view('user.reset_password');
     }
     
     public function forgotSend(Request $request)
@@ -121,18 +123,17 @@ class UserController extends Controller
         try {
             $email = $request->email;
             $token = Str::random(32);
-            $is_user = 1;
-            $user = PasswordReset::where('email',$email)->where('is_user', $is_user)->first();
+            $user = PasswordReset::where('email',$email)->where('is_user', $request->is_user)->first();
             if ($user) {
                 $user->update(['token' => $token]);
             } else {
                 PasswordReset::create([
                     'email' => $email,
                     'token' => $token,
-                    'is_user' => $is_user
+                    'is_user' => $request->is_user
                 ]);
             }
-            $url = 'http://localhost:8080/forgot-form?token=' . $token;
+            $url = UserEnum::DOMAIN_PATH . 'forgot-form?token=' . $token;
             Log::info("Add jobs to Queue , Email: $email with URL: $url");
             Queue::push(new SendForgotPasswordEmail($email, $url));
             return response()->json([
@@ -151,23 +152,36 @@ class UserController extends Controller
     {
         try {
             $new_password = Hash::make($request->new_password);
-            $userReset = PasswordReset::where('token',$request->token)->first();
-            if ($userReset) {
-                $user = User::where('email',$userReset->email)->first();
-                if ($user) {
-                    $user->update(['password' => $new_password]);
-                    $userReset->delete();
-                    return response()->json([
-                        'message' => "Password Reset Success !",
-                    ],200);
+            $passwordReset = PasswordReset::where('token',$request->token)->first();
+            if ($passwordReset) { // user, doctor, hospital 
+                if($passwordReset->is_user == 1) {
+                    $user = User::where('email',$passwordReset->email)->first();
+                    if ($user) {
+                        $user->update(['password' => $new_password]);
+                        $passwordReset->delete();
+    
+                        Toastr::success('Password Reset Success !');
+                        return  redirect()->route('form_reset_password');
+                    }
+                    Toastr::warning('Can not find the account !');
+                    return  redirect()->route('form_reset_password');
                 }
-                return response()->json([
-                    'message' => "Can not find the account !",
-                ],401);
+                else { // admin, superamdin, manager
+                    $admin = Admin::where('email',$passwordReset->email)->first(); 
+                    if ($admin) {
+                        $admin->update(['password' => $new_password]);
+                        $passwordReset->delete();
+    
+                        Toastr::success('Password Reset Success !');
+                        return  redirect()->route('form_reset_password');
+                    }
+                    Toastr::warning('Can not find the account !');
+                    return  redirect()->route('form_reset_password');
+                }
+
             } else {
-                return response()->json([
-                    'message' => "Token has expired !",
-                ],401);
+                Toastr::warning('Token has expired !');
+                return  redirect()->route('form_reset_password');
             }
         } catch (\Exception $e) {
         }
@@ -176,11 +190,11 @@ class UserController extends Controller
     // verify email
     public function verifyEmail(Request $request, $token)
     {
-        $user = User::where('remember_token', $token)->first();
+        $user = User::where('token_verify_email', $token)->first();
         if($user) {
             $user->update([
                 'email_verified_at' => now(),
-                'remember_token' => null,
+                'token_verify_email' => null,
             ]);
             $status = true;
             Toastr::success('Your email has been verified !');

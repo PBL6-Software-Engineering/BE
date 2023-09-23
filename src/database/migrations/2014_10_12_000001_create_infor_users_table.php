@@ -19,8 +19,6 @@ return new class extends Migration
             $table->date('date_of_birth')->nullable();
             $table->string('google_id')->nullable();
             $table->integer('gender')->nullable();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->rememberToken();
             $table->timestamps();
 
             $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');

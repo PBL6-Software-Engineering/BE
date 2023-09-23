@@ -34,3 +34,5 @@ Route::group([
 });
 
 Route::get('verify-email/{token}', [UserController::class, 'verifyEmail'])->name('verify_email');
+Route::get('forgot-form', [UserController::class, 'forgotForm'])->name('form_reset_password');
+Route::post('forgot-update', [UserController::class, 'forgotUpdate'])->name('forgot.update');
