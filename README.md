@@ -36,6 +36,9 @@ $ docker-compose run --rm artisan storage:link
 $ docker-compose run --rm artisan optimize:clear
 $ docker-compose run --rm artisan optimize
 $ docker-compose run --rm artisan migrate:fresh  --seed
+$ docker-compose run --rm artisan db:seed --class=AdminsSeeder
+$ docker-compose run --rm artisan db:seed --class=CategoriesSeeder
+$ docker-compose run --rm artisan db:seed --class=DepartmentsSeeder
 ```
 
 http://localhost:99
@@ -47,6 +50,12 @@ http://localhost:99
   Database : pbl6 
   Username : hivanmanh
   Password : hivanmanh 
+```
+
+### Account Admin role Manager  
+```bash
+  Email    : vanmanh.dut@gmail.com
+  Password : vanmanh.dut
 ```
 
 ### Run API Laravel with Docker use Makefile (MacOS and Linux)
