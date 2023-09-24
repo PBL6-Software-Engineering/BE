@@ -95,6 +95,8 @@ class CategoriesSeeder extends Seeder
 
         $thumbnails = [];
 
+        // lệnh tạo ảnh đôi lúc có cái ảnh tạo được , có cái tạo không được nên phải dùng lệnh while 
+        // để đến khi nào có ảnh mới thôi 
         foreach ($categoryNames as $index => $categoryName) {
             $thumbnail = FakeImageFactory::new()->createThumbnailCategory();
             while (!$thumbnail) {

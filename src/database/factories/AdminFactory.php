@@ -26,7 +26,11 @@ class AdminFactory extends Factory
         if (!File::exists($pathFolder)) { // chưa có folder thì tạo 
             File::makeDirectory($pathFolder, 0755, true);
         }
+
         $nameImage = $this->faker->image($pathFolder, 200, 200, null, false);
+        while(!$nameImage){ // đảm bảo chắc chắc chắn phải có được ảnh 
+            $nameImage = $this->faker->image($pathFolder, 200, 200, null, false);
+        }
 
         return [
             'email' => 'vanmanh.dut@gmail.com',
