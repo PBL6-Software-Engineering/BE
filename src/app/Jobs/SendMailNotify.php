@@ -17,22 +17,22 @@ class SendMailNotify implements ShouldQueue
 
     public $email;
 
-    public $message;
+    public $content;
 
-    public function __construct($email, $message)
+    public function __construct($email, $content)
     {
         $this->email = $email;
-        $this->message = $message;
+        $this->content = $content;
     }
 
     public function handle()
     {
         $email = $this->email;
-        $message = $this->message;
+        $content = $this->content;
 
         // Các bước xử lý logic liên quan đến email và token
-        Mail::to($email)->send(new MailNotify($message));
-        info("Email sent to $email with URL: $message");
-        Log::info("Email sent to $email with URL: $message");
+        Mail::to($email)->send(new MailNotify($content));
+        info("Email sent to $email with URL: $content");
+        Log::info("Email sent to $email with URL: $content");
     }
 }

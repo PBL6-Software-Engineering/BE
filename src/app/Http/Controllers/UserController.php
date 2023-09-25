@@ -96,7 +96,6 @@ class UserController extends Controller
     public function logout()
     {
         auth('user_api')->logout();
-
         return response()->json(['message' => 'Successfully logged out']);
     }
     

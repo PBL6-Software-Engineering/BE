@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description');
+            $table->string('thumbnail')->nullable();
             $table->integer('search_number')->default(0);
             $table->timestamps();
         });

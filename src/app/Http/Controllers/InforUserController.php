@@ -215,13 +215,14 @@ class InforUserController extends Controller
                     File::delete($user->avatar);
                 }
             }
+            $avatar = $this->saveAvatar($request);
+            $user->update(array_merge($request->all(),['avatar' => $avatar]));
+        } else {
+            $user->update($request->all());
         }
-        $avatar = $this->saveAvatar($request);
-        $user->update(array_merge($request->all(),['avatar' => $avatar]));
         $inforUser = InforUser::find($user->id);
         $inforUser->update($request->all());
         $message = 'User successfully updated';
-
         // sendmail verify
         if($oldEmail != $request->email) {
             $token = Str::random(32);

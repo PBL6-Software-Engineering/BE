@@ -28,7 +28,7 @@
                                 <button class="col-12 btn btn-lg btn-primary btn-login fw-bold text-uppercase"
                                     type="submit">Submit</button>
                             </div>
-                            <a class="d-block text-center mt-2 small" href="{{ \App\Enums\UserEnum::DOMAIN_CLIENT }}">Have an account? Sign
+                            <a class="d-block text-center mt-2 small" href="{{ \App\Enums\UserEnum::DOMAIN_CLIENT . 'auth/sign-in'}}">Have an account? Sign
                                 In</a>
                         </form>
                         <script>

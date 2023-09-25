@@ -17,6 +17,7 @@ class InforHospital extends Model
     protected $fillable = [
         'id',
         'id_hospital',
+        'province_code',
         'infrastructure',
         'description',
         'location',

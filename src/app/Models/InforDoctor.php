@@ -18,6 +18,7 @@ class InforDoctor extends Model
         'id',
         'id_doctor',
         'id_department',
+        'province_code',
         'id_hospital',
         'date_of_birth',
         'experience',

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\InforHospitalController;
 use App\Http\Controllers\InforUserController;
 use App\Http\Controllers\UserController;
@@ -47,9 +48,7 @@ Route::prefix('admin')->controller(AdminController::class)->group(function () {
 // User 
 Route::prefix('user')->controller(UserController::class)->group(function () {
     Route::post('login', 'login');
-
     Route::post('forgot-pw-sendcode', 'forgotSend');
-
     Route::middleware('auth:user_api')->group(function () {
         Route::get('logout', 'logout');
         Route::post('change-password', 'changePassword');
@@ -60,12 +59,9 @@ Route::prefix('user')->controller(UserController::class)->group(function () {
 // User Infor 
 Route::prefix('infor-user')->controller(InforUserController::class)->group(function () {
     Route::post('register', 'register');
-
     Route::get('authorized/google', [InforUserController::class, 'redirectToGoogle'])->name('google');
     Route::get('authorized/google/callback', [InforUserController::class, 'handleGoogleCallback']);
-
     Route::middleware(['auth:user_api','role:user'])->group(function () {
-        Route::get('logout', 'logout');
         Route::post('create-password', 'createPassword'); 
         Route::post('{user}', 'updateProfile');
         Route::get('profile', 'profile');
@@ -76,10 +72,7 @@ Route::prefix('infor-user')->controller(InforUserController::class)->group(funct
 // Hospital Infor  
 Route::prefix('infor-hospital')->controller(InforHospitalController::class)->group(function () {
     Route::post('register', 'register');
-    Route::post('login', 'login');
-
     Route::middleware(['auth:user_api','role:hospital'])->group(function () {
-        Route::get('logout', 'logout');
         Route::post('change-password', 'changePassword');
         Route::post('create-password', 'createPassword'); 
         Route::post('{user}', 'updateProfile');
@@ -97,6 +90,23 @@ Route::prefix('category')->controller(CategoryController::class)->group(function
     Route::get('/', 'all');
     Route::get('/{id}', 'details');
 });
+
+// Department 
+Route::prefix('department')->controller(DepartmentController::class)->group(function () {
+    Route::middleware('auth:admin_api')->group(function () {
+        Route::post('/add', 'add');
+        Route::post('update/{id}', 'edit');
+        Route::delete('/{id}', 'delete');
+    });
+    Route::get('/', 'all');
+    Route::get('/{id}', 'details');
+});
+
+
+
+
+
+
 
 // // Products 
 // Route::prefix('products')->controller(ProductController::class)->group(function () {

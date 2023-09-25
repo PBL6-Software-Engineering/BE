@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_doctor');
             $table->unsignedBigInteger('id_department');
             $table->unsignedBigInteger('id_hospital');
+            $table->integer('province_code')->nullable();
             $table->string('address')->nullable();
             $table->date('date_of_birth')->nullable();
             $table->integer('experience')->nullable();

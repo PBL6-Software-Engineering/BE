@@ -2,12 +2,12 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\UniqueUsernameForRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Validation\Rule;
 
-class RequestCreateInforHospital extends FormRequest
+class RequestUpdateDepartment extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,18 +26,10 @@ class RequestCreateInforHospital extends FormRequest
      */
     public function rules()
     {
+        $id = $this->route('id');
         return [
-            'name' => 'required|string|between:2,100',
-            'email' => 'required|string|email|max:100|unique:users',
-            'username' => 'required|string|max:100|unique:users',
-            'password' => 'required|string|confirmed|min:6',
-            'province_code' => 'required|integer',
-            'address' => 'required|string|min:1',
-            'phone' => 'required|min:9|numeric',
-            'infrastructure' => 'required',
-            'description' => 'required',
-            'location' => 'required'
-            // 'username' => ['required', 'string', 'max:100', new UniqueUsernameForRole('hospital')],
+            'name' => ['required', 'string', Rule::unique('departments')->ignore($id)],
+            'description' => 'required|string',
         ];
     }
 

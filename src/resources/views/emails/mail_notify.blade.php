@@ -7,7 +7,7 @@
 
 <body>
     <h1>Notify from System</h1>
-    <h2>{{$message}}</h2>
+    <h2>{{$content}}</h2>
 </body>
 
 </html>

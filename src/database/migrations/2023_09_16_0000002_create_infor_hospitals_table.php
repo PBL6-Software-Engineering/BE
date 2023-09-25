@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('infor_hospitals', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('id_hospital');
+            $table->integer('province_code')->nullable();
             $table->json('infrastructure')->nullable();
             $table->text('description')->nullable();
             $table->json('location')->nullable();

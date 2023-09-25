@@ -532,7 +532,7 @@ class DepartmentsSeeder extends Seeder
             while (!$thumbnail) {
                 $thumbnail = FakeImageFactory::new()->createThumbnailDepartment();
             }
-            $thumbnails[$index] = 'storage/image/thumbnail/categories/' . $thumbnail;
+            $thumbnails[$index] = 'storage/image/thumbnail/departments/' . $thumbnail;
         }
         
         foreach ($departments as $index => $department) {
