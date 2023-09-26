@@ -28,21 +28,23 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Admin
 Route::prefix('admin')->controller(AdminController::class)->group(function () { 
     Route::post('login', 'login'); 
-
     Route::post('forgot-pw-sendcode', 'forgotSend');
-    Route::post('forgot-update', 'forgotUpdate');
-
     Route::middleware('auth:admin_api')->group(function () {
         Route::get('logout', 'logout');
         Route::get('me', 'me');
         Route::post('change-password', 'changePassword');
         Route::post('update/{admin}', 'updateProfile');
+
         Route::get('all-user', 'allUser');
+        Route::post('change-accept/{id}', 'changeAccept');
+    });
+    Route::middleware(['auth:admin_api','role_admin:superadmin,manager'])->group(function () {
         Route::get('all-admin', 'allAdmin');
         Route::post('add-admin', 'addAdmin');
-        Route::delete('{id}', 'deleteAdmin');
         Route::patch('{id}', 'editRole');
-        Route::post('change-status/{id}', 'changeStatus');
+    });
+    Route::middleware(['auth:admin_api','role_admin:superadmin'])->group(function () {
+        Route::delete('{id}', 'deleteAdmin');
     });
 });
 
@@ -55,7 +57,6 @@ Route::prefix('user')->controller(UserController::class)->group(function () {
         Route::post('change-password', 'changePassword');
     });
 });
-
 
 // User Infor 
 Route::prefix('infor-user')->controller(InforUserController::class)->group(function () {
@@ -74,8 +75,6 @@ Route::prefix('infor-user')->controller(InforUserController::class)->group(funct
 Route::prefix('infor-hospital')->controller(InforHospitalController::class)->group(function () {
     Route::post('register', 'register');
     Route::middleware(['auth:user_api','role:hospital'])->group(function () {
-        Route::post('change-password', 'changePassword');
-        Route::post('create-password', 'createPassword'); 
         Route::post('update/{user}', 'updateProfile');
         Route::get('profile', 'profile');
         Route::post('add-doctor', 'addDoctor');
@@ -85,14 +84,11 @@ Route::prefix('infor-hospital')->controller(InforHospitalController::class)->gro
 // Hospital Infor  
 Route::prefix('infor-doctor')->controller(InforDoctorController::class)->group(function () {
     Route::middleware(['auth:user_api','role:doctor'])->group(function () {
-        Route::post('change-password', 'changePassword');
-        Route::post('create-password', 'createPassword'); 
         Route::post('update/{user}', 'updateProfile');
         Route::get('profile', 'profile');
         Route::post('add-doctor', 'addDoctor');
     });
 });
-
 
 // Category 
 Route::prefix('category')->controller(CategoryController::class)->group(function () {

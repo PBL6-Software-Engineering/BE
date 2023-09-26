@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserEnum;
 use App\Http\Requests\RequestChangePassword;
 use App\Http\Requests\RequestCreateNewAdmin;
 use App\Http\Requests\RequestCreatePassword;
 use App\Http\Requests\RequestUpdateAdmin;
 use App\Jobs\SendForgotPasswordEmail;
+use App\Jobs\SendMailNotify;
 use App\Jobs\SendPasswordNewAdmin;
+use App\Jobs\SendVerifyEmail;
 use App\Models\Admin;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -26,6 +29,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Queue;
 use Faker\Factory ;
 use Illuminate\Support\Facades\Storage;
+use Brian2694\Toastr\Facades\Toastr;
 
 class AdminController extends Controller
 {
@@ -77,7 +81,7 @@ class AdminController extends Controller
     }
 
     public function changePassword(RequestChangePassword $request) {
-        $admin = Admin::find($request->id);
+        $admin = Admin::find(auth('admin_api')->user()->id);
         if (!(Hash::check($request->get('current_password'), $admin->password))) {
             return response()->json([
                 'message' => 'Your current password does not matches with the password.',
@@ -93,27 +97,62 @@ class AdminController extends Controller
         if ($request->hasFile('avatar')) {
             $image = $request->file('avatar');
             $filename =  pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME) . '_' . time() . '.' . $image->getClientOriginalExtension();
-            $image->storeAs('public/image/avatars', $filename);
-            return 'storage/image/avatars/' . $filename;
+            $image->storeAs('public/image/avatars/admins', $filename);
+            return 'storage/image/avatars/admins/' . $filename;
         }
     }
 
     public function updateProfile(RequestUpdateAdmin $request, $id_admin)
     {
         $admin = Admin::find($id_admin);
+        $oldEmail = $admin->email;
         if($request->hasFile('avatar')) {
-            if (!Str::startsWith($admin->avatar, 'http')) {
-                if ($admin->avatar) {
-                    File::delete($admin->avatar);
-                }
+            if ($admin->avatar) {
+                File::delete($admin->avatar);
             }
+            $avatar = $this->saveAvatar($request);
+            $admin->update(array_merge($request->all(),['avatar' => $avatar]));
+        } else {
+            $admin->update($request->all());
         }
-        $avatar = $this->saveAvatar($request);
-        $admin->update(array_merge($request->all(),['avatar' => $avatar]));
+        $message = 'Admin successfully updated';
+        // sendmail verify
+        if($oldEmail != $request->email) {
+            $token = Str::random(32);
+            $url =  UserEnum::DOMAIN_PATH . 'admin/verify-email/' . $token;
+            Queue::push(new SendVerifyEmail($admin->email, $url));
+            $content = 'Your account has been transferred to email ' . $admin->email . '. If you are not the one making the change, please contact your system administrator for assistance. ';
+            Queue::push(new SendMailNotify($oldEmail, $content));
+            $admin->update([
+                'token_verify_email' => $token,
+                'email_verified_at' => null,
+            ]);
+            $message = 'Admin successfully updated . A confirmation email has been sent to this email, please check and confirm !';
+        } 
+        // sendmail verify
         return response()->json([
-            'message' => 'Admin successfully updated',
+            'message' => $message,
             'admin' => $admin
         ], 201);
+    }
+
+    // verify email
+    public function verifyEmail(Request $request, $token)
+    {
+        $admin = Admin::where('token_verify_email', $token)->first();
+        if($admin) {
+            $admin->update([
+                'email_verified_at' => now(),
+                'token_verify_email' => null,
+            ]);
+            $status = true;
+            Toastr::success('Your email has been verified !');
+        } 
+        else {
+            $status = false;
+            Toastr::warning('Token has expired !');
+        }
+        return view('admin.status_verify_email', ['status' => $status]);
     }
 
     public function allAdmin()
@@ -134,29 +173,28 @@ class AdminController extends Controller
         ], 201);
     }
 
-    /**
-     * forgotSend
-     *
-     * @param Request $request
-     * @return object
-     */
+    public function forgotForm(Request $request)
+    {
+        return view('admin.reset_password');
+    }
+    
     public function forgotSend(Request $request)
     {
         try {
             $email = $request->email;
             $token = Str::random(32);
-            $is_user = 0;
-            $user = PasswordReset::where('email',$email)->where('is_user', $is_user)->first();
+            $isUser = 0;
+            $user = PasswordReset::where('email',$email)->where('is_user', $isUser)->first();
             if ($user) {
                 $user->update(['token' => $token]);
             } else {
                 PasswordReset::create([
                     'email' => $email,
                     'token' => $token,
-                    'is_user' => $is_user
+                    'is_user' => $isUser
                 ]);
             }
-            $url = 'http://localhost:8080/admin/forgot-form?token=' . $token;
+            $url = UserEnum::DOMAIN_PATH . 'admin/forgot-form?token=' . $token;
             Log::info("Add jobs to Queue , Email: $email with URL: $url");
             Queue::push(new SendForgotPasswordEmail($email, $url));
             return response()->json([
@@ -171,37 +209,44 @@ class AdminController extends Controller
         }
     }
 
-        /**
-     * forgotUpdate
-     *
-     * @param object $filter
-     */
     public function forgotUpdate(RequestCreatePassword $request)
     {
         try {
             $new_password = Hash::make($request->new_password);
-            $userReset = PasswordReset::where('token',$request->token)->first();
-            if ($userReset) {
-                $user = Admin::where('email',$userReset->email)->first();
-                if ($user) {
-                    $user->update(['password' => $new_password]);
-                    $userReset->delete();
-                    return response()->json([
-                        'message' => "Password Reset Success !",
-                    ],200);
+            $passwordReset = PasswordReset::where('token',$request->token)->first();
+            if ($passwordReset) { // user, doctor, hospital 
+                if($passwordReset->is_user == 1) {
+                    $user = User::where('email',$passwordReset->email)->first();
+                    if ($user) {
+                        $user->update(['password' => $new_password]);
+                        $passwordReset->delete();
+    
+                        Toastr::success('Password Reset Success !');
+                        return  redirect()->route('form_reset_password');
+                    }
+                    Toastr::warning('Can not find the account !');
+                    return  redirect()->route('form_reset_password');
                 }
-                return response()->json([
-                    'message' => "Can not find the account !",
-                ],401);
+                else { // admin, superamdin, manager
+                    $admin = Admin::where('email',$passwordReset->email)->first(); 
+                    if ($admin) {
+                        $admin->update(['password' => $new_password]);
+                        $passwordReset->delete();
+    
+                        Toastr::success('Password Reset Success !');
+                        return  redirect()->route('admin_form_reset_password');
+                    }
+                    Toastr::warning('Can not find the account !');
+                    return  redirect()->route('admin_form_reset_password');
+                }
+
             } else {
-                return response()->json([
-                    'message' => "Token has expired !",
-                ],401);
+                Toastr::warning('Token has expired !');
+                return  redirect()->route('admin_form_reset_password');
             }
         } catch (\Exception $e) {
         }
     }
-
     /**
      * addAdmin
      * 
@@ -283,11 +328,11 @@ class AdminController extends Controller
      * @param int $id 
      * @param Request $request  
      */
-    public function changeStatus(Request $request, $id)
+    public function changeAccept(Request $request, $id)
     {
         $user = User::where('id', $id)->first();
         $user->update([
-            'status' => $request->status,
+            'is_accept' => $request->is_accept,
         ]);
         return response()->json([
             'message' => "Change Status User Success !",

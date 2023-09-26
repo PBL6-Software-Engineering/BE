@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ExampleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -35,4 +36,11 @@ Route::group([
 
 Route::get('verify-email/{token}', [UserController::class, 'verifyEmail'])->name('verify_email');
 Route::get('forgot-form', [UserController::class, 'forgotForm'])->name('form_reset_password');
-Route::post('forgot-update', [UserController::class, 'forgotUpdate'])->name('forgot.update');
+Route::post('forgot-update', [UserController::class, 'forgotUpdate'])->name('forgot_update');
+
+Route::prefix('admin')->controller(AdminController::class)->group(function () { 
+    Route::get('verify-email/{token}','verifyEmail')->name('admin_verify_email');
+    Route::get('forgot-form', 'forgotForm')->name('admin_form_reset_password');
+    Route::post('forgot-update', 'forgotUpdate')->name('admin_forgot_update');
+});
+

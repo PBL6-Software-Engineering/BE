@@ -30,7 +30,7 @@ class FakeImageFactory extends Factory
 
     public function createAvatarDoctor()
     {
-        $pathFolder = 'public/storage/image/avatars/doctors';
+        $pathFolder = 'storage/image/avatars/doctors';
         if (!File::exists($pathFolder)) {
             File::makeDirectory($pathFolder, 0755, true);
         }

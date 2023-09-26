@@ -123,14 +123,15 @@ class UserController extends Controller
         try {
             $email = $request->email;
             $token = Str::random(32);
-            $user = PasswordReset::where('email',$email)->where('is_user', $request->is_user)->first();
+            $isUser = 1;
+            $user = PasswordReset::where('email',$email)->where('is_user', $isUser)->first();
             if ($user) {
                 $user->update(['token' => $token]);
             } else {
                 PasswordReset::create([
                     'email' => $email,
                     'token' => $token,
-                    'is_user' => $request->is_user
+                    'is_user' => $isUser
                 ]);
             }
             $url = UserEnum::DOMAIN_PATH . 'forgot-form?token=' . $token;

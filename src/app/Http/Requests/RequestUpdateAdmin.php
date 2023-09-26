@@ -31,7 +31,6 @@ class RequestUpdateAdmin extends FormRequest
         return [
             'name' => 'required|string|between:2,100',
             'email' => ['required','string','email','max:100',Rule::unique('admins')->ignore($userId)],
-            'username' => ['required','string','max:100',Rule::unique('admins')->ignore($userId)],
             'address' => 'required|string|min:1',
             'date_of_birth' => 'required|string|min:1',
             'phone' => 'required|min:9|numeric',

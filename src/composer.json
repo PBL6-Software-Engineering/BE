@@ -9,7 +9,7 @@
         "brian2694/laravel-toastr": "^5.57",
         "darkaonline/l5-swagger": "^8.5",
         "fruitcake/laravel-cors": "^2.0.5",
-        "guzzlehttp/guzzle": "^7.2",
+        "guzzlehttp/guzzle": "^7.8",
         "laravel/framework": "^9.0",
         "laravel/sanctum": "^3.2",
         "laravel/tinker": "^2.7",

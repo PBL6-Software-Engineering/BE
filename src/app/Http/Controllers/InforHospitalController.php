@@ -20,6 +20,7 @@ use App\Mail\SendPassword;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Faker\Factory ;
+use GuzzleHttp\Client;
 
 use App\Http\Requests\RequestCreateUser;
 use App\Http\Requests\RequestLogin;
@@ -158,6 +159,7 @@ class InforHospitalController extends Controller
         try {
             $hospital = User::find(auth('user_api')->user()->id);
 
+            // Cách 1 dùng Factory 
             // $fakeImageFactory = FakeImageFactory::new();
             // $avatar = $fakeImageFactory->createAvatarDoctor();
             // while (!$avatar) {
@@ -165,13 +167,28 @@ class InforHospitalController extends Controller
             // }
             // $avatar = 'storage/image/avatars/doctors/' . $avatar;
 
+            // Cách 2 dùng "guzzlehttp/guzzle": "^7.8"
+            try {
+                $pathFolder = 'storage/image/avatars/doctors';
+                if (!File::exists($pathFolder)) {
+                    File::makeDirectory($pathFolder, 0755, true);
+                }
+                $client = new Client();
+                $response = $client->get('https://picsum.photos/200/200');
+                $imageContent = $response->getBody()->getContents();
+                $pathFolder = 'storage/image/avatars/doctors/';
+                $nameImage = uniqid() . '.jpg';
+                $avatar = $pathFolder . $nameImage;
+                file_put_contents($avatar, $imageContent);
+            } catch (\Exception $e) {
+                $avatar = null;
+            }
             $new_password = Str::random(10);
             $doctor = User::create([
                 'email' => $request->email,
                 'password' => Hash::make($new_password),
                 'name' => $request->name,
-                'avatar' => null,
-                // 'avatar' => $avatar,
+                'avatar' => $avatar,
                 'is_accept' => true,
                 'role' => 'doctor',
                 'token_verify_email' => null,
