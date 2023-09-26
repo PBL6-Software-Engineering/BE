@@ -27,4 +27,14 @@ class FakeImageFactory extends Factory
         $nameImage = $this->faker->image($pathFolder, 200, 200, null, false);
         return $nameImage;
     }
+
+    public function createAvatarDoctor()
+    {
+        $pathFolder = 'public/storage/image/avatars/doctors';
+        if (!File::exists($pathFolder)) {
+            File::makeDirectory($pathFolder, 0755, true);
+        }
+        $nameImage = $this->faker->image($pathFolder, 200, 200, null, false);
+        return $nameImage;
+    }
 }

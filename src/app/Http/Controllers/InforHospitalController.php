@@ -6,6 +6,7 @@ use App\Enums\UserEnum;
 use App\Http\Requests\RequestCreateInforHospital;
 use App\Http\Requests\RequestChangePassword;
 use App\Http\Requests\RequestCreateInforUser;
+use App\Http\Requests\RequestCreateNewDoctor;
 use App\Http\Requests\RequestCreatePassword;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use App\Mail\SendPassword;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Faker\Factory ;
 
 use App\Http\Requests\RequestCreateUser;
 use App\Http\Requests\RequestLogin;
@@ -27,11 +29,13 @@ use App\Http\Requests\RequestUpdateUser;
 use App\Jobs\SendForgotPasswordEmail;
 use App\Jobs\SendMailNotify;
 use App\Jobs\SendVerifyEmail;
+use App\Models\InforDoctor;
 use App\Models\InforHospital;
 use App\Models\InforUser;
 use App\Models\PasswordReset;
 use App\Rules\ReCaptcha;
 use App\Services\UserService;
+use Database\Factories\FakeImageFactory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Laravel\Socialite\Facades\Socialite;
@@ -117,11 +121,13 @@ class InforHospitalController extends Controller
             if ($user->avatar) {
                 File::delete($user->avatar);
             }
+            $avatar = $this->saveAvatar($request);
+            $user->update(array_merge($request->all(),['avatar' => $avatar]));
+        } else {
+            $user->update($request->all());
         }
-        $avatar = $this->saveAvatar($request);
-        $user->update(array_merge($request->all(),['avatar' => $avatar]));
-
-        $inforHospital = InforHospital::find($user->id);
+        
+        $inforHospital = InforHospital::where('id_hospital', $user->id)->first();
         $inforHospital->update($request->all());
         $message = 'Hospital successfully updated';
 
@@ -146,4 +152,49 @@ class InforHospitalController extends Controller
             'hospital' => array_merge($user->toArray(), $inforHospital->toArray()),
         ], 201);
     }
+
+    public function addDoctor(RequestCreateNewDoctor $request)
+    {
+        try {
+            $hospital = User::find(auth('user_api')->user()->id);
+
+            // $fakeImageFactory = FakeImageFactory::new();
+            // $avatar = $fakeImageFactory->createAvatarDoctor();
+            // while (!$avatar) {
+            //     $avatar = $fakeImageFactory->createAvatarDoctor();
+            // }
+            // $avatar = 'storage/image/avatars/doctors/' . $avatar;
+
+            $new_password = Str::random(10);
+            $doctor = User::create([
+                'email' => $request->email,
+                'password' => Hash::make($new_password),
+                'name' => $request->name,
+                'avatar' => null,
+                // 'avatar' => $avatar,
+                'is_accept' => true,
+                'role' => 'doctor',
+                'token_verify_email' => null,
+                'email_verified_at' => now(),
+            ]);
+            InforDoctor::create([
+                'id_doctor' => $doctor->id,
+                'id_department' => $request->id_department,
+                'id_hospital' => $hospital->id,
+                'is_confirm' => true,
+                'province_code' => $request->province_code
+            ]);
+            $content = 'This is your doctor account information , use it to log in to the system, then you should change your password for security <br> email: ' . $doctor->email . ' <br> password: ' . $new_password;
+            Queue::push(new SendMailNotify($doctor->email, $content));
+            return response()->json([
+                'message' => "Add Doctor Success !",
+            ],200);
+        }
+        catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

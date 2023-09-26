@@ -220,7 +220,7 @@ class InforUserController extends Controller
         } else {
             $user->update($request->all());
         }
-        $inforUser = InforUser::find($user->id);
+        $inforUser = InforUser::where('id_user', $user->id)->first();
         $inforUser->update($request->all());
         $message = 'User successfully updated';
         // sendmail verify

@@ -23,6 +23,7 @@ use App\Http\Requests\RequestUpdateInfor;
 use App\Http\Requests\RequestUpdateUser;
 use App\Jobs\SendForgotPasswordEmail;
 use App\Models\Admin;
+use App\Models\InforDoctor;
 use App\Models\InforHospital;
 use App\Models\InforUser;
 use App\Models\PasswordReset;
@@ -83,7 +84,7 @@ class UserController extends Controller
             $inforUser = InforHospital::where('id_hospital', $user->id)->first();
         }
         if($user->role == 'doctor') {
-            $inforUser = InforHospital::where('id_doctor', $user->id)->first();
+            $inforUser = InforDoctor::where('id_doctor', $user->id)->first();
         }
 
         return response()->json([

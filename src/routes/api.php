@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\InforDoctorController;
 use App\Http\Controllers\InforHospitalController;
 use App\Http\Controllers\InforUserController;
 use App\Http\Controllers\UserController;
@@ -63,7 +64,7 @@ Route::prefix('infor-user')->controller(InforUserController::class)->group(funct
     Route::get('authorized/google/callback', [InforUserController::class, 'handleGoogleCallback']);
     Route::middleware(['auth:user_api','role:user'])->group(function () {
         Route::post('create-password', 'createPassword'); 
-        Route::post('{user}', 'updateProfile');
+        Route::post('update/{user}', 'updateProfile');
         Route::get('profile', 'profile');
         Route::post('create-password', 'createPassword'); 
     });
@@ -75,10 +76,23 @@ Route::prefix('infor-hospital')->controller(InforHospitalController::class)->gro
     Route::middleware(['auth:user_api','role:hospital'])->group(function () {
         Route::post('change-password', 'changePassword');
         Route::post('create-password', 'createPassword'); 
-        Route::post('{user}', 'updateProfile');
+        Route::post('update/{user}', 'updateProfile');
         Route::get('profile', 'profile');
+        Route::post('add-doctor', 'addDoctor');
     });
 });
+
+// Hospital Infor  
+Route::prefix('infor-doctor')->controller(InforDoctorController::class)->group(function () {
+    Route::middleware(['auth:user_api','role:doctor'])->group(function () {
+        Route::post('change-password', 'changePassword');
+        Route::post('create-password', 'createPassword'); 
+        Route::post('update/{user}', 'updateProfile');
+        Route::get('profile', 'profile');
+        Route::post('add-doctor', 'addDoctor');
+    });
+});
+
 
 // Category 
 Route::prefix('category')->controller(CategoryController::class)->group(function () {
