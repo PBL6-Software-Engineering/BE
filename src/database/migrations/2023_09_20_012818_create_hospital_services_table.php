@@ -19,7 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_department');
             $table->string('name');
             $table->integer('time_advise');
-            $table->float('price');
+            $table->double('price', 15, 2);
             $table->json('infor');
             $table->timestamps();
 

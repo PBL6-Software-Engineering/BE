@@ -24,9 +24,7 @@ class CategoryController extends Controller
 
     public function add(RequestCreateCategory $request){
         try {
-            $category = Category::create(array_merge(
-                $request->all()
-            ));
+            $category = Category::create($request->all());
             $thumbnail = $this->saveAvatar($request);
             $category->update([
                 'thumbnail' => $thumbnail,

@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\HospitalDepartmentController;
 use App\Http\Controllers\InforDoctorController;
 use App\Http\Controllers\InforHospitalController;
 use App\Http\Controllers\InforUserController;
@@ -136,6 +137,16 @@ Route::prefix('department')->controller(DepartmentController::class)->group(func
     Route::get('/detail/{id}', 'details');
 });
 
+// HospitalDepartment 
+Route::prefix('hospita-department')->controller(HospitalDepartmentController::class)->group(function () {
+    Route::middleware(['auth:user_api','role:hospital'])->group(function () {
+        Route::post('/add', 'add');
+        Route::post('update/{id}', 'edit');
+        Route::delete('/{id}', 'delete');
+        Route::get('/', 'departmentOfHospital');
+        Route::get('/detail/{id}', 'details');
+    });
+});
 
 
 

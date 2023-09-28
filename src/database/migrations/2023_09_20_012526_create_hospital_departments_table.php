@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_department');
             $table->unsignedBigInteger('id_hospital');
             $table->integer('time_advise');
-            $table->float('price');
+            $table->double('price', 15, 2);
             $table->timestamps();
 
             $table->foreign('id_department')->references('id')->on('departments')->onDelete('cascade');
