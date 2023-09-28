@@ -8,6 +8,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use GuzzleHttp\Client;
 
 class CategoriesSeeder extends Seeder
 {
@@ -93,25 +94,53 @@ class CategoriesSeeder extends Seeder
             'Sức khỏe nam giới',
         ];
 
-        $thumbnails = [];
+        // Cách 1 : Chậm 
+        // $thumbnails = [];
 
         // lệnh tạo ảnh đôi lúc có cái ảnh tạo được , có cái tạo không được nên phải dùng lệnh while 
         // để đến khi nào có ảnh mới thôi 
-        foreach ($categoryNames as $index => $categoryName) {
-            $thumbnail = FakeImageFactory::new()->createThumbnailCategory();
-            while (!$thumbnail) {
-                $thumbnail = FakeImageFactory::new()->createThumbnailCategory();
-            }
-            $thumbnails[$index] = 'storage/image/thumbnail/categories/' . $thumbnail;
-        }
+
+        // foreach ($categoryNames as $index => $categoryName) {
+        //     $thumbnail = FakeImageFactory::new()->createThumbnailCategory();
+        //     while (!$thumbnail) {
+        //         $thumbnail = FakeImageFactory::new()->createThumbnailCategory();
+        //     }
+        //     $thumbnails[$index] = 'storage/image/thumbnail/categories/' . $thumbnail;
+        // }
         
+        // foreach ($categoryNames as $index => $categoryName) {
+        //     Category::create([
+        //         'name' => $categoryName,
+        //         'thumbnail' => $thumbnails[$index],
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ]);
+        // }
+
+        // Cách 2 : Nhanh hơn rất nhiều 
         foreach ($categoryNames as $index => $categoryName) {
-            Category::create([
-                'name' => $categoryName,
-                'thumbnail' => $thumbnails[$index],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            try {
+                $pathFolder = 'storage/app/public/image/thumbnail/categories/';
+                if (!File::exists($pathFolder)) {
+                    File::makeDirectory($pathFolder, 0755, true);
+                }
+                $client = new Client();
+                while (true) {
+                    $response = $client->get('https://picsum.photos/200/200');
+                    $imageContent = $response->getBody()->getContents();
+                    $nameImage = uniqid() . '.jpg';
+                    $thumbnail = $pathFolder . $nameImage;
+                    if (file_put_contents($thumbnail, $imageContent)) {
+                        Category::create([
+                            'name' => $categoryName,
+                            'thumbnail' => 'storage/image/thumbnail/categories/' . $nameImage,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                        break;
+                    }
+                }
+            } catch (\Exception $e) {}
         }
     }
 }

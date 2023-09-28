@@ -8,6 +8,7 @@ use Database\Factories\FakeImageFactory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use GuzzleHttp\Client;
 
 class DepartmentsSeeder extends Seeder
 {
@@ -525,24 +526,52 @@ class DepartmentsSeeder extends Seeder
             ],
         ];
 
-        $thumbnails = [];
+        // Cách 1 : Chậm 
+        // $thumbnails = [];
 
-        foreach ($departments as $index => $department) {
-            $thumbnail = FakeImageFactory::new()->createThumbnailDepartment();
-            while (!$thumbnail) {
-                $thumbnail = FakeImageFactory::new()->createThumbnailDepartment();
-            }
-            $thumbnails[$index] = 'storage/image/thumbnail/departments/' . $thumbnail;
-        }
+        // foreach ($departments as $index => $department) {
+        //     $thumbnail = FakeImageFactory::new()->createThumbnailDepartment();
+        //     while (!$thumbnail) {
+        //         $thumbnail = FakeImageFactory::new()->createThumbnailDepartment();
+        //     }
+        //     $thumbnails[$index] = 'storage/image/thumbnail/departments/' . $thumbnail;
+        // }
         
+        // foreach ($departments as $index => $department) {
+        //     Department::create([
+        //         'name' => $department['name'],
+        //         'description' => $department['description'],
+        //         'thumbnail' => $thumbnails[$index],
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ]);
+        // }
+
+        // Cách 2 
         foreach ($departments as $index => $department) {
-            Department::create([
-                'name' => $department['name'],
-                'description' => $department['description'],
-                'thumbnail' => $thumbnails[$index],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            try {
+                $pathFolder = 'storage/app/public/image/thumbnail/departments/';
+                if (!File::exists($pathFolder)) {
+                    File::makeDirectory($pathFolder, 0755, true);
+                }
+                $client = new Client();
+                while (true) {
+                    $response = $client->get('https://picsum.photos/200/200');
+                    $imageContent = $response->getBody()->getContents();
+                    $nameImage = uniqid() . '.jpg';
+                    $thumbnail = $pathFolder . $nameImage;
+                    if (file_put_contents($thumbnail, $imageContent)) {
+                        Department::create([
+                            'name' => $department['name'],
+                            'description' => $department['description'],
+                            'thumbnail' => 'storage/image/thumbnail/departments/' . $nameImage,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                        break;
+                    }
+                }
+            } catch (\Exception $e) {}
         }
     }
 }
