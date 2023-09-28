@@ -30,6 +30,7 @@ class RequestUpdateDepartment extends FormRequest
         return [
             'name' => ['required', 'string', Rule::unique('departments')->ignore($id)],
             'description' => 'required|string',
+            'thumbnail' => 'image',
         ];
     }
 

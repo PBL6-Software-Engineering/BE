@@ -37,13 +37,13 @@ class DepartmentController extends Controller
     }
 
     public function edit(RequestUpdateDepartment $request,$id){
-        $department = Department::where("id",$id)->first();
+        $department = Department::find($id);
         if($request->hasFile('thumbnail')) {
             if ($department->thumbnail) {
                 File::delete($department->thumbnail);
             }
-            $avatar = $this->saveAvatar($request);
-            $department->update(array_merge($request->all(),['thumbnail' => $avatar]));
+            $thumbnail = $this->saveAvatar($request);
+            $department->update(array_merge($request->all(),['thumbnail' => $thumbnail]));
         } else {
             $department->update($request->all());
         }

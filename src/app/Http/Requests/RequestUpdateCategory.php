@@ -29,6 +29,7 @@ class RequestUpdateCategory extends FormRequest
         $id = $this->route('id');
         return [
             'name' => ['required', 'string', Rule::unique('categories')->ignore($id)],
+            'thumbnail' => 'image',
         ];
     }
 

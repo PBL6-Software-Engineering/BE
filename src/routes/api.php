@@ -92,12 +92,12 @@ Route::prefix('infor-doctor')->controller(InforDoctorController::class)->group(f
     });
 });
 
-// Category (chưa xong)
+// Category 
 Route::prefix('category')->controller(CategoryController::class)->group(function () {
     Route::middleware('auth:admin_api')->group(function () {
         Route::post('/add', 'add');
         Route::post('update/{id}', 'edit');
-        Route::delete('/{id}', 'delete');
+        Route::delete('delete/{id}', 'delete');
     });
     Route::get('/', 'all');
     Route::get('/detail/{id}', 'details');
