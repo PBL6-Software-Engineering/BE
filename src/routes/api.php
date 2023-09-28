@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\InforDoctorController;
@@ -34,16 +35,17 @@ Route::prefix('admin')->controller(AdminController::class)->group(function () {
         Route::get('me', 'me');
         Route::post('change-password', 'changePassword');
         Route::post('update/{admin}', 'updateProfile');
-
         Route::get('all-user', 'allUser');
         Route::post('change-accept/{id}', 'changeAccept');
     });
-    Route::middleware(['auth:admin_api','role_admin:superadmin,manager'])->group(function () {
+    // Route::middleware(['auth:admin_api','role_admin:superadmin,manager'])->group(function () {
+    // Gộp chung role (users) và role_amdin (admins) thành role vì cả 2 bảng users và admins đều có cột role  
+    Route::middleware(['auth:admin_api','role:superadmin,manager'])->group(function () {
         Route::get('all-admin', 'allAdmin');
         Route::post('add-admin', 'addAdmin');
         Route::patch('{id}', 'editRole');
     });
-    Route::middleware(['auth:admin_api','role_admin:superadmin'])->group(function () {
+    Route::middleware(['auth:admin_api','role:superadmin'])->group(function () {
         Route::delete('{id}', 'deleteAdmin');
     });
 });
@@ -90,15 +92,37 @@ Route::prefix('infor-doctor')->controller(InforDoctorController::class)->group(f
     });
 });
 
-// Category 
+// Category (chưa xong)
 Route::prefix('category')->controller(CategoryController::class)->group(function () {
     Route::middleware('auth:admin_api')->group(function () {
         Route::post('/add', 'add');
-        Route::patch('{id}', 'edit');
+        Route::post('update/{id}', 'edit');
         Route::delete('/{id}', 'delete');
     });
     Route::get('/', 'all');
-    Route::get('/{id}', 'details');
+    Route::get('/detail/{id}', 'details');
+});
+
+// Article 
+Route::prefix('article')->controller(ArticleController::class)->group(function () {
+    Route::middleware(['auth:admin_api,user_api','role:admin,superadmin,manager,doctor,hospital'])->group(function () {
+        Route::post('/add', 'add');
+        Route::post('update/{id}', 'edit');
+    });
+
+    Route::middleware(['auth:user_api','role:doctor,hospital'])->group(function () {
+        Route::delete('delete/{id}', 'delete');
+    });
+
+    Route::middleware('auth:admin_api')->group(function () {
+        Route::post('hide-show/{id}', 'hideShow');
+        Route::post('change-accept/{id}', 'changeAccept');
+    });
+
+    Route::get('/', 'all');
+    Route::get('/user/{id}', 'articleOfDoctor');
+    Route::get('/admin', 'articleOfAdmin');
+    Route::get('/detail/{id}', 'details');
 });
 
 // Department 
@@ -109,7 +133,7 @@ Route::prefix('department')->controller(DepartmentController::class)->group(func
         Route::delete('/{id}', 'delete');
     });
     Route::get('/', 'all');
-    Route::get('/{id}', 'details');
+    Route::get('/detail/{id}', 'details');
 });
 
 

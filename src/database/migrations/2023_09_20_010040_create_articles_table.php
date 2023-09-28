@@ -15,12 +15,18 @@ return new class extends Migration
     {
         Schema::create('articles', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_doctor')->nullable();
+            $table->unsignedBigInteger('id_user')->nullable();
+            $table->unsignedBigInteger('id_category')->nullable();
             $table->string('title');
             $table->text('content');
+            $table->string('thumbnail')->nullable();
+            $table->boolean('is_accept')->nullable();
+            $table->boolean('is_show')->nullable();
             $table->timestamps();
 
-            $table->foreign('id_doctor')->references('id_doctor')->on('infor_doctors')->onDelete('cascade');
+            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('id_category')->references('id')->on('categories')->onDelete('cascade');
+            // nếu cùng một trường liên kết đến nhiều bảng thì làm như này 
         });
     }
 

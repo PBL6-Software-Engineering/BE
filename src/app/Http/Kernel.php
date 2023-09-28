@@ -55,8 +55,9 @@ class Kernel extends HttpKernel
      */
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
-        'role' => \App\Http\Middleware\CheckUserRole::class,
-        'role_admin' => \App\Http\Middleware\CheckAdminRole::class,
+        // 'role' => \App\Http\Middleware\CheckUserRole::class,
+        // 'role_admin' => \App\Http\Middleware\CheckAdminRole::class,
+        'role' => \App\Http\Middleware\CheckRole::class, // Tại vì admins và users đều có cột role nên dùng chung luôn , không cần tách ra nữa
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,

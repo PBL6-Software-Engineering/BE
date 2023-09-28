@@ -31,7 +31,7 @@ class DepartmentController extends Controller
         $thumbnail = $this->saveAvatar($request);
         $department->update(['thumbnail' => $thumbnail]);
         return response()->json([
-            'message' => 'Add mame department successfully ',
+            'message' => 'Add department successfully ',
             'department' => $department
         ], 201);
     }

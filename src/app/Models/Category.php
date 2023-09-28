@@ -14,15 +14,10 @@ class Category extends Model
         'thumbnail',
         'search_number'
     ];
-    
-    public function products()
-    {
-        return $this->hasMany(Product::class);
-    }
 
-    public function articleCategories()
+    public function articles()
     {
-        return $this->hasMany(ArticleCategory::class);
+        return $this->hasMany(Article::class);
     }
 
 }

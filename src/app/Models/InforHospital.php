@@ -39,6 +39,11 @@ class InforHospital extends Model
         return $this->hasMany(HealthInsuranceHospital::class);
     }
 
+    public function articles()
+    {
+        return $this->hasMany(Article::class);
+    }
+
     public function timeWork() {
         return $this->hasOne(TimeWork::class);
     }
