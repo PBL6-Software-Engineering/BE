@@ -22,13 +22,13 @@ class HospitalServiceController extends Controller
         $user = auth()->guard('user_api')->user();
         $hospitalDepartment = HospitalDepartment::where('id',$request->id_hospital_department)
         ->where('id_hospital', $user->id)->first();
-        if(empty($hospitalDepartment)) return response()->json(['message' => 'Not found Hospital Department !',], 404);
+        if(empty($hospitalDepartment)) return response()->json(['message' => 'Không tìm thấy khoa trong bệnh viện !',], 404);
         
         $request->merge(['infor' => json_encode($request->infor)]);
         $hospitalService = HospitalService::create($request->all());
         
         return response()->json([
-            'message' => 'Add Hospital Service for Hospital successfully ',
+            'message' => 'Thêm dịch vụ cho bệnh viện thành công ! ',
             'hospital_service' => $hospitalService
         ], 201);
     }
@@ -40,18 +40,18 @@ class HospitalServiceController extends Controller
             $hospitalDepartment = HospitalDepartment::where('id',$hospitalService->id_hospital_department)
             ->where('id_hospital', $user->id)->first();
             if(empty($hospitalDepartment)) {
-                return response()->json(['message' => 'Not found hospital department !',], 404);
+                return response()->json(['message' => 'Không tìm thấy khoa trong bệnh viện !',], 404);
             }
 
             $hospitalDepartment = HospitalDepartment::where('id',$request->id_hospital_department)
             ->where('id_hospital', $user->id)->first();
-            if(empty($hospitalDepartment)) return response()->json(['message' => 'Not found Hospital Department !',], 404);
+            if(empty($hospitalDepartment)) return response()->json(['message' => 'Không tìm thấy khoa trong bệnh viện !',], 404);
 
             $request->merge(['infor' => json_encode($request->infor)]);
             $hospitalService->update($request->all());
 
             return response()->json([
-                'message' => 'Update Service for Hospital successfully ',
+                'message' => 'Cập nhật dịch vụ thành công !',
                 'hospital_service' => $hospitalService
             ], 201);
         } catch (Exception $e) {
@@ -80,11 +80,11 @@ class HospitalServiceController extends Controller
                 }
                 $hospitalService->delete();
                 return response()->json([
-                    'message' => 'Delete hospital Service successfully',
+                    'message' => 'Xóa dịch vụ thành công !',
                 ], 201);
             } else {
                 return response()->json([
-                    'message' => 'Not found hospital service !',
+                    'message' => 'Không tìm thấy dịch vụ !',
                 ], 404);
             }
         } catch (Exception $e) {
@@ -122,7 +122,7 @@ class HospitalServiceController extends Controller
             ->paginate(6);
 
             return response()->json([
-                'message' => 'Get all hospital Services successfully !',
+                'message' => 'Xem tất cả dịch vụ của bệnh viện thành công !',
                 'hospital_services' => $hospitalServices,
             ], 201);
         }
@@ -136,7 +136,7 @@ class HospitalServiceController extends Controller
                 'hospital_services.*', 'hospital_departments.*')
             ->paginate(6);
             return response()->json([
-                'message' => 'Get all hospital Services successfully !',
+                'message' => 'Xem tất cả dịch vụ của bệnh viện thành công !',
                 'hospital_services' => $hospitalServices,
             ], 201);
         }
@@ -155,13 +155,13 @@ class HospitalServiceController extends Controller
         ->first();
         if($hospitalServices) {
             return response()->json([
-                'message' => 'Get hospital service details successfully !',
+                'message' => 'Xem dịch vụ chi tiết thành công !',
                 'hospital_service' => $hospitalServices
             ], 201);
         }
         else {
             return response()->json([
-                'message' => 'Not found hospital service !',
+                'message' => 'Không tìm thấy dịch vụ trong bệnh viện !',
             ], 404);
         }
 

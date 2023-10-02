@@ -53,10 +53,15 @@ class AdminController extends Controller
     {
         $credentials = request(['email', 'password']);
         $user = Admin::where('email',$request->email)->first();
-        if (!$token = auth()->guard('admin_api')->attempt($credentials)) {
-            return response()->json(['error' => 'Either email or password is wrong. !'], 401);
-        }
 
+        if($user->email_verified_at == null){
+            return response()->json(['error' => 'Email này chưa được xác nhận , hãy kiểm tra và xác nhận nó trước khi đăng nhập !'], 401);
+        } 
+        
+        if (!$token = auth()->guard('admin_api')->attempt($credentials)) {
+            return response()->json(['error' => 'Email hoặc mật khẩu không đúng !'], 401);
+        }
+        
         return response()->json([
             'admin' => $user,
             'message'=>$this->respondWithToken($token)
@@ -77,19 +82,19 @@ class AdminController extends Controller
     {
         auth('admin_api')->logout();
 
-        return response()->json(['message' => 'Successfully logged out']);
+        return response()->json(['message' => 'Đăng xuất thành công !']);
     }
 
     public function changePassword(RequestChangePassword $request) {
         $admin = Admin::find(auth('admin_api')->user()->id);
         if (!(Hash::check($request->get('current_password'), $admin->password))) {
             return response()->json([
-                'message' => 'Your current password does not matches with the password.',
+                'message' => 'Mật khẩu của bạn không chính xác !',
             ],400);
         }
         $admin->update(['password' => Hash::make($request->get('new_password'))]);
         return response()->json([
-            'message' => "Password successfully changed !",
+            'message' => "Thay đổi mật khẩu thành công !",
         ],200);
     }
 
@@ -115,19 +120,19 @@ class AdminController extends Controller
         } else {
             $admin->update($request->all());
         }
-        $message = 'Admin successfully updated';
+        $message = 'Cập nhật thông tin tài khoản admin thành công !';
         // sendmail verify
         if($oldEmail != $request->email) {
             $token = Str::random(32);
             $url =  UserEnum::DOMAIN_PATH . 'admin/verify-email/' . $token;
             Queue::push(new SendVerifyEmail($admin->email, $url));
-            $content = 'Your account has been transferred to email ' . $admin->email . '. If you are not the one making the change, please contact your system administrator for assistance. ';
+            $content = 'Tài khoản của bạn đã thay đổi email thành ' . $admin->email . '. Nếu bạn không làm điều này, hãy liên hệ với quản trị viên của hệ thống để được hỗ trợ . ';
             Queue::push(new SendMailNotify($oldEmail, $content));
             $admin->update([
                 'token_verify_email' => $token,
                 'email_verified_at' => null,
             ]);
-            $message = 'Admin successfully updated . A confirmation email has been sent to this email, please check and confirm !';
+            $message = 'Cập nhật thông tin thành công . Một email xác nhận đã được gửi hãy kiểm tra mail và xác nhận nó !';
         } 
         // sendmail verify
         return response()->json([
@@ -146,11 +151,11 @@ class AdminController extends Controller
                 'token_verify_email' => null,
             ]);
             $status = true;
-            Toastr::success('Your email has been verified !');
+            Toastr::success('Email của bạn đã được xác nhận !');
         } 
         else {
             $status = false;
-            Toastr::warning('Token has expired !');
+            Toastr::warning('Token đã hết hạn !');
         }
         return view('admin.status_verify_email', ['status' => $status]);
     }
@@ -159,7 +164,7 @@ class AdminController extends Controller
     {
         $allAdmin = Admin::paginate(6);
         return response()->json([
-            'message' => 'Get All Admin successfully',
+            'message' => 'Lấy tất cả quản trị viên thành công !',
             'admins' => $allAdmin
         ], 201);
     }
@@ -168,7 +173,7 @@ class AdminController extends Controller
     {
         $allUser = User::paginate(6);
         return response()->json([
-            'message' => 'Get All User successfully',
+            'message' => 'Lấy tất cả người dùng thành công !',
             'users' => $allUser
         ], 201);
     }
@@ -198,13 +203,13 @@ class AdminController extends Controller
             Log::info("Add jobs to Queue , Email: $email with URL: $url");
             Queue::push(new SendForgotPasswordEmail($email, $url));
             return response()->json([
-                'message' => "Send Mail Password Reset Success !",
+                'message' => "Gửi mail đặt lại mật khẩu thành công , hãy kiểm tra mail !",
             ],200);
         } catch (\Exception $e) {
             Log::error('Error occurred: ' . $e->getMessage());
 
             return response()->json([
-                'error' => 'An error occurred while sending the reset email.'
+                'error' => 'Có lỗi gì đó khi gửi mail .'
             ], 500);
         }
     }
@@ -221,10 +226,10 @@ class AdminController extends Controller
                         $user->update(['password' => $new_password]);
                         $passwordReset->delete();
     
-                        Toastr::success('Password Reset Success !');
+                        Toastr::success('Đặt lại mật khẩu thành công !');
                         return  redirect()->route('form_reset_password');
                     }
-                    Toastr::warning('Can not find the account !');
+                    Toastr::warning('Không tìm thấy tài khoản !');
                     return  redirect()->route('form_reset_password');
                 }
                 else { // admin, superamdin, manager
@@ -233,15 +238,15 @@ class AdminController extends Controller
                         $admin->update(['password' => $new_password]);
                         $passwordReset->delete();
     
-                        Toastr::success('Password Reset Success !');
+                        Toastr::success('Đặt lại mật khẩu thành công !');
                         return  redirect()->route('admin_form_reset_password');
                     }
-                    Toastr::warning('Can not find the account !');
+                    Toastr::warning('Không tìm thấy tài khoản !');
                     return  redirect()->route('admin_form_reset_password');
                 }
 
             } else {
-                Toastr::warning('Token has expired !');
+                Toastr::warning('Token đã hết hạn !');
                 return  redirect()->route('admin_form_reset_password');
             }
         } catch (\Exception $e) {
@@ -271,7 +276,7 @@ class AdminController extends Controller
         ]);
         Queue::push(new SendPasswordNewAdmin($request->email, $new_password));
         return response()->json([
-            'message' => "Add Admin Success !",
+            'message' => "Thêm quản trị viên thành công !",
         ],200);
     }
 
@@ -285,7 +290,7 @@ class AdminController extends Controller
         $role = auth('admin_api')->user()->role;
         if($role == 0) {
             return response()->json([
-                'message' => "You do not have permission, only super admin has the right to delete !",
+                'message' => "Bạn không có quyền, chỉ có quản trị viên cấp cao mới có quyền xóa !",
             ],401);
         } else {
             $admin = Admin::where('id', $id)->first();
@@ -294,7 +299,7 @@ class AdminController extends Controller
             }
             $admin->delete();
             return response()->json([
-                'message' => "Delete Admin Success !",
+                'message' => "Xóa tài khoản thành công !",
             ],200);
         }
     }
@@ -309,7 +314,7 @@ class AdminController extends Controller
         $role = auth('admin_api')->user()->role;
         if($role == 0) {
             return response()->json([
-                'message' => "You do not have permission, only super admin has the right to delete !",
+                'message' => "Bạn không có quyền , chỉ có quản trị viên cấp cao mới có quyền thay đổi role !",
             ],401);
         } else {
             $admin = Admin::where('id', $id)->first();
@@ -317,7 +322,7 @@ class AdminController extends Controller
                 'role' => $request->role,
             ]);
             return response()->json([
-                'message' => "Change Role Admin Success !",
+                'message' => "Thay đổi role cho quản trị viên thành công !",
             ],200);
         }
     }
@@ -335,9 +340,7 @@ class AdminController extends Controller
             'is_accept' => $request->is_accept,
         ]);
         return response()->json([
-            'message' => "Change Status User Success !",
+            'message' => "Thay đổi trạng thái của người dùng thành công !",
         ],200);
     }
-    
-    
 }

@@ -31,7 +31,7 @@ class DepartmentController extends Controller
         $thumbnail = $this->saveAvatar($request);
         $department->update(['thumbnail' => $thumbnail]);
         return response()->json([
-            'message' => 'Add department successfully ',
+            'message' => 'Thêm khoa thành công !',
             'department' => $department
         ], 201);
     }
@@ -48,7 +48,7 @@ class DepartmentController extends Controller
             $department->update($request->all());
         }
         return response()->json([
-            'message' => 'Update name department successfully ',
+            'message' => 'Cập nhật thông tin khoa thành công !',
             'department' => $department
         ], 201);
     }
@@ -62,16 +62,16 @@ class DepartmentController extends Controller
                 HospitalDepartment::where("id_department",$id)->update(['id_department'=>null]); 
                 $department->delete();
                 return response()->json([
-                    'message' => 'Delete department successfully',
+                    'message' => 'Xóa khoa thành công !',
                 ], 201);
             } else {
                 return response()->json([
-                    'message' => 'Not found department !',
+                    'message' => 'Không tìm thấy khoa !',
                 ], 404);
             }
         } catch (QueryException $e) {
             return response()->json([
-                'message' => 'Delete Department false ',
+                'message' => 'Xóa khoa thấy bại ! ',
             ], 400);
         }
     }
@@ -99,14 +99,14 @@ class DepartmentController extends Controller
                 ->paginate(6);
         
             return response()->json([
-                'message' => 'Get all departments successfully !',
+                'message' => 'Xem tất cả khoa thành công !',
                 'department' => $departments,
             ], 201);
         }
         else { // lấy cho product 
             $departments = Department::all();
             return response()->json([
-                'message' => 'Get all departments successfully !',
+                'message' => 'Xem tất cả khoa thành công !',
                 'department' => $departments,
             ], 201);
         }
@@ -116,16 +116,15 @@ class DepartmentController extends Controller
         $department = Department::find($id); 
         if($department) {
             return response()->json([
-                'message' => 'Get department details successfully !',
+                'message' => 'Xem chi tiết khoa thành công !',
                 'department' => $department
             ], 201);
         }
         else {
             return response()->json([
-                'message' => 'Not found department !',
+                'message' => 'Không tìm thấy khoa !',
                 'department' => $department
             ], 404);
         }
-
     }
 }

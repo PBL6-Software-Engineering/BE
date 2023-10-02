@@ -30,7 +30,7 @@ class CategoryController extends Controller
                 'thumbnail' => $thumbnail,
             ]);
             return response()->json([
-                'message' => 'Add category successfully ',
+                'message' => 'Thêm danh mục thành công !',
                 'category' => $category
             ], 201);
         } 
@@ -54,7 +54,7 @@ class CategoryController extends Controller
                 $category->update($request->all());
             }
             return response()->json([
-                'message' => 'Update name category successfully ',
+                'message' => 'Cập nhật thông tin danh mục thành công !',
                 'category' => $category
             ], 201);
         } 
@@ -73,16 +73,16 @@ class CategoryController extends Controller
                 Article::where("id_category",$id)->update(['id_category'=>null]); 
                 $category->delete();
                 return response()->json([
-                    'message' => 'Delete category successfully',
+                    'message' => 'Xóa danh mục thành công !',
                 ], 201);
             } else {
                 return response()->json([
-                    'message' => 'Not found category !',
+                    'message' => 'Không tìm thấy danh mục !',
                 ], 404);
             }
         } catch (QueryException $e) {
             return response()->json([
-                'message' => 'Delete Category false ',
+                'message' => 'Xóa danh mục thất bại !',
             ], 400);
         }
     }
@@ -108,14 +108,14 @@ class CategoryController extends Controller
                 ->paginate(15);
         
             return response()->json([
-                'message' => 'Get all categorys successfully !',
+                'message' => 'Xem tất cả danh mục thành công !',
                 'category' => $categorys,
             ], 201);
         }
-        else { // lấy cho product 
+        else { 
             $categorys = Category::all();
             return response()->json([
-                'message' => 'Get all categorys successfully !',
+                'message' => 'Xem tất cả danh mục thành công !',
                 'category' => $categorys,
             ], 201);
         }
@@ -127,17 +127,17 @@ class CategoryController extends Controller
             $category = Category::find($id); 
             if ($category) {
                 return response()->json([
-                    'message' => 'Get category details successfully !',
+                    'message' => 'Lấy danh mục chi tiết thành công !',
                     'category' => $category
                 ], 201);
             } else {
                 return response()->json([
-                    'message' => 'Not found category !',
+                    'message' => 'Không tìm thấy danh mục !',
                 ], 404);
             }
         } catch (QueryException $e) {
             return response()->json([
-                'message' => 'Delete Category false ',
+                'message' => 'Xóa danh mục thất bại !',
             ], 400);
         }
     }

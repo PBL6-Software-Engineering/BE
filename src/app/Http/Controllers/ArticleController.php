@@ -50,7 +50,7 @@ class ArticleController extends Controller
                 'id_user' => $id_user
             ]);
             return response()->json([
-                'message' => 'Add article successfully ',
+                'message' => 'Thêm bài viết thành công !',
                 'article' => $article
             ], 201);
         } 
@@ -67,7 +67,7 @@ class ArticleController extends Controller
             $article = Article::find($id);
             if($user->id != $article->id_user) {
                 return response()->json([
-                    'message' => 'You do not have permission to edit this article !',
+                    'message' => 'Bạn không có quyền chỉnh sửa bài viết này !',
                 ], 403);
             }
             if($request->hasFile('thumbnail')) {
@@ -80,7 +80,7 @@ class ArticleController extends Controller
                 $article->update($request->all());
             }
             return response()->json([
-                'message' => 'Update article successfully ',
+                'message' => 'Cập nhật bài viết thành công !',
                 'article' => $article
             ], 201);
         } 
@@ -96,7 +96,7 @@ class ArticleController extends Controller
             $article = Article::find($id);
             $article->update(['is_show' => $request->is_show]);
             return response()->json([
-                'message' => 'Change Status Article Successfully ',
+                'message' => 'Thay đổi trạng thái hiển thị của bài viết thành công !',
                 'article' => $article
             ], 201);
         } 
@@ -112,7 +112,7 @@ class ArticleController extends Controller
             $article = Article::find($id);
             $article->update(['is_accept' => $request->is_accept]);
             return response()->json([
-                'message' => 'Change Status Accept Successfully ',
+                'message' => 'Thay đổi trạng thái của bài viết thành công !',
                 'article' => $article
             ], 201);
         } 
@@ -131,7 +131,7 @@ class ArticleController extends Controller
             $article = Article::find($id);
             if($user->id != $article->id_user) {
                 return response()->json([
-                    'message' => 'You do not have permission to delete this article !',
+                    'message' => 'Bạn không có quyền xóa bài viết này !',
                 ], 403);
             }
             if ($article->thumbnail) {
@@ -139,7 +139,7 @@ class ArticleController extends Controller
             }
             $article->delete();
             return response()->json([
-                'message' => 'Delete article successfully ',
+                'message' => 'Xóa bài viết thành công !',
             ], 201);
         } 
         catch (QueryException $e) {
@@ -187,7 +187,7 @@ class ArticleController extends Controller
         ->paginate(6);
     
         return response()->json([
-            'message' => 'Get all articles successfully !',
+            'message' => 'Xem tất cả bài viết thành công !',
             'article' => $articles,
         ], 201);
     }
@@ -202,7 +202,7 @@ class ArticleController extends Controller
         ->first();
         if($article) {
             return response()->json([
-                'message' => 'Get article details successfully !',
+                'message' => 'Xem bài viết chi tiết thành công !',
                 'article' => $article
             ], 201);
         }
@@ -253,7 +253,7 @@ class ArticleController extends Controller
         ->paginate(6);
     
         return response()->json([
-            'message' => 'Get all articles successfully !',
+            'message' => 'Xem tất cả bài viết chi tiết thành công !',
             'article' => $articles,
         ], 201);
     }
@@ -297,7 +297,7 @@ class ArticleController extends Controller
         ->paginate(6);
     
         return response()->json([
-            'message' => 'Get all articles successfully !',
+            'message' => 'Xem tất cả bài viết chi tiết thành công !',
             'article' => $articles,
         ], 201);
     }

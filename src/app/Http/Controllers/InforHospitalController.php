@@ -76,7 +76,7 @@ class InforHospitalController extends Controller
     {
         $userEmail = User::where('email', $request->email)->where('role', 'hospital')->first();
         if($userEmail){
-            return response()->json(['error' => 'Account already exists !'], 401);
+            return response()->json(['error' => 'Tài khoản đã tồn tại !'], 401);
         }
         else {
             $avatar = $this->saveAvatar($request);
@@ -98,7 +98,7 @@ class InforHospitalController extends Controller
             // verify email 
 
             return response()->json([
-                'message' => 'Hospital successfully registered',
+                'message' => 'Đăng kí tài khoản thành công !',
                 'hospital' => array_merge($user->toArray(), $inforUser->toArray()),
             ], 201);
         }
@@ -138,13 +138,13 @@ class InforHospitalController extends Controller
             $url =  UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
             Queue::push(new SendVerifyEmail($user->email, $url));
             $new_email = $user->email;
-            $content = 'Your account has been transferred to email ' . $new_email . ' If you are not the one making the change, please contact your system administrator for assistance. ';
+            $content = 'Email tài khoản của bạn đã được thay đổi thành ' . $new_email . ' Nếu bạn không phải là người thực hiện thay đổi này , hãy liên hệ với quản trị viên của hệ thống để được hỗ trợ ! ';
             Queue::push(new SendMailNotify($oldEmail, $content));
             $user->update([
                 'token_verify_email' => $token,
                 'email_verified_at' => null,
             ]);
-            $message = 'Hospital successfully updated . A confirmation email has been sent to this email, please check and confirm !';
+            $message = 'Cập nhật thông tin bệnh viện thành công . Một mail xác nhận đã được gửi đến cho bạn , hãy kiểm tra và xác nhận nó !';
         } 
         // sendmail verify
 
@@ -201,10 +201,10 @@ class InforHospitalController extends Controller
                 'is_confirm' => true,
                 'province_code' => $request->province_code
             ]);
-            $content = 'This is your doctor account information , use it to log in to the system, then you should change your password for security <br> email: ' . $doctor->email . ' <br> password: ' . $new_password;
+            $content = 'Dưới đây là thông tin tài khoản của bạn , hãy sử dụng nó để đăng nhập vào hệ thống , sau đó hãy tiến hành đổi mật khẩu để đảm bảo tính bảo mật cho tài khoản . <br> email: ' . $doctor->email . ' <br> password: ' . $new_password;
             Queue::push(new SendMailNotify($doctor->email, $content));
             return response()->json([
-                'message' => "Add Doctor Success !",
+                'message' => "Thêm tài khoản bác sĩ thành công !",
             ],200);
         }
         catch (\Exception $e) {

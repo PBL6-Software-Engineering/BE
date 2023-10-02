@@ -99,7 +99,7 @@ class InforDoctorController extends Controller
         // $newHospital = InforHospital::find($request->id_hospital);
         // $emailNewHospital = User::find($newHospital->id_hospital)->email;
         $inforDoctor->update($request->all());
-        $message = 'Doctor successfully updated';
+        $message = 'Cập nhật thông tin bác sĩ thành công !';
 
         // sendmail verify
         if($oldEmail != $request->email) {
@@ -107,13 +107,13 @@ class InforDoctorController extends Controller
             $url =  UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
             Queue::push(new SendVerifyEmail($user->email, $url));
             $new_email = $user->email;
-            $content = 'Your account has been transferred to email ' . $new_email . ' If you are not the one making the change, please contact your system administrator for assistance. ';
+            $content = 'Email tài khoản của bạn đã chuyển thành ' . $new_email . ' Nếu bạn không phải là người thực hiện , hãy liên hệ với quản trị viên của hệ thống để được hỗ trợ . ';
             Queue::push(new SendMailNotify($oldEmail, $content));
             $user->update([
                 'token_verify_email' => $token,
                 'email_verified_at' => null,
             ]);
-            $message = 'Hospital successfully updated . A confirmation email has been sent to this email, please check and confirm !';
+            $message = 'Cập nhật thông tin thành công . Một mail xác nhận đã được gửi đến cho bạn , hãy kiểm tra và xác nhận nó !';
         } 
         // sendmail verify
 

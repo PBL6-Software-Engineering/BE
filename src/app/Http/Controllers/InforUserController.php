@@ -69,7 +69,7 @@ class InforUserController extends Controller
         $userEmail = User::where('email', $request->email)->where('role', 'user')->first();
         if($userEmail){
             if($userEmail['password']){
-                return response()->json(['error' => 'Account already exists !'], 401);
+                return response()->json(['error' => 'Tài khoản đã tồn tại !'], 401);
             }
             else { 
                 $avatar = $this->saveAvatar($request);
@@ -84,7 +84,7 @@ class InforUserController extends Controller
                 ));
                 
                 return response()->json([
-                    'message' => 'User successfully registered',
+                    'message' => 'Đăng kí tài khoản thành công !',
                     'user' => array_merge($userEmail->toArray(),$inforUser->toArray()),
                 ], 201);
             }
@@ -110,7 +110,7 @@ class InforUserController extends Controller
             // verify email 
             
             return response()->json([
-                'message' => 'User successfully registered',
+                'message' => 'Đăng kí tài khoản thành công !',
                 'user' => array_merge($user->toArray(), $inforUser->toArray()),
             ], 201);
         }
@@ -130,7 +130,7 @@ class InforUserController extends Controller
             if ($inforUser) {
                 $user = User::find($inforUser->id_user);
                 if ($user->is_accept == 0) {
-                    return response()->json(['error' => 'Your account has been locked or not approved !'], 401);
+                    return response()->json(['error' => 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !'], 401);
                 } else {
                     Auth::login($user);
                     $this->token = auth()->guard('user_api')->login($user);
@@ -146,7 +146,7 @@ class InforUserController extends Controller
                 $findEmail = User::where('email',$ggUser->email)->where('role','user')->first();
                 if ($findEmail) {
                     if ($findEmail->is_accept == 0) {
-                        return response()->json(['error' => 'Your account has been locked or not approved !'], 401);
+                        return response()->json(['error' => 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !'], 401);
                     } else {
                         $inforUser = InforUser::where('id_user',$findEmail->id)->first();
                         $inforUser->update([
@@ -222,20 +222,20 @@ class InforUserController extends Controller
         }
         $inforUser = InforUser::where('id_user', $user->id)->first();
         $inforUser->update($request->all());
-        $message = 'User successfully updated';
+        $message = 'Cập nhật thông tin cho tài khoản thành công !';
         // sendmail verify
         if($oldEmail != $request->email) {
             $token = Str::random(32);
             $url =  UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
             Log::info("Add jobs to Queue , Email: $user->email with URL: $url");
             Queue::push(new SendVerifyEmail($user->email, $url));
-            $content = 'Your account has been transferred to email ' . $user->email . '. If you are not the one making the change, please contact your system administrator for assistance. ';
+            $content = 'Email của tài khoản của bạn đã được thay đổi thành ' . $user->email . '. Nếu bạn không phải là người thay đổi , hãy liên hệ với quản trị viên của hệ thống để được hỗ trợ . ';
             Queue::push(new SendMailNotify($oldEmail, $content));
             $user->update([
                 'token_verify_email' => $token,
                 'email_verified_at' => null,
             ]);
-            $message = 'User successfully updated . A confirmation email has been sent to this email, please check and confirm !';
+            $message = 'Cập nhật thông tin tài khoản thành công . Có một email xác nhận đã được gửi đến cho bạn , hãy kiểm tra và xác nhận nó !';
         } 
         // sendmail verify
 
@@ -249,7 +249,7 @@ class InforUserController extends Controller
         $user = User::find(auth('user_api')->user()->id);
         $user->update(['password' => Hash::make($request->get('new_password'))]);
         return response()->json([
-            'message' => "Password successfully changed ! ",
+            'message' => "Thay đổi mật khẩu thành công ! ",
         ],200);
     }
 

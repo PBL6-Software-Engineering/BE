@@ -15,7 +15,7 @@ class HospitalDepartmentController extends Controller
     {
         $user = auth()->guard('user_api')->user();
         $department = Department::find($request->id_department);
-        if(empty($department)) return response()->json(['message' => 'Not found department !',], 404);
+        if(empty($department)) return response()->json(['message' => 'Không tìm thấy khoa !',], 404);
        
         $hospitalDepartment = HospitalDepartment::create(array_merge(
             $request->all(),
@@ -24,7 +24,7 @@ class HospitalDepartmentController extends Controller
             ]
         ));
         return response()->json([
-            'message' => 'Add Department for Hospital successfully ',
+            'message' => 'Thêm khoa cho bệnh viện thành công ! ',
             'hospital_department' => $hospitalDepartment
         ], 201);
     }
@@ -34,16 +34,16 @@ class HospitalDepartmentController extends Controller
         $user = auth()->guard('user_api')->user();
         $hospitalDepartment = HospitalDepartment::find($id); 
         if(empty($hospitalDepartment)) {
-            return response()->json(['message' => 'Not found hospital department !',], 404);
+            return response()->json(['message' => 'Không tìm thấy khoa này của bệnh viện !',], 404);
         }
 
         if($user->id != $hospitalDepartment->id_hospital) {
-            return response()->json(['message' => 'Forbidden !',], 403);
+            return response()->json(['message' => 'Bạn không có quyền chỉnh sửa !',], 403);
         }
 
         $hospitalDepartment->update($request->all());
         return response()->json([
-            'message' => 'Update Department for Hospital successfully ',
+            'message' => 'Cập nhật thông tin khoa cho bệnh viện thành công ! ',
             'hospital_department' => $hospitalDepartment
         ], 201);
     }
@@ -53,11 +53,11 @@ class HospitalDepartmentController extends Controller
         $user = auth()->guard('user_api')->user();
         $hospitalDepartment = HospitalDepartment::find($id); 
         if(empty($hospitalDepartment)) {
-            return response()->json(['message' => 'Not found hospital department !',], 404);
+            return response()->json(['message' => 'Không tìm thấy khoa trong bệnh viện !',], 404);
         }
 
         if($user->id != $hospitalDepartment->id_hospital) {
-            return response()->json(['message' => 'Forbidden !',], 403);
+            return response()->json(['message' => 'Bạn không có quyền !',], 403);
         }
 
         $count = HospitalService::where('id_hospital_department', $id)->count();
@@ -67,7 +67,7 @@ class HospitalDepartmentController extends Controller
 
         $hospitalDepartment->delete();
         return response()->json([
-            'message' => 'Delete Department for Hospital successfully ',
+            'message' => 'Xóa khoa của bệnh viện thành công ! ',
         ], 201);
     }
 
@@ -79,7 +79,7 @@ class HospitalDepartmentController extends Controller
             ->get();
 
         return response()->json([
-            'message' => 'Get All Department of Hospital successfully ',
+            'message' => 'Xem tất cả khoa của bệnh viện thành công ! ',
             'hospital_departments' => $hospitalDepartments
         ], 201);
     }
@@ -91,10 +91,10 @@ class HospitalDepartmentController extends Controller
             ->first();
 
         if(empty($hospitalDepartment)) {
-            return response()->json(['message' => 'Not found hospital department !',], 404);
+            return response()->json(['message' => 'Không tìm thấy khoa trong bệnh viện !',], 404);
         }
         return response()->json([
-            'message' => 'Get All Department of Hospital successfully ',
+            'message' => 'Lấy tất cả khoa của bệnh viện thành công !',
             'hospital_departments' => $hospitalDepartment
         ], 201);
     }

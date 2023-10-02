@@ -58,22 +58,22 @@ class UserController extends Controller
         
         $u = User::where('email',$request->email)->first();
         if(empty($u)){
-            return response()->json(['error' => 'Email is incorrect !'], 401);
+            return response()->json(['error' => 'Email không tồn tại !'], 401);
         }
         else {
             $is_accept = $u->is_accept;
             if($is_accept == 0){
-                return response()->json(['error' => 'Your account has not been approved or may have been locked !'], 401);
+                return response()->json(['error' => 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !'], 401);
             } 
             if($u->email_verified_at == null){
-                return response()->json(['error' => 'This email has not been confirmed by the user, please go to your inbox to confirm this email !'], 401);
+                return response()->json(['error' => 'Email này chưa được xác nhận , hãy kiểm tra và xác nhận nó trước khi đăng nhập !'], 401);
             } 
         }
 
         $credentials = request(['email', 'password']);
         $user = User::where('email',$request->email)->first();
         if (!$token = auth()->guard('user_api')->attempt($credentials)) {
-            return response()->json(['error' => 'Either email or password is wrong. !'], 401);
+            return response()->json(['error' => 'Email hoặc mật khẩu không chính xác !'], 401);
         }
 
         $user->have_password = true;
@@ -97,19 +97,19 @@ class UserController extends Controller
     public function logout()
     {
         auth('user_api')->logout();
-        return response()->json(['message' => 'Successfully logged out']);
+        return response()->json(['message' => 'Đăng xuất thành công !']);
     }
     
     public function changePassword(RequestChangePassword $request) {
         $user = User::find(auth('user_api')->user()->id);
         if (!(Hash::check($request->get('current_password'), $user->password))) {
             return response()->json([
-                'message' => 'Your current password does not matches with the password.',
+                'message' => 'Mật khẩu không chính xác !',
             ],400);
         }
         $user->update(['password' => Hash::make($request->get('new_password'))]);
         return response()->json([
-            'message' => "Password successfully changed !",
+            'message' => "Thay đổi mật khẩu thành công !",
         ],200);
     }
 
@@ -138,13 +138,13 @@ class UserController extends Controller
             Log::info("Add jobs to Queue , Email: $email with URL: $url");
             Queue::push(new SendForgotPasswordEmail($email, $url));
             return response()->json([
-                'message' => "Send Mail Password Reset Success !",
+                'message' => "Gửi mail đặt lại mật khẩu thành công !",
             ],200);
         } catch (\Exception $e) {
             Log::error('Error occurred: ' . $e->getMessage());
 
             return response()->json([
-                'error' => 'An error occurred while sending the reset email.'
+                'error' => 'Có một lỗi nào đó khi gửi mail !'
             ], 500);
         }
     }
@@ -161,10 +161,10 @@ class UserController extends Controller
                         $user->update(['password' => $new_password]);
                         $passwordReset->delete();
     
-                        Toastr::success('Password Reset Success !');
+                        Toastr::success('Đặt lại mật khẩu thành công !');
                         return  redirect()->route('form_reset_password');
                     }
-                    Toastr::warning('Can not find the account !');
+                    Toastr::warning('Không thể tìm thấy tài khoản !');
                     return  redirect()->route('form_reset_password');
                 }
                 else { // admin, superamdin, manager
@@ -173,15 +173,15 @@ class UserController extends Controller
                         $admin->update(['password' => $new_password]);
                         $passwordReset->delete();
     
-                        Toastr::success('Password Reset Success !');
+                        Toastr::success('Đặt lại mật khẩu thành công !');
                         return  redirect()->route('form_reset_password');
                     }
-                    Toastr::warning('Can not find the account !');
+                    Toastr::warning('Không tìm thấy tài khoản !');
                     return  redirect()->route('form_reset_password');
                 }
 
             } else {
-                Toastr::warning('Token has expired !');
+                Toastr::warning('Token đã hết hạn !');
                 return  redirect()->route('form_reset_password');
             }
         } catch (\Exception $e) {
@@ -198,11 +198,11 @@ class UserController extends Controller
                 'token_verify_email' => null,
             ]);
             $status = true;
-            Toastr::success('Your email has been verified !');
+            Toastr::success('Email của bạn đã được xác nhận !');
         } 
         else {
             $status = false;
-            Toastr::warning('Token has expired !');
+            Toastr::warning('Token đã hết hạn !');
         }
         return view('user.status_verify_email', ['status' => $status]);
     }
@@ -210,7 +210,7 @@ class UserController extends Controller
     public function getInforUser($id) {
         $user = User::find($id);
         if(empty($user)) {
-            return response()->json(['message' => 'Not found user !',], 404);
+            return response()->json(['message' => 'Không tìm thấy tài khoản !',], 404);
         }
         return response()->json([
             'user' => $user
