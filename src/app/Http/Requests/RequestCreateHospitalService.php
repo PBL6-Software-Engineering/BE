@@ -33,7 +33,7 @@ class RequestCreateHospitalService extends FormRequest
             'name' => 'required|string',
             'time_advise' => 'required|integer',
             'price' => 'required|numeric', 
-            // 'infor' => 'required|json',
+            // 'infor' => 'required|array',
             'infor' => 'required',
         ];
     }

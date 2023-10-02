@@ -27,6 +27,7 @@ class HospitalServiceController extends Controller
         $request->merge(['infor' => json_encode($request->infor)]);
         $hospitalService = HospitalService::create($request->all());
         
+        $hospitalService->infor = json_decode($hospitalService->infor);
         return response()->json([
             'message' => 'Thêm dịch vụ cho bệnh viện thành công ! ',
             'hospital_service' => $hospitalService
@@ -50,6 +51,7 @@ class HospitalServiceController extends Controller
             $request->merge(['infor' => json_encode($request->infor)]);
             $hospitalService->update($request->all());
 
+            $hospitalService->infor = json_decode($hospitalService->infor);
             return response()->json([
                 'message' => 'Cập nhật dịch vụ thành công !',
                 'hospital_service' => $hospitalService
@@ -121,6 +123,10 @@ class HospitalServiceController extends Controller
                 'hospital_services.*', 'hospital_departments.*')
             ->paginate(6);
 
+            foreach($hospitalServices as $index => $hospitalService) {
+                $hospitalService->infor = json_decode($hospitalService->infor);
+            } 
+
             return response()->json([
                 'message' => 'Xem tất cả dịch vụ của bệnh viện thành công !',
                 'hospital_services' => $hospitalServices,
@@ -134,7 +140,12 @@ class HospitalServiceController extends Controller
                 'hospital_services.time_advise as time_advise_hospital_service', 'hospital_departments.time_advise as time_advise_hospital_departments',
                 'hospital_services.price as price_hospital_service', 'hospital_departments.price as price_hospital_departments',
                 'hospital_services.*', 'hospital_departments.*')
-            ->paginate(6);
+            ->get();
+
+            foreach($hospitalServices as $index => $hospitalService) {
+                $hospitalService->infor = json_decode($hospitalService->infor);
+            } 
+
             return response()->json([
                 'message' => 'Xem tất cả dịch vụ của bệnh viện thành công !',
                 'hospital_services' => $hospitalServices,
@@ -154,6 +165,7 @@ class HospitalServiceController extends Controller
             'hospital_services.*', 'hospital_departments.*')
         ->first();
         if($hospitalServices) {
+            $hospitalServices->infor = json_decode($hospitalServices->infor);
             return response()->json([
                 'message' => 'Xem dịch vụ chi tiết thành công !',
                 'hospital_service' => $hospitalServices
@@ -164,6 +176,5 @@ class HospitalServiceController extends Controller
                 'message' => 'Không tìm thấy dịch vụ trong bệnh viện !',
             ], 404);
         }
-
     }
 }

@@ -31,6 +31,7 @@ class RequestUpdateHospitalService extends FormRequest
             'name' => 'string',
             'time_advise' => 'integer',
             'price' => 'numeric', 
+            // 'infor' => 'array',
         ];
     }
 

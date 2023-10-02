@@ -85,6 +85,11 @@ class InforHospitalController extends Controller
                 ['password' => Hash::make($request->password), 'is_accept'=> 0, 'role'=> 'hospital', 'avatar' => $avatar]
             ));
 
+            $request->merge([
+                'infrastructure' => json_encode($request->infrastructure),
+                'location' => json_encode($request->location)
+            ]);
+
             $inforUser = InforHospital::create(array_merge(
                 $request->all(),
                 ['id_hospital' => $user->id]
@@ -97,6 +102,8 @@ class InforHospitalController extends Controller
             $user->update(['token_verify_email' => $token]);
             // verify email 
 
+            $inforUser->infrastructure = json_decode($inforUser->infrastructure);
+            $inforUser->location = json_decode($inforUser->location);
             return response()->json([
                 'message' => 'Đăng kí tài khoản thành công !',
                 'hospital' => array_merge($user->toArray(), $inforUser->toArray()),
@@ -109,6 +116,8 @@ class InforHospitalController extends Controller
         $user = User::find(auth('user_api')->user()->id);
         $inforUser = InforHospital::where('id_hospital', $user->id)->first();
 
+        $inforUser->infrastructure = json_decode($inforUser->infrastructure);
+        $inforUser->location = json_decode($inforUser->location);
         return response()->json([
             'hospital' => array_merge($user->toArray(), $inforUser->toArray()),
         ]);
@@ -118,6 +127,12 @@ class InforHospitalController extends Controller
     {
         $user = User::find(auth('user_api')->user()->id);
         $oldEmail = $user->email;
+        
+        $request->merge([
+            'infrastructure' => json_encode($request->infrastructure),
+            'location' => json_encode($request->location)
+        ]);
+
         if($request->hasFile('avatar')) {
             if ($user->avatar) {
                 File::delete($user->avatar);
@@ -148,6 +163,8 @@ class InforHospitalController extends Controller
         } 
         // sendmail verify
 
+        $inforHospital->infrastructure = json_decode($inforHospital->infrastructure);
+        $inforHospital->location = json_decode($inforHospital->location);
         return response()->json([
             'message' => $message,
             'hospital' => array_merge($user->toArray(), $inforHospital->toArray()),
