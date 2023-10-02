@@ -207,5 +207,15 @@ class UserController extends Controller
         return view('user.status_verify_email', ['status' => $status]);
     }
 
+    public function getInforUser($id) {
+        $user = User::find($id);
+        if(empty($user)) {
+            return response()->json(['message' => 'Not found user !',], 404);
+        }
+        return response()->json([
+            'user' => $user
+        ], 201);
+    }
+
 
 }

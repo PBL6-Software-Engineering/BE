@@ -24,4 +24,9 @@ class HospitalDepartment extends Model
         return $this->belongsTo(InforHospital::class);
     }
 
+    public function hospitalServices()
+    {
+        return $this->hasMany(HospitalService::class);
+    }
+    
 }

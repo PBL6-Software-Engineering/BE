@@ -5,9 +5,11 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\HospitalDepartmentController;
+use App\Http\Controllers\HospitalServiceController;
 use App\Http\Controllers\InforDoctorController;
 use App\Http\Controllers\InforHospitalController;
 use App\Http\Controllers\InforUserController;
+use App\Http\Controllers\ProvinceController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -58,6 +60,7 @@ Route::prefix('user')->controller(UserController::class)->group(function () {
     Route::middleware('auth:user_api')->group(function () {
         Route::get('logout', 'logout');
         Route::post('change-password', 'changePassword');
+        Route::get('infor-user/{id}', 'getInforUser');
     });
 });
 
@@ -138,7 +141,7 @@ Route::prefix('department')->controller(DepartmentController::class)->group(func
 });
 
 // HospitalDepartment 
-Route::prefix('hospita-department')->controller(HospitalDepartmentController::class)->group(function () {
+Route::prefix('hospital-department')->controller(HospitalDepartmentController::class)->group(function () {
     Route::middleware(['auth:user_api','role:hospital'])->group(function () {
         Route::post('/add', 'add');
         Route::post('update/{id}', 'edit');
@@ -148,24 +151,26 @@ Route::prefix('hospita-department')->controller(HospitalDepartmentController::cl
     });
 });
 
+// HospitalService 
+Route::prefix('hospital-service')->controller(HospitalServiceController::class)->group(function () {
+    Route::middleware(['auth:user_api','role:hospital'])->group(function () {
+        Route::post('/add', 'add');
+        Route::post('update/{id}', 'edit');
+        Route::delete('/{id}', 'delete');
+        Route::get('/', 'serviceOfHospital');
+        Route::get('/detail/{id}', 'details');
+    });
+});
 
 
 
 
 
-// // Products 
-// Route::prefix('products')->controller(ProductController::class)->group(function () {
-//     Route::middleware('auth:admin_api')->group(function () {
-//         Route::post('/', 'allProducts');
-//         Route::post('/getwarehouse', 'allProducts2');
-//         Route::get('/getcategory', 'getCategory');
-//         Route::get('/{uri}', 'getProduct');
-//         Route::post('/add', 'add');
-//         Route::post('/upfile', 'upfile'); 
-//         Route::patch('update/{id}', 'update'); 
-//         Route::delete('/{id}', 'delete'); 
-//     });
 
-//     Route::get('/', 'getAllProduct');
-//     Route::get('/{id}', 'show');
-// });
+
+
+// Seeder Value 
+Route::get('province', [ProvinceController::class, 'all']);
+
+
+

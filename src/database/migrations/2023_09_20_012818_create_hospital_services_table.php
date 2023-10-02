@@ -15,16 +15,14 @@ return new class extends Migration
     {
         Schema::create('hospital_services', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_hospital');
-            $table->unsignedBigInteger('id_department');
+            $table->unsignedBigInteger('id_hospital_department');
             $table->string('name');
             $table->integer('time_advise');
             $table->double('price', 15, 2);
             $table->json('infor');
             $table->timestamps();
 
-            $table->foreign('id_hospital')->references('id_hospital')->on('infor_hospitals')->onDelete('cascade');
-            $table->foreign('id_department')->references('id')->on('departments')->onDelete('cascade');
+            $table->foreign('id_hospital_department')->references('id')->on('hospital_departments')->onDelete('cascade');
         });
     }
 

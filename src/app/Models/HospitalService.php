@@ -10,16 +10,15 @@ class HospitalService extends Model
     use HasFactory;
     protected $fillable = [
         'id',
-        'id_hospital',
-        'id_department',
+        'id_hospital_department',
         'name',
         'time_advise',
         'price',
         'infor',
     ];
 
-    public function inforHospital() {
-        return $this->belongsTo(InforHospital::class);
+    public function hospitalDepartment() {
+        return $this->belongsTo(HospitalDepartment::class);
     }
     
 }

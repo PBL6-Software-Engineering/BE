@@ -6,6 +6,7 @@ use App\Http\Requests\RequestCreateHospitalDepartment;
 use App\Http\Requests\RequestUpdateHospitalDepartment;
 use App\Models\Department;
 use App\Models\HospitalDepartment;
+use App\Models\HospitalService;
 use Illuminate\Http\Request;
 
 class HospitalDepartmentController extends Controller
@@ -57,6 +58,11 @@ class HospitalDepartmentController extends Controller
 
         if($user->id != $hospitalDepartment->id_hospital) {
             return response()->json(['message' => 'Forbidden !',], 403);
+        }
+
+        $count = HospitalService::where('id_hospital_department', $id)->count();
+        if($count > 0) {
+            return response()->json(['message' => 'Khoa này đang có dịch vụ , bạn không được xóa nó !',], 400);
         }
 
         $hospitalDepartment->delete();

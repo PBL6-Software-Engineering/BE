@@ -39,6 +39,7 @@ $ docker-compose run --rm artisan migrate:fresh  --seed
 $ docker-compose run --rm artisan db:seed --class=AdminsSeeder
 $ docker-compose run --rm artisan db:seed --class=CategoriesSeeder
 $ docker-compose run --rm artisan db:seed --class=DepartmentsSeeder
+$ docker-compose run --rm artisan db:seed --class=ProvincesSeeder
 ```
 
 http://localhost:99

@@ -48,11 +48,6 @@ class InforHospital extends Model
         return $this->hasOne(TimeWork::class);
     }
 
-    public function hospitalServices()
-    {
-        return $this->hasMany(HospitalService::class);
-    }
-
     public function user() {
         return $this->belongsTo(User::class);
     }
