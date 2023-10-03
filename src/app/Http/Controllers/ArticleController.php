@@ -13,6 +13,7 @@ use App\Models\InforDoctor;
 use App\Models\InforHospital;
 use App\Models\Product;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\File;
@@ -53,11 +54,8 @@ class ArticleController extends Controller
                 'message' => 'Thêm bài viết thành công !',
                 'article' => $article
             ], 201);
-        } 
-        catch (QueryException $e) {
-            return response()->json([
-                'error' => $e,
-            ], 500);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
 
@@ -83,11 +81,8 @@ class ArticleController extends Controller
                 'message' => 'Cập nhật bài viết thành công !',
                 'article' => $article
             ], 201);
-        } 
-        catch (QueryException $e) {
-            return response()->json([
-                'error' => $e,
-            ], 500);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
 
@@ -99,11 +94,8 @@ class ArticleController extends Controller
                 'message' => 'Thay đổi trạng thái hiển thị của bài viết thành công !',
                 'article' => $article
             ], 201);
-        } 
-        catch (QueryException $e) {
-            return response()->json([
-                'error' => $e,
-            ], 500);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
 
@@ -115,14 +107,10 @@ class ArticleController extends Controller
                 'message' => 'Thay đổi trạng thái của bài viết thành công !',
                 'article' => $article
             ], 201);
-        } 
-        catch (QueryException $e) {
-            return response()->json([
-                'error' => $e,
-            ], 500);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
-    
 
     public function delete($id)
     {
@@ -141,76 +129,81 @@ class ArticleController extends Controller
             return response()->json([
                 'message' => 'Xóa bài viết thành công !',
             ], 201);
-        } 
-        catch (QueryException $e) {
-            return response()->json([
-                'error' => $e,
-            ], 500);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
 
     public function all(Request $request)
     {
-        // search theo name của category thì search theo select , option 
-        $name_category = '';
-        if(!empty($request->name_category)) $name_category = $request->name_category; 
+        try {
+            // search theo name của category thì search theo select , option 
+            $name_category = '';
+            if(!empty($request->name_category)) $name_category = $request->name_category; 
 
-        $search = $request->search;
-        $orderBy = 'id';
-        $orderDirection = 'ASC';
-    
-        if ($request->sortlatest == 'true') {
+            $search = $request->search;
             $orderBy = 'id';
-            $orderDirection = 'DESC';
+            $orderDirection = 'ASC';
+        
+            if ($request->sortlatest == 'true') {
+                $orderBy = 'id';
+                $orderDirection = 'DESC';
+            }
+        
+            if ($request->sortname == 'true') {
+                $orderBy = 'title';
+                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            }
+        
+            // leftjoin để khi mà id_category trong articles null thì vẫn kết hợp với bản categories để lấy ra 
+            $articles = Article::selectRaw('articles.*, categories.*, articles.id AS id_article, 
+            articles.thumbnail AS thumbnail_article, categories.thumbnail AS thumbnail_categorie, categories.id AS id_category, 
+            articles.created_at AS created_at_article, categories.created_at AS created_at_category,
+            articles.updated_at AS updated_at_article, categories.updated_at AS updated_at_category')
+            ->leftJoin('categories', 'articles.id_category', '=', 'categories.id')
+            ->where(function ($query) use ($search) {
+                $query->where('title', 'LIKE', '%' . $search . '%')
+                    ->orWhere('content', 'LIKE', '%' . $search . '%');
+            })
+            // chỉ khi chọn name_category thì mới search , còn không thì vẫn lấy ra những bài viết có name_category null 
+            ->when($name_category, function ($query, $name_category) {
+                return $query->where('name', 'LIKE', '%' . $name_category . '%');
+            })
+            ->orderBy('articles.id', $orderDirection)
+            ->paginate(6);
+        
+            return response()->json([
+                'message' => 'Xem tất cả bài viết thành công !',
+                'article' => $articles,
+            ], 201);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
-    
-        if ($request->sortname == 'true') {
-            $orderBy = 'title';
-            $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
-        }
-    
-        // leftjoin để khi mà id_category trong articles null thì vẫn kết hợp với bản categories để lấy ra 
-        $articles = Article::selectRaw('articles.*, categories.*, articles.id AS id_article, 
-        articles.thumbnail AS thumbnail_article, categories.thumbnail AS thumbnail_categorie, categories.id AS id_category, 
-        articles.created_at AS created_at_article, categories.created_at AS created_at_category,
-        articles.updated_at AS updated_at_article, categories.updated_at AS updated_at_category')
-        ->leftJoin('categories', 'articles.id_category', '=', 'categories.id')
-        ->where(function ($query) use ($search) {
-            $query->where('title', 'LIKE', '%' . $search . '%')
-                ->orWhere('content', 'LIKE', '%' . $search . '%');
-        })
-        // chỉ khi chọn name_category thì mới search , còn không thì vẫn lấy ra những bài viết có name_category null 
-        ->when($name_category, function ($query, $name_category) {
-            return $query->where('name', 'LIKE', '%' . $name_category . '%');
-        })
-        ->orderBy('articles.id', $orderDirection)
-        ->paginate(6);
-    
-        return response()->json([
-            'message' => 'Xem tất cả bài viết thành công !',
-            'article' => $articles,
-        ], 201);
     }
 
     public function details(Request $request, $id){
-        $article = Article::selectRaw('articles.*, categories.*, articles.id AS id_article, 
-        articles.thumbnail AS thumbnail_article, categories.thumbnail AS thumbnail_categorie, categories.id AS id_category, 
-        articles.created_at AS created_at_article, categories.created_at AS created_at_category,
-        articles.updated_at AS updated_at_article, categories.updated_at AS updated_at_category')
-        ->leftJoin('categories', 'articles.id_category', '=', 'categories.id')
-        ->where('articles.id', '=', $id)
-        ->first();
-        if($article) {
-            return response()->json([
-                'message' => 'Xem bài viết chi tiết thành công !',
-                'article' => $article
-            ], 201);
-        }
-        else {
-            return response()->json([
-                'message' => 'Not found article !',
-                'article' => $article
-            ], 404);
+        try {
+            $article = Article::selectRaw('articles.*, categories.*, articles.id AS id_article, 
+            articles.thumbnail AS thumbnail_article, categories.thumbnail AS thumbnail_categorie, categories.id AS id_category, 
+            articles.created_at AS created_at_article, categories.created_at AS created_at_category,
+            articles.updated_at AS updated_at_article, categories.updated_at AS updated_at_category')
+            ->leftJoin('categories', 'articles.id_category', '=', 'categories.id')
+            ->where('articles.id', '=', $id)
+            ->first();
+            if($article) {
+                return response()->json([
+                    'message' => 'Xem bài viết chi tiết thành công !',
+                    'article' => $article
+                ], 201);
+            }
+            else {
+                return response()->json([
+                    'message' => 'Not found article !',
+                    'article' => $article
+                ], 404);
+            }
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
 
@@ -260,46 +253,49 @@ class ArticleController extends Controller
 
     public function articleOfAdmin(Request $request)
     {
-        // search theo name của category thì search theo select , option 
-        $name_category = '';
-        if(!empty($request->name_category)) $name_category = $request->name_category; 
+        try {
+            // search theo name của category thì search theo select , option 
+            $name_category = '';
+            if(!empty($request->name_category)) $name_category = $request->name_category; 
 
-        $search = $request->search;
-        $orderBy = 'id';
-        $orderDirection = 'ASC';
-    
-        if ($request->sortlatest == 'true') {
+            $search = $request->search;
             $orderBy = 'id';
-            $orderDirection = 'DESC';
+            $orderDirection = 'ASC';
+        
+            if ($request->sortlatest == 'true') {
+                $orderBy = 'id';
+                $orderDirection = 'DESC';
+            }
+        
+            if ($request->sortname == 'true') {
+                $orderBy = 'title';
+                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            }
+        
+            // leftjoin để khi mà id_category trong articles null thì vẫn kết hợp với bản categories để lấy ra 
+            $articles = Article::selectRaw('articles.*, categories.*, articles.id AS id_article, 
+            articles.thumbnail AS thumbnail_article, categories.thumbnail AS thumbnail_categorie, categories.id AS id_category, 
+            articles.created_at AS created_at_article, categories.created_at AS created_at_category,
+            articles.updated_at AS updated_at_article, categories.updated_at AS updated_at_category')
+            ->leftJoin('categories', 'articles.id_category', '=', 'categories.id')
+            ->where(function ($query) use ($search) {
+                $query->where('title', 'LIKE', '%' . $search . '%')
+                    ->orWhere('content', 'LIKE', '%' . $search . '%');
+            })
+            // chỉ khi chọn name_category thì mới search , còn không thì vẫn lấy ra những bài viết có name_category null 
+            ->when($name_category, function ($query, $name_category) {
+                return $query->where('name', 'LIKE', '%' . $name_category . '%');
+            })
+            ->where('id_user', null)
+            ->orderBy('articles.id', $orderDirection)
+            ->paginate(6);
+        
+            return response()->json([
+                'message' => 'Xem tất cả bài viết chi tiết thành công !',
+                'article' => $articles,
+            ], 201);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
-    
-        if ($request->sortname == 'true') {
-            $orderBy = 'title';
-            $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
-        }
-    
-        // leftjoin để khi mà id_category trong articles null thì vẫn kết hợp với bản categories để lấy ra 
-        $articles = Article::selectRaw('articles.*, categories.*, articles.id AS id_article, 
-        articles.thumbnail AS thumbnail_article, categories.thumbnail AS thumbnail_categorie, categories.id AS id_category, 
-        articles.created_at AS created_at_article, categories.created_at AS created_at_category,
-        articles.updated_at AS updated_at_article, categories.updated_at AS updated_at_category')
-        ->leftJoin('categories', 'articles.id_category', '=', 'categories.id')
-        ->where(function ($query) use ($search) {
-            $query->where('title', 'LIKE', '%' . $search . '%')
-                ->orWhere('content', 'LIKE', '%' . $search . '%');
-        })
-        // chỉ khi chọn name_category thì mới search , còn không thì vẫn lấy ra những bài viết có name_category null 
-        ->when($name_category, function ($query, $name_category) {
-            return $query->where('name', 'LIKE', '%' . $name_category . '%');
-        })
-        ->where('id_user', null)
-        ->orderBy('articles.id', $orderDirection)
-        ->paginate(6);
-    
-        return response()->json([
-            'message' => 'Xem tất cả bài viết chi tiết thành công !',
-            'article' => $articles,
-        ], 201);
     }
-    
 }

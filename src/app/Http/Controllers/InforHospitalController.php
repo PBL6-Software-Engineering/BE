@@ -74,101 +74,113 @@ class InforHospitalController extends Controller
 
     public function register(RequestCreateInforHospital $request)
     {
-        $userEmail = User::where('email', $request->email)->where('role', 'hospital')->first();
-        if($userEmail){
-            return response()->json(['error' => 'Tài khoản đã tồn tại !'], 401);
-        }
-        else {
-            $avatar = $this->saveAvatar($request);
-            $user = User::create(array_merge(
-                $request->all(),
-                ['password' => Hash::make($request->password), 'is_accept'=> 0, 'role'=> 'hospital', 'avatar' => $avatar]
-            ));
-
-            $request->merge([
-                'infrastructure' => json_encode($request->infrastructure),
-                'location' => json_encode($request->location)
-            ]);
-
-            $inforUser = InforHospital::create(array_merge(
-                $request->all(),
-                ['id_hospital' => $user->id]
-            ));
-
-            // verify email 
-            $token = Str::random(32);
-            $url =  UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
-            Queue::push(new SendVerifyEmail($user->email, $url));
-            $user->update(['token_verify_email' => $token]);
-            // verify email 
-
-            $inforUser->infrastructure = json_decode($inforUser->infrastructure);
-            $inforUser->location = json_decode($inforUser->location);
-            return response()->json([
-                'message' => 'Đăng kí tài khoản thành công !',
-                'hospital' => array_merge($user->toArray(), $inforUser->toArray()),
-            ], 201);
+        try {
+            $userEmail = User::where('email', $request->email)->where('role', 'hospital')->first();
+            if($userEmail){
+                return response()->json(['message' => 'Tài khoản đã tồn tại !'], 400);
+            }
+            else {
+                $avatar = $this->saveAvatar($request);
+                $user = User::create(array_merge(
+                    $request->all(),
+                    ['password' => Hash::make($request->password), 'is_accept'=> 0, 'role'=> 'hospital', 'avatar' => $avatar]
+                ));
+    
+                $request->merge([
+                    'infrastructure' => json_encode($request->infrastructure),
+                    'location' => json_encode($request->location)
+                ]);
+    
+                $inforUser = InforHospital::create(array_merge(
+                    $request->all(),
+                    ['id_hospital' => $user->id]
+                ));
+    
+                // verify email 
+                $token = Str::random(32);
+                $url =  UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
+                Queue::push(new SendVerifyEmail($user->email, $url));
+                $user->update(['token_verify_email' => $token]);
+                // verify email 
+    
+                $inforUser->infrastructure = json_decode($inforUser->infrastructure);
+                $inforUser->location = json_decode($inforUser->location);
+                return response()->json([
+                    'message' => 'Đăng kí tài khoản thành công !',
+                    'hospital' => array_merge($user->toArray(), $inforUser->toArray()),
+                ], 201);
+            }
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
 
     public function profile()
     {
-        $user = User::find(auth('user_api')->user()->id);
-        $inforUser = InforHospital::where('id_hospital', $user->id)->first();
-
-        $inforUser->infrastructure = json_decode($inforUser->infrastructure);
-        $inforUser->location = json_decode($inforUser->location);
-        return response()->json([
-            'hospital' => array_merge($user->toArray(), $inforUser->toArray()),
-        ]);
+        try {
+            $user = User::find(auth('user_api')->user()->id);
+            $inforUser = InforHospital::where('id_hospital', $user->id)->first();
+    
+            $inforUser->infrastructure = json_decode($inforUser->infrastructure);
+            $inforUser->location = json_decode($inforUser->location);
+            return response()->json([
+                'hospital' => array_merge($user->toArray(), $inforUser->toArray()),
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
+        }
     }
 
     public function updateProfile(RequestUpdateHospital $request, $id_user)
     {
-        $user = User::find(auth('user_api')->user()->id);
-        $oldEmail = $user->email;
-        
-        $request->merge([
-            'infrastructure' => json_encode($request->infrastructure),
-            'location' => json_encode($request->location)
-        ]);
-
-        if($request->hasFile('avatar')) {
-            if ($user->avatar) {
-                File::delete($user->avatar);
-            }
-            $avatar = $this->saveAvatar($request);
-            $user->update(array_merge($request->all(),['avatar' => $avatar]));
-        } else {
-            $user->update($request->all());
-        }
-        
-        $inforHospital = InforHospital::where('id_hospital', $user->id)->first();
-        $inforHospital->update($request->all());
-        $message = 'Hospital successfully updated';
-
-        // sendmail verify
-        if($oldEmail != $request->email) {
-            $token = Str::random(32);
-            $url =  UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
-            Queue::push(new SendVerifyEmail($user->email, $url));
-            $new_email = $user->email;
-            $content = 'Email tài khoản của bạn đã được thay đổi thành ' . $new_email . ' Nếu bạn không phải là người thực hiện thay đổi này , hãy liên hệ với quản trị viên của hệ thống để được hỗ trợ ! ';
-            Queue::push(new SendMailNotify($oldEmail, $content));
-            $user->update([
-                'token_verify_email' => $token,
-                'email_verified_at' => null,
+        try {
+            $user = User::find(auth('user_api')->user()->id);
+            $oldEmail = $user->email;
+            
+            $request->merge([
+                'infrastructure' => json_encode($request->infrastructure),
+                'location' => json_encode($request->location)
             ]);
-            $message = 'Cập nhật thông tin bệnh viện thành công . Một mail xác nhận đã được gửi đến cho bạn , hãy kiểm tra và xác nhận nó !';
-        } 
-        // sendmail verify
-
-        $inforHospital->infrastructure = json_decode($inforHospital->infrastructure);
-        $inforHospital->location = json_decode($inforHospital->location);
-        return response()->json([
-            'message' => $message,
-            'hospital' => array_merge($user->toArray(), $inforHospital->toArray()),
-        ], 201);
+    
+            if($request->hasFile('avatar')) {
+                if ($user->avatar) {
+                    File::delete($user->avatar);
+                }
+                $avatar = $this->saveAvatar($request);
+                $user->update(array_merge($request->all(),['avatar' => $avatar]));
+            } else {
+                $user->update($request->all());
+            }
+            
+            $inforHospital = InforHospital::where('id_hospital', $user->id)->first();
+            $inforHospital->update($request->all());
+            $message = 'Hospital successfully updated';
+    
+            // sendmail verify
+            if($oldEmail != $request->email) {
+                $token = Str::random(32);
+                $url =  UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
+                Queue::push(new SendVerifyEmail($user->email, $url));
+                $new_email = $user->email;
+                $content = 'Email tài khoản của bạn đã được thay đổi thành ' . $new_email . ' Nếu bạn không phải là người thực hiện thay đổi này , hãy liên hệ với quản trị viên của hệ thống để được hỗ trợ ! ';
+                Queue::push(new SendMailNotify($oldEmail, $content));
+                $user->update([
+                    'token_verify_email' => $token,
+                    'email_verified_at' => null,
+                ]);
+                $message = 'Cập nhật thông tin bệnh viện thành công . Một mail xác nhận đã được gửi đến cho bạn , hãy kiểm tra và xác nhận nó !';
+            } 
+            // sendmail verify
+    
+            $inforHospital->infrastructure = json_decode($inforHospital->infrastructure);
+            $inforHospital->location = json_decode($inforHospital->location);
+            return response()->json([
+                'message' => $message,
+                'hospital' => array_merge($user->toArray(), $inforHospital->toArray()),
+            ], 201);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
+        }
     }
 
     public function addDoctor(RequestCreateNewDoctor $request)
@@ -223,12 +235,8 @@ class InforHospitalController extends Controller
             return response()->json([
                 'message' => "Thêm tài khoản bác sĩ thành công !",
             ],200);
-        }
-        catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ], 500);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
-
 }

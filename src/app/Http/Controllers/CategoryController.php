@@ -7,6 +7,7 @@ use App\Http\Requests\RequestUpdateCategory;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Product;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\File;
@@ -34,10 +35,8 @@ class CategoryController extends Controller
                 'category' => $category
             ], 201);
         } 
-        catch (QueryException $e) {
-            return response()->json([
-                'error' => $e,
-            ], 500);
+        catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
 
@@ -58,10 +57,8 @@ class CategoryController extends Controller
                 'category' => $category
             ], 201);
         } 
-        catch (QueryException $e) {
-            return response()->json([
-                'error' => $e,
-            ], 500);
+        catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
 
@@ -80,44 +77,47 @@ class CategoryController extends Controller
                     'message' => 'Không tìm thấy danh mục !',
                 ], 404);
             }
-        } catch (QueryException $e) {
-            return response()->json([
-                'message' => 'Xóa danh mục thất bại !',
-            ], 400);
+        }
+        catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
 
     public function all(Request $request)
     {
-        if ($request->paginate == true) { // lấy cho category 
-            $search = $request->search;
-            $orderBy = 'id';
-            $orderDirection = 'ASC';
-        
-            if ($request->sortlatest == 'true') {
+        try {
+            if ($request->paginate == true) { // lấy cho category 
+                $search = $request->search;
                 $orderBy = 'id';
-                $orderDirection = 'DESC';
+                $orderDirection = 'ASC';
+            
+                if ($request->sortlatest == 'true') {
+                    $orderBy = 'id';
+                    $orderDirection = 'DESC';
+                }
+            
+                if ($request->sortname == 'true') {
+                    $orderBy = 'name';
+                    $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+                }
+                $categorys = Category::orderBy($orderBy, $orderDirection)
+                    ->where('name', 'LIKE', '%' . $search . '%')
+                    ->paginate(15);
+            
+                return response()->json([
+                    'message' => 'Xem tất cả danh mục thành công !',
+                    'category' => $categorys,
+                ], 201);
             }
-        
-            if ($request->sortname == 'true') {
-                $orderBy = 'name';
-                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            else { 
+                $categorys = Category::all();
+                return response()->json([
+                    'message' => 'Xem tất cả danh mục thành công !',
+                    'category' => $categorys,
+                ], 201);
             }
-            $categorys = Category::orderBy($orderBy, $orderDirection)
-                ->where('name', 'LIKE', '%' . $search . '%')
-                ->paginate(15);
-        
-            return response()->json([
-                'message' => 'Xem tất cả danh mục thành công !',
-                'category' => $categorys,
-            ], 201);
-        }
-        else { 
-            $categorys = Category::all();
-            return response()->json([
-                'message' => 'Xem tất cả danh mục thành công !',
-                'category' => $categorys,
-            ], 201);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
     
@@ -135,10 +135,8 @@ class CategoryController extends Controller
                     'message' => 'Không tìm thấy danh mục !',
                 ], 404);
             }
-        } catch (QueryException $e) {
-            return response()->json([
-                'message' => 'Xóa danh mục thất bại !',
-            ], 400);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
 }

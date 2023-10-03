@@ -55,43 +55,46 @@ class UserController extends Controller
 
     public function login(Request $request)
     {
-        
-        $u = User::where('email',$request->email)->first();
-        if(empty($u)){
-            return response()->json(['error' => 'Email không tồn tại !'], 401);
+        try {
+            $u = User::where('email',$request->email)->first();
+            if(empty($u)){
+                return response()->json(['message' => 'Email không tồn tại !'], 400);
+            }
+            else {
+                $is_accept = $u->is_accept;
+                if($is_accept == 0){
+                    return response()->json(['message' => 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !'], 400);
+                } 
+                if($u->email_verified_at == null){
+                    return response()->json(['message' => 'Email này chưa được xác nhận , hãy kiểm tra và xác nhận nó trước khi đăng nhập !'], 400);
+                } 
+            }
+    
+            $credentials = request(['email', 'password']);
+            $user = User::where('email',$request->email)->first();
+            if (!$token = auth()->guard('user_api')->attempt($credentials)) {
+                return response()->json(['message' => 'Email hoặc mật khẩu không chính xác !'], 400);
+            }
+    
+            $user->have_password = true;
+            if(!$user->password) $user->have_password = false; // login by gg chưa có password 
+    
+            $inforUser = InforUser::where('id_user', $user->id)->first();
+            if($user->role == 'hospital') {
+                $inforUser = InforHospital::where('id_hospital', $user->id)->first();
+            }
+            if($user->role == 'doctor') {
+                $inforUser = InforDoctor::where('id_doctor', $user->id)->first();
+            }
+    
+            return response()->json([
+                // "$user->role" => array_merge($user->toArray(), $inforUser->toArray()),
+                "user" => array_merge($user->toArray(), $inforUser->toArray()),
+                'message'=>$this->respondWithToken($token)
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
-        else {
-            $is_accept = $u->is_accept;
-            if($is_accept == 0){
-                return response()->json(['error' => 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !'], 401);
-            } 
-            if($u->email_verified_at == null){
-                return response()->json(['error' => 'Email này chưa được xác nhận , hãy kiểm tra và xác nhận nó trước khi đăng nhập !'], 401);
-            } 
-        }
-
-        $credentials = request(['email', 'password']);
-        $user = User::where('email',$request->email)->first();
-        if (!$token = auth()->guard('user_api')->attempt($credentials)) {
-            return response()->json(['error' => 'Email hoặc mật khẩu không chính xác !'], 401);
-        }
-
-        $user->have_password = true;
-        if(!$user->password) $user->have_password = false; // login by gg chưa có password 
-
-        $inforUser = InforUser::where('id_user', $user->id)->first();
-        if($user->role == 'hospital') {
-            $inforUser = InforHospital::where('id_hospital', $user->id)->first();
-        }
-        if($user->role == 'doctor') {
-            $inforUser = InforDoctor::where('id_doctor', $user->id)->first();
-        }
-
-        return response()->json([
-            // "$user->role" => array_merge($user->toArray(), $inforUser->toArray()),
-            "user" => array_merge($user->toArray(), $inforUser->toArray()),
-            'message'=>$this->respondWithToken($token)
-        ]);
     }
 
     public function logout()
@@ -101,16 +104,20 @@ class UserController extends Controller
     }
     
     public function changePassword(RequestChangePassword $request) {
-        $user = User::find(auth('user_api')->user()->id);
-        if (!(Hash::check($request->get('current_password'), $user->password))) {
+        try {
+            $user = User::find(auth('user_api')->user()->id);
+            if (!(Hash::check($request->get('current_password'), $user->password))) {
+                return response()->json([
+                    'message' => 'Mật khẩu không chính xác !',
+                ],400);
+            }
+            $user->update(['password' => Hash::make($request->get('new_password'))]);
             return response()->json([
-                'message' => 'Mật khẩu không chính xác !',
-            ],400);
+                'message' => "Thay đổi mật khẩu thành công !",
+            ],200);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
-        $user->update(['password' => Hash::make($request->get('new_password'))]);
-        return response()->json([
-            'message' => "Thay đổi mật khẩu thành công !",
-        ],200);
     }
 
     public function forgotForm(Request $request)
@@ -140,12 +147,8 @@ class UserController extends Controller
             return response()->json([
                 'message' => "Gửi mail đặt lại mật khẩu thành công !",
             ],200);
-        } catch (\Exception $e) {
-            Log::error('Error occurred: ' . $e->getMessage());
-
-            return response()->json([
-                'error' => 'Có một lỗi nào đó khi gửi mail !'
-            ], 500);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
 
@@ -184,38 +187,41 @@ class UserController extends Controller
                 Toastr::warning('Token đã hết hạn !');
                 return  redirect()->route('form_reset_password');
             }
-        } catch (\Exception $e) {
-        }
+        } catch (\Exception $e) {}
     }
 
     // verify email
     public function verifyEmail(Request $request, $token)
     {
-        $user = User::where('token_verify_email', $token)->first();
-        if($user) {
-            $user->update([
-                'email_verified_at' => now(),
-                'token_verify_email' => null,
-            ]);
-            $status = true;
-            Toastr::success('Email của bạn đã được xác nhận !');
-        } 
-        else {
-            $status = false;
-            Toastr::warning('Token đã hết hạn !');
-        }
-        return view('user.status_verify_email', ['status' => $status]);
+        try {
+            $user = User::where('token_verify_email', $token)->first();
+            if($user) {
+                $user->update([
+                    'email_verified_at' => now(),
+                    'token_verify_email' => null,
+                ]);
+                $status = true;
+                Toastr::success('Email của bạn đã được xác nhận !');
+            } 
+            else {
+                $status = false;
+                Toastr::warning('Token đã hết hạn !');
+            }
+            return view('user.status_verify_email', ['status' => $status]);
+        } catch (Exception $e) {}
     }
 
     public function getInforUser($id) {
-        $user = User::find($id);
-        if(empty($user)) {
-            return response()->json(['message' => 'Không tìm thấy tài khoản !',], 404);
+        try {
+            $user = User::find($id);
+            if(empty($user)) {
+                return response()->json(['message' => 'Không tìm thấy tài khoản !',], 404);
+            }
+            return response()->json([
+                'user' => $user
+            ], 201);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
-        return response()->json([
-            'user' => $user
-        ], 201);
     }
-
-
 }

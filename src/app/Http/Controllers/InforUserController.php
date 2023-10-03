@@ -66,53 +66,57 @@ class InforUserController extends Controller
 
     public function register(RequestCreateInforUser $request)
     {
-        $userEmail = User::where('email', $request->email)->where('role', 'user')->first();
-        if($userEmail){
-            if($userEmail['password']){
-                return response()->json(['error' => 'Tài khoản đã tồn tại !'], 401);
+        try {
+            $userEmail = User::where('email', $request->email)->where('role', 'user')->first();
+            if($userEmail){
+                if($userEmail['password']){
+                    return response()->json(['message' => 'Tài khoản đã tồn tại !'], 400);
+                }
+                else { 
+                    $avatar = $this->saveAvatar($request);
+                    $userEmail->update(array_merge(
+                        $request->all(),
+                        ['password' => Hash::make($request->password),'avatar' => $avatar]
+                    ));
+    
+                    $inforUser = InforUser::where('id_user',$userEmail->id)->first();
+                    $inforUser->update(array_merge(
+                        $request->all()
+                    ));
+                    
+                    return response()->json([
+                        'message' => 'Đăng kí tài khoản thành công !',
+                        'user' => array_merge($userEmail->toArray(),$inforUser->toArray()),
+                    ], 201);
+                }
             }
-            else { 
+            else {
                 $avatar = $this->saveAvatar($request);
-                $userEmail->update(array_merge(
+                $user = User::create(array_merge(
                     $request->all(),
-                    ['password' => Hash::make($request->password),'avatar' => $avatar]
+                    ['password' => Hash::make($request->password), 'is_accept'=> 0, 'role'=> 'user', 'avatar' => $avatar]
                 ));
-
-                $inforUser = InforUser::where('id_user',$userEmail->id)->first();
-                $inforUser->update(array_merge(
-                    $request->all()
+    
+                $inforUser = InforUser::create(array_merge(
+                    $request->all(),
+                    ['id_user' => $user->id]
                 ));
+    
+                // verify email 
+                $token = Str::random(32);
+                $url =  UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
+                Log::info("Add jobs to Queue , Email: $user->email with URL: $url");
+                Queue::push(new SendVerifyEmail($user->email, $url));
+                $user->update(['token_verify_email' => $token]);
+                // verify email 
                 
                 return response()->json([
                     'message' => 'Đăng kí tài khoản thành công !',
-                    'user' => array_merge($userEmail->toArray(),$inforUser->toArray()),
+                    'user' => array_merge($user->toArray(), $inforUser->toArray()),
                 ], 201);
             }
-        }
-        else {
-            $avatar = $this->saveAvatar($request);
-            $user = User::create(array_merge(
-                $request->all(),
-                ['password' => Hash::make($request->password), 'is_accept'=> 0, 'role'=> 'user', 'avatar' => $avatar]
-            ));
-
-            $inforUser = InforUser::create(array_merge(
-                $request->all(),
-                ['id_user' => $user->id]
-            ));
-
-            // verify email 
-            $token = Str::random(32);
-            $url =  UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
-            Log::info("Add jobs to Queue , Email: $user->email with URL: $url");
-            Queue::push(new SendVerifyEmail($user->email, $url));
-            $user->update(['token_verify_email' => $token]);
-            // verify email 
-            
-            return response()->json([
-                'message' => 'Đăng kí tài khoản thành công !',
-                'user' => array_merge($user->toArray(), $inforUser->toArray()),
-            ], 201);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
 
@@ -130,7 +134,7 @@ class InforUserController extends Controller
             if ($inforUser) {
                 $user = User::find($inforUser->id_user);
                 if ($user->is_accept == 0) {
-                    return response()->json(['error' => 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !'], 401);
+                    return response()->json(['message' => 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !'], 400);
                 } else {
                     Auth::login($user);
                     $this->token = auth()->guard('user_api')->login($user);
@@ -146,7 +150,7 @@ class InforUserController extends Controller
                 $findEmail = User::where('email',$ggUser->email)->where('role','user')->first();
                 if ($findEmail) {
                     if ($findEmail->is_accept == 0) {
-                        return response()->json(['error' => 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !'], 401);
+                        return response()->json(['message' => 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !'], 400);
                     } else {
                         $inforUser = InforUser::where('id_user',$findEmail->id)->first();
                         $inforUser->update([
@@ -190,68 +194,78 @@ class InforUserController extends Controller
                 }
             }
         } catch (Exception $e) {
-            return response()->json(['error' => $e], 401);
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
     // Login by Google User 
 
     public function profile()
     {
-        $user = User::find(auth('user_api')->user()->id);
-        $inforUser = InforUser::where('id_user', $user->id)->first();
-
-        return response()->json([
-            'user' => array_merge($user->toArray(), $inforUser->toArray()),
-        ]);
+        try {
+            $user = User::find(auth('user_api')->user()->id);
+            $inforUser = InforUser::where('id_user', $user->id)->first();
+    
+            return response()->json([
+                'user' => array_merge($user->toArray(), $inforUser->toArray()),
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
+        }
     }
 
     public function updateProfile(RequestUpdateUser $request, $id_user)
     {
-        $user = User::find(auth('user_api')->user()->id);
-        $oldEmail = $user->email;
-        if($request->hasFile('avatar')) {
-            if (!Str::startsWith($user->avatar, 'http')) {
-                if ($user->avatar) {
-                    File::delete($user->avatar);
+        try {
+            $user = User::find(auth('user_api')->user()->id);
+            $oldEmail = $user->email;
+            if($request->hasFile('avatar')) {
+                if (!Str::startsWith($user->avatar, 'http')) {
+                    if ($user->avatar) {
+                        File::delete($user->avatar);
+                    }
                 }
+                $avatar = $this->saveAvatar($request);
+                $user->update(array_merge($request->all(),['avatar' => $avatar]));
+            } else {
+                $user->update($request->all());
             }
-            $avatar = $this->saveAvatar($request);
-            $user->update(array_merge($request->all(),['avatar' => $avatar]));
-        } else {
-            $user->update($request->all());
+            $inforUser = InforUser::where('id_user', $user->id)->first();
+            $inforUser->update($request->all());
+            $message = 'Cập nhật thông tin cho tài khoản thành công !';
+            // sendmail verify
+            if($oldEmail != $request->email) {
+                $token = Str::random(32);
+                $url =  UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
+                Log::info("Add jobs to Queue , Email: $user->email with URL: $url");
+                Queue::push(new SendVerifyEmail($user->email, $url));
+                $content = 'Email của tài khoản của bạn đã được thay đổi thành ' . $user->email . '. Nếu bạn không phải là người thay đổi , hãy liên hệ với quản trị viên của hệ thống để được hỗ trợ . ';
+                Queue::push(new SendMailNotify($oldEmail, $content));
+                $user->update([
+                    'token_verify_email' => $token,
+                    'email_verified_at' => null,
+                ]);
+                $message = 'Cập nhật thông tin tài khoản thành công . Có một email xác nhận đã được gửi đến cho bạn , hãy kiểm tra và xác nhận nó !';
+            } 
+            // sendmail verify
+    
+            return response()->json([
+                'message' => $message,
+                'user' => array_merge($user->toArray(), $inforUser->toArray()),
+            ], 201);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
-        $inforUser = InforUser::where('id_user', $user->id)->first();
-        $inforUser->update($request->all());
-        $message = 'Cập nhật thông tin cho tài khoản thành công !';
-        // sendmail verify
-        if($oldEmail != $request->email) {
-            $token = Str::random(32);
-            $url =  UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
-            Log::info("Add jobs to Queue , Email: $user->email with URL: $url");
-            Queue::push(new SendVerifyEmail($user->email, $url));
-            $content = 'Email của tài khoản của bạn đã được thay đổi thành ' . $user->email . '. Nếu bạn không phải là người thay đổi , hãy liên hệ với quản trị viên của hệ thống để được hỗ trợ . ';
-            Queue::push(new SendMailNotify($oldEmail, $content));
-            $user->update([
-                'token_verify_email' => $token,
-                'email_verified_at' => null,
-            ]);
-            $message = 'Cập nhật thông tin tài khoản thành công . Có một email xác nhận đã được gửi đến cho bạn , hãy kiểm tra và xác nhận nó !';
-        } 
-        // sendmail verify
-
-        return response()->json([
-            'message' => $message,
-            'user' => array_merge($user->toArray(), $inforUser->toArray()),
-        ], 201);
     }
 
     public function createPassword(RequestCreatePassword $request) {
-        $user = User::find(auth('user_api')->user()->id);
-        $user->update(['password' => Hash::make($request->get('new_password'))]);
-        return response()->json([
-            'message' => "Thay đổi mật khẩu thành công ! ",
-        ],200);
+        try {
+            $user = User::find(auth('user_api')->user()->id);
+            $user->update(['password' => Hash::make($request->get('new_password'))]);
+            return response()->json([
+                'message' => "Thay đổi mật khẩu thành công ! ",
+            ],200);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
+        }
     }
-
-
 }

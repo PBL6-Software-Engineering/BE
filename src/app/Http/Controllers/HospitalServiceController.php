@@ -19,19 +19,23 @@ use Illuminate\Support\Facades\File;
 class HospitalServiceController extends Controller
 {
     public function add(RequestCreateHospitalService $request){
-        $user = auth()->guard('user_api')->user();
-        $hospitalDepartment = HospitalDepartment::where('id',$request->id_hospital_department)
-        ->where('id_hospital', $user->id)->first();
-        if(empty($hospitalDepartment)) return response()->json(['message' => 'Không tìm thấy khoa trong bệnh viện !',], 404);
-        
-        $request->merge(['infor' => json_encode($request->infor)]);
-        $hospitalService = HospitalService::create($request->all());
-        
-        $hospitalService->infor = json_decode($hospitalService->infor);
-        return response()->json([
-            'message' => 'Thêm dịch vụ cho bệnh viện thành công ! ',
-            'hospital_service' => $hospitalService
-        ], 201);
+        try {
+            $user = auth()->guard('user_api')->user();
+            $hospitalDepartment = HospitalDepartment::where('id',$request->id_hospital_department)
+            ->where('id_hospital', $user->id)->first();
+            if(empty($hospitalDepartment)) return response()->json(['message' => 'Không tìm thấy khoa trong bệnh viện !',], 404);
+            
+            $request->merge(['infor' => json_encode($request->infor)]);
+            $hospitalService = HospitalService::create($request->all());
+            
+            $hospitalService->infor = json_decode($hospitalService->infor);
+            return response()->json([
+                'message' => 'Thêm dịch vụ cho bệnh viện thành công ! ',
+                'hospital_service' => $hospitalService
+            ], 201);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
+        }
     }
 
     public function edit(RequestUpdateHospitalService $request,$id){
@@ -57,14 +61,14 @@ class HospitalServiceController extends Controller
                 'hospital_service' => $hospitalService
             ], 201);
         } catch (Exception $e) {
-            return response()->json(['error' =>  $e->getMessage()], 401);
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
 
     public function delete($id)
     {
-        $user = auth()->guard('user_api')->user();
         try {
+            $user = auth()->guard('user_api')->user();
             $hospitalService =  HospitalService::find($id);
             if ($hospitalService) {
                 $hospitalDepartment = HospitalDepartment::where('id',$hospitalService->id_hospital_department)
@@ -90,91 +94,99 @@ class HospitalServiceController extends Controller
                 ], 404);
             }
         } catch (Exception $e) {
-            return response()->json(['error' =>  $e->getMessage()], 401);
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
 
     public function serviceOfHospital(Request $request)
     {
-        $user = auth()->guard('user_api')->user();
-        if ($request->paginate == true) { // lấy cho department 
-            $search = $request->search;
-            $orderBy = 'id_hospital_service';
-            $orderDirection = 'ASC';
-        
-            if ($request->sortlatest == 'true') {
+        try {
+            $user = auth()->guard('user_api')->user();
+            if ($request->paginate == true) { // lấy cho department 
+                $search = $request->search;
                 $orderBy = 'id_hospital_service';
-                $orderDirection = 'DESC';
+                $orderDirection = 'ASC';
+            
+                if ($request->sortlatest == 'true') {
+                    $orderBy = 'id_hospital_service';
+                    $orderDirection = 'DESC';
+                }
+            
+                if ($request->sortname == 'true') {
+                    $orderBy = 'name';
+                    $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+                }
+            
+                $hospitalServices = HospitalService::orderBy($orderBy, $orderDirection)
+                ->join('hospital_departments', 'hospital_departments.id', '=', 'hospital_services.id_hospital_department')
+                ->where('name', 'LIKE', '%' . $search . '%')
+                ->where('id_hospital',$user->id)
+                ->select(
+                    'hospital_services.id as id_hospital_service', 'hospital_departments.id as id_hospital_departments',
+                    'hospital_services.time_advise as time_advise_hospital_service', 'hospital_departments.time_advise as time_advise_hospital_departments',
+                    'hospital_services.price as price_hospital_service', 'hospital_departments.price as price_hospital_departments',
+                    'hospital_services.*', 'hospital_departments.*')
+                ->paginate(6);
+    
+                foreach($hospitalServices as $index => $hospitalService) {
+                    $hospitalService->infor = json_decode($hospitalService->infor);
+                } 
+    
+                return response()->json([
+                    'message' => 'Xem tất cả dịch vụ của bệnh viện thành công !',
+                    'hospital_services' => $hospitalServices,
+                ], 201);
             }
-        
-            if ($request->sortname == 'true') {
-                $orderBy = 'name';
-                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            else { // lấy cho product 
+                $hospitalServices = HospitalService::join('hospital_departments', 'hospital_departments.id', '=', 'hospital_services.id_hospital_department')
+                ->where('id_hospital',$user->id)
+                ->select(
+                    'hospital_services.id as id_hospital_service', 'hospital_departments.id as id_hospital_departments',
+                    'hospital_services.time_advise as time_advise_hospital_service', 'hospital_departments.time_advise as time_advise_hospital_departments',
+                    'hospital_services.price as price_hospital_service', 'hospital_departments.price as price_hospital_departments',
+                    'hospital_services.*', 'hospital_departments.*')
+                ->get();
+    
+                foreach($hospitalServices as $index => $hospitalService) {
+                    $hospitalService->infor = json_decode($hospitalService->infor);
+                } 
+    
+                return response()->json([
+                    'message' => 'Xem tất cả dịch vụ của bệnh viện thành công !',
+                    'hospital_services' => $hospitalServices,
+                ], 201);
             }
-        
-            $hospitalServices = HospitalService::orderBy($orderBy, $orderDirection)
-            ->join('hospital_departments', 'hospital_departments.id', '=', 'hospital_services.id_hospital_department')
-            ->where('name', 'LIKE', '%' . $search . '%')
-            ->where('id_hospital',$user->id)
-            ->select(
-                'hospital_services.id as id_hospital_service', 'hospital_departments.id as id_hospital_departments',
-                'hospital_services.time_advise as time_advise_hospital_service', 'hospital_departments.time_advise as time_advise_hospital_departments',
-                'hospital_services.price as price_hospital_service', 'hospital_departments.price as price_hospital_departments',
-                'hospital_services.*', 'hospital_departments.*')
-            ->paginate(6);
-
-            foreach($hospitalServices as $index => $hospitalService) {
-                $hospitalService->infor = json_decode($hospitalService->infor);
-            } 
-
-            return response()->json([
-                'message' => 'Xem tất cả dịch vụ của bệnh viện thành công !',
-                'hospital_services' => $hospitalServices,
-            ], 201);
-        }
-        else { // lấy cho product 
-            $hospitalServices = HospitalService::join('hospital_departments', 'hospital_departments.id', '=', 'hospital_services.id_hospital_department')
-            ->where('id_hospital',$user->id)
-            ->select(
-                'hospital_services.id as id_hospital_service', 'hospital_departments.id as id_hospital_departments',
-                'hospital_services.time_advise as time_advise_hospital_service', 'hospital_departments.time_advise as time_advise_hospital_departments',
-                'hospital_services.price as price_hospital_service', 'hospital_departments.price as price_hospital_departments',
-                'hospital_services.*', 'hospital_departments.*')
-            ->get();
-
-            foreach($hospitalServices as $index => $hospitalService) {
-                $hospitalService->infor = json_decode($hospitalService->infor);
-            } 
-
-            return response()->json([
-                'message' => 'Xem tất cả dịch vụ của bệnh viện thành công !',
-                'hospital_services' => $hospitalServices,
-            ], 201);
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
 
     public function details(Request $request, $id){
-        $user = auth()->guard('user_api')->user();
-        $hospitalServices = HospitalService::join('hospital_departments', 'hospital_departments.id', '=', 'hospital_services.id_hospital_department')
-        ->where('id_hospital',$user->id)
-        ->where('hospital_services.id',$id)
-        ->select(
-            'hospital_services.id as id_hospital_service', 'hospital_departments.id as id_hospital_departments',
-            'hospital_services.time_advise as time_advise_hospital_service', 'hospital_departments.time_advise as time_advise_hospital_departments',
-            'hospital_services.price as price_hospital_service', 'hospital_departments.price as price_hospital_departments',
-            'hospital_services.*', 'hospital_departments.*')
-        ->first();
-        if($hospitalServices) {
-            $hospitalServices->infor = json_decode($hospitalServices->infor);
-            return response()->json([
-                'message' => 'Xem dịch vụ chi tiết thành công !',
-                'hospital_service' => $hospitalServices
-            ], 201);
-        }
-        else {
-            return response()->json([
-                'message' => 'Không tìm thấy dịch vụ trong bệnh viện !',
-            ], 404);
+        try {
+            $user = auth()->guard('user_api')->user();
+            $hospitalServices = HospitalService::join('hospital_departments', 'hospital_departments.id', '=', 'hospital_services.id_hospital_department')
+            ->where('id_hospital',$user->id)
+            ->where('hospital_services.id',$id)
+            ->select(
+                'hospital_services.id as id_hospital_service', 'hospital_departments.id as id_hospital_departments',
+                'hospital_services.time_advise as time_advise_hospital_service', 'hospital_departments.time_advise as time_advise_hospital_departments',
+                'hospital_services.price as price_hospital_service', 'hospital_departments.price as price_hospital_departments',
+                'hospital_services.*', 'hospital_departments.*')
+            ->first();
+            if($hospitalServices) {
+                $hospitalServices->infor = json_decode($hospitalServices->infor);
+                return response()->json([
+                    'message' => 'Xem dịch vụ chi tiết thành công !',
+                    'hospital_service' => $hospitalServices
+                ], 201);
+            }
+            else {
+                return response()->json([
+                    'message' => 'Không tìm thấy dịch vụ trong bệnh viện !',
+                ], 404);
+            }
+        } catch (Exception $e) {
+            return response()->json(['message' =>  $e->getMessage()], 400);
         }
     }
 }
