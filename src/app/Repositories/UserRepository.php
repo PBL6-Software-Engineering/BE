@@ -42,4 +42,9 @@ class UserRepository extends BaseRepository implements UserInterface
             throw $e;
         }
     }
+
+    public function findUserByTokenVerifyEmail($token)
+    {
+        return $this->model->where('token_verify_email', $token)->first();
+    }
 }

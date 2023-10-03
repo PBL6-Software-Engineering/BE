@@ -14,4 +14,6 @@ interface UserInterface extends RepositoryInterface
     public static function findUserById($id);
 
     public static function updateUser($id, $data);
+
+    public function findUserByTokenVerifyEmail($token);
 }

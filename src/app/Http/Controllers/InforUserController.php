@@ -10,7 +10,6 @@ use App\Jobs\SendMailNotify;
 use App\Jobs\SendVerifyEmail;
 use App\Models\InforUser;
 use App\Models\User;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -19,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
+use Throwable;
 
 class InforUserController extends Controller
 {
@@ -98,7 +98,7 @@ class InforUserController extends Controller
                     'user' => array_merge($user->toArray(), $inforUser->toArray()),
                 ], 201);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -176,7 +176,7 @@ class InforUserController extends Controller
                     // ], 201);
                 }
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -191,7 +191,7 @@ class InforUserController extends Controller
             return response()->json([
                 'user' => array_merge($user->toArray(), $inforUser->toArray()),
             ]);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -235,7 +235,7 @@ class InforUserController extends Controller
                 'message' => $message,
                 'user' => array_merge($user->toArray(), $inforUser->toArray()),
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -249,7 +249,7 @@ class InforUserController extends Controller
             return response()->json([
                 'message' => 'Thay đổi mật khẩu thành công ! ',
             ], 200);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }

@@ -9,7 +9,7 @@ interface AdminInterface extends RepositoryInterface
 {
     public function getAdmin();
 
-    public function findAdminByEmail($email);
+    public static function findAdminByEmail($email);
 
     public function findAdminById($id);
 
@@ -17,5 +17,5 @@ interface AdminInterface extends RepositoryInterface
 
     public function createAdmin($data);
 
-    public function updateAdmin($id, $data);
+    public static function updateAdmin($id, $data);
 }

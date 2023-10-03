@@ -7,7 +7,7 @@ use App\Http\Requests\RequestUpdateHospitalDepartment;
 use App\Models\Department;
 use App\Models\HospitalDepartment;
 use App\Models\HospitalService;
-use Exception;
+use Throwable;
 
 class HospitalDepartmentController extends Controller
 {
@@ -31,7 +31,7 @@ class HospitalDepartmentController extends Controller
                 'message' => 'Thêm khoa cho bệnh viện thành công ! ',
                 'hospital_department' => $hospitalDepartment,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -55,7 +55,7 @@ class HospitalDepartmentController extends Controller
                 'message' => 'Cập nhật thông tin khoa cho bệnh viện thành công ! ',
                 'hospital_department' => $hospitalDepartment,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -83,7 +83,7 @@ class HospitalDepartmentController extends Controller
             return response()->json([
                 'message' => 'Xóa khoa của bệnh viện thành công ! ',
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -101,7 +101,7 @@ class HospitalDepartmentController extends Controller
                 'message' => 'Xem tất cả khoa của bệnh viện thành công ! ',
                 'hospital_departments' => $hospitalDepartments,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -122,7 +122,7 @@ class HospitalDepartmentController extends Controller
                 'message' => 'Lấy tất cả khoa của bệnh viện thành công !',
                 'hospital_departments' => $hospitalDepartment,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }

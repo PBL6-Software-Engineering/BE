@@ -6,9 +6,9 @@ use App\Http\Requests\RequestCreateCategory;
 use App\Http\Requests\RequestUpdateCategory;
 use App\Models\Article;
 use App\Models\Category;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Throwable;
 
 class CategoryController extends Controller
 {
@@ -36,7 +36,7 @@ class CategoryController extends Controller
                 'message' => 'Thêm danh mục thành công !',
                 'category' => $category,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -59,7 +59,7 @@ class CategoryController extends Controller
                 'message' => 'Cập nhật thông tin danh mục thành công !',
                 'category' => $category,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -80,7 +80,7 @@ class CategoryController extends Controller
                     'message' => 'Không tìm thấy danh mục !',
                 ], 404);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -118,7 +118,7 @@ class CategoryController extends Controller
                     'category' => $categorys,
                 ], 201);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -137,7 +137,7 @@ class CategoryController extends Controller
                     'message' => 'Không tìm thấy danh mục !',
                 ], 404);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }

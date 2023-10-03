@@ -12,7 +12,6 @@ use App\Models\InforDoctor;
 use App\Models\InforHospital;
 use App\Models\User;
 use Database\Factories\FakeImageFactory;
-use Exception;
 use Faker\Factory;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
@@ -21,23 +20,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 class InforHospitalController extends Controller
 {
-    public function refresh()
-    {
-        return $this->respondWithToken(auth('user_api')->refresh());
-    }
-
-    protected function respondWithToken($token)
-    {
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->guard('user_api')->factory()->getTTL() * 60,
-        ]);
-    }
-
     public function saveAvatar(Request $request)
     {
         // $pathToFile = $request->file('avatar')->store('image/avatars','public');
@@ -89,7 +75,7 @@ class InforHospitalController extends Controller
                     'hospital' => array_merge($user->toArray(), $inforUser->toArray()),
                 ], 201);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -106,7 +92,7 @@ class InforHospitalController extends Controller
             return response()->json([
                 'hospital' => array_merge($user->toArray(), $inforUser->toArray()),
             ]);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -159,7 +145,7 @@ class InforHospitalController extends Controller
                 'message' => $message,
                 'hospital' => array_merge($user->toArray(), $inforHospital->toArray()),
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -178,21 +164,27 @@ class InforHospitalController extends Controller
             // $avatar = 'storage/image/avatars/doctors/' . $avatar;
 
             // Cách 2 dùng "guzzlehttp/guzzle": "^7.8"
-            try {
-                $pathFolder = 'storage/image/avatars/doctors';
-                if (!File::exists($pathFolder)) {
-                    File::makeDirectory($pathFolder, 0755, true);
-                }
-                $client = new Client;
-                $response = $client->get('https://picsum.photos/200/200');
-                $imageContent = $response->getBody()->getContents();
-                $pathFolder = 'storage/image/avatars/doctors/';
-                $nameImage = uniqid() . '.jpg';
-                $avatar = $pathFolder . $nameImage;
-                file_put_contents($avatar, $imageContent);
-            } catch (\Exception $e) {
-                $avatar = null;
+            $avatar = null;
+            $pathFolder = 'storage/image/avatars/doctors';
+            if (!File::exists($pathFolder)) {
+                File::makeDirectory($pathFolder, 0755, true);
             }
+            $client = new Client;
+            while (true) {
+                try {
+                    $response = $client->get('https://picsum.photos/200/200');
+                    $imageContent = $response->getBody()->getContents();
+                    $pathFolder = 'storage/image/avatars/doctors/';
+                    $nameImage = uniqid() . '.jpg';
+                    $avatar = $pathFolder . $nameImage;
+                    file_put_contents($avatar, $imageContent);
+                    if (file_exists($avatar)) {
+                        break;
+                    }
+                } catch (Throwable $e) {
+                }
+            }
+
             $new_password = Str::random(10);
             $doctor = User::create([
                 'email' => $request->email,
@@ -217,7 +209,7 @@ class InforHospitalController extends Controller
             return response()->json([
                 'message' => 'Thêm tài khoản bác sĩ thành công !',
             ], 200);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }

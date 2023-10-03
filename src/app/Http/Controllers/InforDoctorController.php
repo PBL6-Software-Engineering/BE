@@ -9,28 +9,14 @@ use App\Jobs\SendVerifyEmail;
 use App\Models\InforDoctor;
 use App\Models\InforHospital;
 use App\Models\User;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
+use Throwable;
 
 class InforDoctorController extends Controller
 {
-    public function refresh()
-    {
-        return $this->respondWithToken(auth('user_api')->refresh());
-    }
-
-    protected function respondWithToken($token)
-    {
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->guard('user_api')->factory()->getTTL() * 60,
-        ]);
-    }
-
     public function saveAvatar(Request $request)
     {
         if ($request->hasFile('avatar')) {
@@ -51,7 +37,7 @@ class InforDoctorController extends Controller
             return response()->json([
                 'doctor' => array_merge($user->toArray(), $inforUser->toArray()),
             ]);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -99,7 +85,7 @@ class InforDoctorController extends Controller
                 'message' => $message,
                 'hospital' => array_merge($user->toArray(), $inforDoctor->toArray()),
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }

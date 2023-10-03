@@ -8,9 +8,9 @@ use App\Models\Department;
 use App\Models\HospitalDepartment;
 use App\Models\InforDoctor;
 use App\Models\Product;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Throwable;
 
 class DepartmentController extends Controller
 {
@@ -38,7 +38,7 @@ class DepartmentController extends Controller
                 'message' => 'Thêm khoa thành công !',
                 'department' => $department,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -61,7 +61,7 @@ class DepartmentController extends Controller
                 'message' => 'Cập nhật thông tin khoa thành công !',
                 'department' => $department,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -83,7 +83,7 @@ class DepartmentController extends Controller
                     'message' => 'Không tìm thấy khoa !',
                 ], 404);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -123,7 +123,7 @@ class DepartmentController extends Controller
                     'department' => $departments,
                 ], 201);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -143,7 +143,7 @@ class DepartmentController extends Controller
                     'department' => $department,
                 ], 404);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }

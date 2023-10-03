@@ -18,7 +18,6 @@ use App\Repositories\AdminInterface;
 use App\Repositories\PasswordResetRepository;
 use App\Repositories\UserRepository;
 use Brian2694\Toastr\Facades\Toastr;
-use Exception;
 use Faker\Factory;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
@@ -28,6 +27,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 class AdminService
 {
@@ -66,7 +66,7 @@ class AdminService
                 'admin' => $user,
                 'message' => $this->respondWithToken($token),
             ]);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -87,7 +87,7 @@ class AdminService
             return response()->json([
                 'message' => 'Thay đổi mật khẩu thành công !',
             ], 200);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -139,7 +139,7 @@ class AdminService
                 'message' => $message,
                 'admin' => $admin,
             ], 200);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -173,7 +173,7 @@ class AdminService
                 'message' => 'Lấy tất cả quản trị viên thành công !',
                 'admins' => $allAdmin,
             ], 200);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -187,7 +187,7 @@ class AdminService
                 'message' => 'Lấy tất cả người dùng thành công !',
                 'users' => $allUser,
             ], 200);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -211,7 +211,7 @@ class AdminService
             return response()->json([
                 'message' => 'Gửi mail đặt lại mật khẩu thành công , hãy kiểm tra mail !',
             ], 200);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -254,7 +254,7 @@ class AdminService
 
                 return redirect()->route('admin_form_reset_password');
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
         }
     }
 
@@ -287,7 +287,7 @@ class AdminService
                     if (file_exists($avatar)) {
                         break;
                     }
-                } catch (Exception $e) {
+                } catch (Throwable $e) {
                 }
             }
 
@@ -309,7 +309,7 @@ class AdminService
                 'message' => 'Thêm quản trị viên thành công !',
                 'new_admin' => $newAdmin,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -333,7 +333,7 @@ class AdminService
                     'message' => 'Xóa tài khoản thành công !',
                 ], 200);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -368,7 +368,7 @@ class AdminService
                 'message' => 'Thay đổi role cho quản trị viên thành công !',
                 'admin' => $admin,
             ], 200);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -383,7 +383,7 @@ class AdminService
             return response()->json([
                 'message' => 'Thay đổi trạng thái của người dùng thành công !',
             ], 200);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }

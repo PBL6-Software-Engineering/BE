@@ -9,8 +9,8 @@ use App\Models\HospitalDepartment;
 use App\Models\HospitalService;
 use App\Models\Product;
 use App\Models\WorkSchedule;
-use Exception;
 use Illuminate\Http\Request;
+use Throwable;
 
 class HospitalServiceController extends Controller
 {
@@ -33,7 +33,7 @@ class HospitalServiceController extends Controller
                 'message' => 'Thêm dịch vụ cho bệnh viện thành công ! ',
                 'hospital_service' => $hospitalService,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -64,7 +64,7 @@ class HospitalServiceController extends Controller
                 'message' => 'Cập nhật dịch vụ thành công !',
                 'hospital_service' => $hospitalService,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -98,7 +98,7 @@ class HospitalServiceController extends Controller
                     'message' => 'Không tìm thấy dịch vụ !',
                 ], 404);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -160,7 +160,7 @@ class HospitalServiceController extends Controller
                     'hospital_services' => $hospitalServices,
                 ], 201);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -190,7 +190,7 @@ class HospitalServiceController extends Controller
                     'message' => 'Không tìm thấy dịch vụ trong bệnh viện !',
                 ], 404);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }

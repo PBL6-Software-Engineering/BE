@@ -18,9 +18,9 @@ class AdminRepository extends BaseRepository implements AdminInterface
         return $this->model;
     }
 
-    public function findAdminByEmail($email)
+    public static function findAdminByEmail($email)
     {
-        return $this->model->where('email', $email)->first();
+        return (new self)->model->where('email', $email)->first();
     }
 
     public function findAdminById($id)
@@ -47,11 +47,11 @@ class AdminRepository extends BaseRepository implements AdminInterface
         }
     }
 
-    public function updateAdmin($id, $data)
+    public static function updateAdmin($id, $data)
     {
         DB::beginTransaction();
         try {
-            $admin = $this->model->find($id);
+            $admin = (new self)->model->find($id);
             $admin->update($data);
             DB::commit();
 

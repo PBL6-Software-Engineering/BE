@@ -6,10 +6,10 @@ use App\Http\Requests\RequestCreateArticle;
 use App\Http\Requests\RequestUpdateArticle;
 use App\Models\Article;
 use App\Models\User;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Throwable;
 
 class ArticleController extends Controller
 {
@@ -50,7 +50,7 @@ class ArticleController extends Controller
                 'message' => 'Thêm bài viết thành công !',
                 'article' => $article,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -79,7 +79,7 @@ class ArticleController extends Controller
                 'message' => 'Cập nhật bài viết thành công !',
                 'article' => $article,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -94,7 +94,7 @@ class ArticleController extends Controller
                 'message' => 'Thay đổi trạng thái hiển thị của bài viết thành công !',
                 'article' => $article,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -109,7 +109,7 @@ class ArticleController extends Controller
                 'message' => 'Thay đổi trạng thái của bài viết thành công !',
                 'article' => $article,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -132,7 +132,7 @@ class ArticleController extends Controller
             return response()->json([
                 'message' => 'Xóa bài viết thành công !',
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -181,7 +181,7 @@ class ArticleController extends Controller
                 'message' => 'Xem tất cả bài viết thành công !',
                 'article' => $articles,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -207,7 +207,7 @@ class ArticleController extends Controller
                     'article' => $article,
                 ], 404);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
@@ -303,7 +303,7 @@ class ArticleController extends Controller
                 'message' => 'Xem tất cả bài viết chi tiết thành công !',
                 'article' => $articles,
             ], 201);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
