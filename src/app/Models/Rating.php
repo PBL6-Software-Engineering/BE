@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Rating extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'id',
         'id_work_schedule',
@@ -15,8 +16,8 @@ class Rating extends Model
         'detail_rating',
     ];
 
-    public function workSchedule() {
+    public function workSchedule()
+    {
         return $this->belongsTo(WorkSchedule::class);
     }
-    
 }

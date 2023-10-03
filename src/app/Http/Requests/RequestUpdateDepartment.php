@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\Rule;
 
 class RequestUpdateDepartment extends FormRequest
@@ -27,6 +27,7 @@ class RequestUpdateDepartment extends FormRequest
     public function rules()
     {
         $id = $this->route('id');
+
         return [
             'name' => ['required', 'string', Rule::unique('departments')->ignore($id)],
             'description' => 'required|string',
@@ -37,18 +38,17 @@ class RequestUpdateDepartment extends FormRequest
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
-            'success'   => false,
-            'message'   => 'Validation errors',
-            'data'      => $validator->errors()
+            'success' => false,
+            'message' => 'Validation errors',
+            'data' => $validator->errors(),
         ]));
-
     }
 
     public function messages()
     {
         return [
             'title.required' => 'Title is required',
-            'body.required' => 'Body is required'
+            'body.required' => 'Body is required',
         ];
     }
 }

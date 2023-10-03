@@ -3,12 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\Department;
-use Carbon\Carbon;
 use Database\Factories\FakeImageFactory;
+use GuzzleHttp\Client;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use GuzzleHttp\Client;
 
 class DepartmentsSeeder extends Seeder
 {
@@ -526,7 +525,7 @@ class DepartmentsSeeder extends Seeder
             ],
         ];
 
-        // Cách 1 : Chậm 
+        // Cách 1 : Chậm
         // $thumbnails = [];
 
         // foreach ($departments as $index => $department) {
@@ -536,7 +535,7 @@ class DepartmentsSeeder extends Seeder
         //     }
         //     $thumbnails[$index] = 'storage/image/thumbnail/departments/' . $thumbnail;
         // }
-        
+
         // foreach ($departments as $index => $department) {
         //     Department::create([
         //         'name' => $department['name'],
@@ -547,14 +546,14 @@ class DepartmentsSeeder extends Seeder
         //     ]);
         // }
 
-        // Cách 2 
+        // Cách 2
         foreach ($departments as $index => $department) {
             try {
                 $pathFolder = 'storage/app/public/image/thumbnail/departments/';
                 if (!File::exists($pathFolder)) {
                     File::makeDirectory($pathFolder, 0755, true);
                 }
-                $client = new Client();
+                $client = new Client;
                 while (true) {
                     $response = $client->get('https://picsum.photos/200/200');
                     $imageContent = $response->getBody()->getContents();
@@ -571,7 +570,8 @@ class DepartmentsSeeder extends Seeder
                         break;
                     }
                 }
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
         }
     }
 }

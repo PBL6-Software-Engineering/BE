@@ -6,69 +6,72 @@ use App\Http\Requests\RequestCreateCategory;
 use App\Http\Requests\RequestUpdateCategory;
 use App\Models\Article;
 use App\Models\Category;
-use App\Models\Product;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\File;
 
 class CategoryController extends Controller
 {
-    public function saveAvatar(Request $request){
+    public function saveAvatar(Request $request)
+    {
         if ($request->hasFile('thumbnail')) {
             $image = $request->file('thumbnail');
-            $filename =  pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME) . '_category_' . time() . '.' . $image->getClientOriginalExtension();
+            $filename = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME) . '_category_' . time() . '.' . $image->getClientOriginalExtension();
             $image->storeAs('public/image/thumbnail/categories/', $filename);
+
             return 'storage/image/thumbnail/categories/' . $filename;
         }
     }
 
-    public function add(RequestCreateCategory $request){
+    public function add(RequestCreateCategory $request)
+    {
         try {
             $category = Category::create($request->all());
             $thumbnail = $this->saveAvatar($request);
             $category->update([
                 'thumbnail' => $thumbnail,
             ]);
+
             return response()->json([
                 'message' => 'Thêm danh mục thành công !',
-                'category' => $category
+                'category' => $category,
             ], 201);
-        } 
-        catch (Exception $e) {
-            return response()->json(['message' =>  $e->getMessage()], 400);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 
-    public function edit(RequestUpdateCategory $request,$id){
+    public function edit(RequestUpdateCategory $request, $id)
+    {
         try {
             $category = Category::find($id);
-            if($request->hasFile('thumbnail')) {
+            if ($request->hasFile('thumbnail')) {
                 if ($category->thumbnail) {
                     File::delete($category->thumbnail);
                 }
                 $thumbnail = $this->saveAvatar($request);
-                $category->update(array_merge($request->all(),['thumbnail' => $thumbnail]));
+                $category->update(array_merge($request->all(), ['thumbnail' => $thumbnail]));
             } else {
                 $category->update($request->all());
             }
+
             return response()->json([
                 'message' => 'Cập nhật thông tin danh mục thành công !',
-                'category' => $category
+                'category' => $category,
             ], 201);
-        } 
-        catch (Exception $e) {
-            return response()->json(['message' =>  $e->getMessage()], 400);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 
     public function delete($id)
     {
         try {
-            $category =  Category::find($id);
+            $category = Category::find($id);
             if ($category) {
-                Article::where("id_category",$id)->update(['id_category'=>null]); 
+                Article::where('id_category', $id)->update(['id_category' => null]);
                 $category->delete();
+
                 return response()->json([
                     'message' => 'Xóa danh mục thành công !',
                 ], 201);
@@ -77,25 +80,24 @@ class CategoryController extends Controller
                     'message' => 'Không tìm thấy danh mục !',
                 ], 404);
             }
-        }
-        catch (Exception $e) {
-            return response()->json(['message' =>  $e->getMessage()], 400);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 
     public function all(Request $request)
     {
         try {
-            if ($request->paginate == true) { // lấy cho category 
+            if ($request->paginate == true) { // lấy cho category
                 $search = $request->search;
                 $orderBy = 'id';
                 $orderDirection = 'ASC';
-            
+
                 if ($request->sortlatest == 'true') {
                     $orderBy = 'id';
                     $orderDirection = 'DESC';
                 }
-            
+
                 if ($request->sortname == 'true') {
                     $orderBy = 'name';
                     $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
@@ -103,32 +105,32 @@ class CategoryController extends Controller
                 $categorys = Category::orderBy($orderBy, $orderDirection)
                     ->where('name', 'LIKE', '%' . $search . '%')
                     ->paginate(15);
-            
+
                 return response()->json([
                     'message' => 'Xem tất cả danh mục thành công !',
                     'category' => $categorys,
                 ], 201);
-            }
-            else { 
+            } else {
                 $categorys = Category::all();
+
                 return response()->json([
                     'message' => 'Xem tất cả danh mục thành công !',
                     'category' => $categorys,
                 ], 201);
             }
         } catch (Exception $e) {
-            return response()->json(['message' =>  $e->getMessage()], 400);
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
-    
 
-    public function details(Request $request, $id){
+    public function details(Request $request, $id)
+    {
         try {
-            $category = Category::find($id); 
+            $category = Category::find($id);
             if ($category) {
                 return response()->json([
                     'message' => 'Lấy danh mục chi tiết thành công !',
-                    'category' => $category
+                    'category' => $category,
                 ], 201);
             } else {
                 return response()->json([
@@ -136,7 +138,7 @@ class CategoryController extends Controller
                 ], 404);
             }
         } catch (Exception $e) {
-            return response()->json(['message' =>  $e->getMessage()], 400);
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 }

@@ -4,49 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Enums\UserEnum;
 use App\Http\Requests\RequestCreateInforHospital;
-use App\Http\Requests\RequestChangePassword;
-use App\Http\Requests\RequestCreateInforUser;
 use App\Http\Requests\RequestCreateNewDoctor;
-use App\Http\Requests\RequestCreatePassword;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\File;
-use SebastianBergmann\Environment\Console;
-use Exception;
-use Mail;        
-use Illuminate\Support\Facades\DB;
-use App\Mail\SendPassword;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-use Faker\Factory ;
-use GuzzleHttp\Client;
-
-use App\Http\Requests\RequestCreateUser;
-use App\Http\Requests\RequestLogin;
 use App\Http\Requests\RequestUpdateHospital;
-use App\Http\Requests\RequestUpdateInfor;
-use App\Http\Requests\RequestUpdateUser;
-use App\Jobs\SendForgotPasswordEmail;
 use App\Jobs\SendMailNotify;
 use App\Jobs\SendVerifyEmail;
 use App\Models\InforDoctor;
 use App\Models\InforHospital;
-use App\Models\InforUser;
-use App\Models\PasswordReset;
-use App\Rules\ReCaptcha;
-use App\Services\UserService;
+use App\Models\User;
 use Database\Factories\FakeImageFactory;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
-use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Facades\Log;
+use Exception;
+use Faker\Factory;
+use GuzzleHttp\Client;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class InforHospitalController extends Controller
 {
-
     public function refresh()
     {
         return $this->respondWithToken(auth('user_api')->refresh());
@@ -57,18 +34,20 @@ class InforHospitalController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->guard('user_api')->factory()->getTTL() * 60
+            'expires_in' => auth()->guard('user_api')->factory()->getTTL() * 60,
         ]);
     }
 
-    public function saveAvatar(Request $request){
+    public function saveAvatar(Request $request)
+    {
         // $pathToFile = $request->file('avatar')->store('image/avatars','public');
         if ($request->hasFile('avatar')) {
             $image = $request->file('avatar');
-            $filename =  pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME) . '_hospital_' . time() . '.' . $image->getClientOriginalExtension();
+            $filename = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME) . '_hospital_' . time() . '.' . $image->getClientOriginalExtension();
             $image->storeAs('public/image/avatars/hospitals/', $filename);
+
             return 'storage/image/avatars/hospitals/' . $filename;
-            // public/image/avatars/users : giả sử folder này chưa có thì nó tự động tạo folder này luôn . Mình không cần tự tạo . 
+            // public/image/avatars/users : giả sử folder này chưa có thì nó tự động tạo folder này luôn . Mình không cần tự tạo .
         }
     }
 
@@ -76,42 +55,42 @@ class InforHospitalController extends Controller
     {
         try {
             $userEmail = User::where('email', $request->email)->where('role', 'hospital')->first();
-            if($userEmail){
+            if ($userEmail) {
                 return response()->json(['message' => 'Tài khoản đã tồn tại !'], 400);
-            }
-            else {
+            } else {
                 $avatar = $this->saveAvatar($request);
                 $user = User::create(array_merge(
                     $request->all(),
-                    ['password' => Hash::make($request->password), 'is_accept'=> 0, 'role'=> 'hospital', 'avatar' => $avatar]
+                    ['password' => Hash::make($request->password), 'is_accept' => 0, 'role' => 'hospital', 'avatar' => $avatar]
                 ));
-    
+
                 $request->merge([
                     'infrastructure' => json_encode($request->infrastructure),
-                    'location' => json_encode($request->location)
+                    'location' => json_encode($request->location),
                 ]);
-    
+
                 $inforUser = InforHospital::create(array_merge(
                     $request->all(),
                     ['id_hospital' => $user->id]
                 ));
-    
-                // verify email 
+
+                // verify email
                 $token = Str::random(32);
-                $url =  UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
+                $url = UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
                 Queue::push(new SendVerifyEmail($user->email, $url));
                 $user->update(['token_verify_email' => $token]);
-                // verify email 
-    
+                // verify email
+
                 $inforUser->infrastructure = json_decode($inforUser->infrastructure);
                 $inforUser->location = json_decode($inforUser->location);
+
                 return response()->json([
                     'message' => 'Đăng kí tài khoản thành công !',
                     'hospital' => array_merge($user->toArray(), $inforUser->toArray()),
                 ], 201);
             }
         } catch (Exception $e) {
-            return response()->json(['message' =>  $e->getMessage()], 400);
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 
@@ -120,14 +99,15 @@ class InforHospitalController extends Controller
         try {
             $user = User::find(auth('user_api')->user()->id);
             $inforUser = InforHospital::where('id_hospital', $user->id)->first();
-    
+
             $inforUser->infrastructure = json_decode($inforUser->infrastructure);
             $inforUser->location = json_decode($inforUser->location);
+
             return response()->json([
                 'hospital' => array_merge($user->toArray(), $inforUser->toArray()),
             ]);
         } catch (Exception $e) {
-            return response()->json(['message' =>  $e->getMessage()], 400);
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 
@@ -136,30 +116,30 @@ class InforHospitalController extends Controller
         try {
             $user = User::find(auth('user_api')->user()->id);
             $oldEmail = $user->email;
-            
+
             $request->merge([
                 'infrastructure' => json_encode($request->infrastructure),
-                'location' => json_encode($request->location)
+                'location' => json_encode($request->location),
             ]);
-    
-            if($request->hasFile('avatar')) {
+
+            if ($request->hasFile('avatar')) {
                 if ($user->avatar) {
                     File::delete($user->avatar);
                 }
                 $avatar = $this->saveAvatar($request);
-                $user->update(array_merge($request->all(),['avatar' => $avatar]));
+                $user->update(array_merge($request->all(), ['avatar' => $avatar]));
             } else {
                 $user->update($request->all());
             }
-            
+
             $inforHospital = InforHospital::where('id_hospital', $user->id)->first();
             $inforHospital->update($request->all());
             $message = 'Hospital successfully updated';
-    
+
             // sendmail verify
-            if($oldEmail != $request->email) {
+            if ($oldEmail != $request->email) {
                 $token = Str::random(32);
-                $url =  UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
+                $url = UserEnum::DOMAIN_PATH . 'verify-email/' . $token;
                 Queue::push(new SendVerifyEmail($user->email, $url));
                 $new_email = $user->email;
                 $content = 'Email tài khoản của bạn đã được thay đổi thành ' . $new_email . ' Nếu bạn không phải là người thực hiện thay đổi này , hãy liên hệ với quản trị viên của hệ thống để được hỗ trợ ! ';
@@ -169,17 +149,18 @@ class InforHospitalController extends Controller
                     'email_verified_at' => null,
                 ]);
                 $message = 'Cập nhật thông tin bệnh viện thành công . Một mail xác nhận đã được gửi đến cho bạn , hãy kiểm tra và xác nhận nó !';
-            } 
+            }
             // sendmail verify
-    
+
             $inforHospital->infrastructure = json_decode($inforHospital->infrastructure);
             $inforHospital->location = json_decode($inforHospital->location);
+
             return response()->json([
                 'message' => $message,
                 'hospital' => array_merge($user->toArray(), $inforHospital->toArray()),
             ], 201);
         } catch (Exception $e) {
-            return response()->json(['message' =>  $e->getMessage()], 400);
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 
@@ -188,7 +169,7 @@ class InforHospitalController extends Controller
         try {
             $hospital = User::find(auth('user_api')->user()->id);
 
-            // Cách 1 dùng Factory 
+            // Cách 1 dùng Factory
             // $fakeImageFactory = FakeImageFactory::new();
             // $avatar = $fakeImageFactory->createAvatarDoctor();
             // while (!$avatar) {
@@ -202,7 +183,7 @@ class InforHospitalController extends Controller
                 if (!File::exists($pathFolder)) {
                     File::makeDirectory($pathFolder, 0755, true);
                 }
-                $client = new Client();
+                $client = new Client;
                 $response = $client->get('https://picsum.photos/200/200');
                 $imageContent = $response->getBody()->getContents();
                 $pathFolder = 'storage/image/avatars/doctors/';
@@ -228,15 +209,16 @@ class InforHospitalController extends Controller
                 'id_department' => $request->id_department,
                 'id_hospital' => $hospital->id,
                 'is_confirm' => true,
-                'province_code' => $request->province_code
+                'province_code' => $request->province_code,
             ]);
             $content = 'Dưới đây là thông tin tài khoản của bạn , hãy sử dụng nó để đăng nhập vào hệ thống , sau đó hãy tiến hành đổi mật khẩu để đảm bảo tính bảo mật cho tài khoản . <br> email: ' . $doctor->email . ' <br> password: ' . $new_password;
             Queue::push(new SendMailNotify($doctor->email, $content));
+
             return response()->json([
-                'message' => "Thêm tài khoản bác sĩ thành công !",
-            ],200);
+                'message' => 'Thêm tài khoản bác sĩ thành công !',
+            ], 200);
         } catch (Exception $e) {
-            return response()->json(['message' =>  $e->getMessage()], 400);
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 }

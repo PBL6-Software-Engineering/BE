@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class TimeWork extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'id',
         'id_hospital',
@@ -16,7 +17,8 @@ class TimeWork extends Model
         'note',
     ];
 
-    public function inforHospital() {
+    public function inforHospital()
+    {
         return $this->belongsTo(InforHospital::class);
     }
 }

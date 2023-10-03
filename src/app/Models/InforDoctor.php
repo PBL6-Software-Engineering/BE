@@ -4,11 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class InforDoctor extends Model
 {
@@ -42,16 +37,18 @@ class InforDoctor extends Model
         return $this->hasMany(Article::class);
     }
 
-    public function department() {
+    public function department()
+    {
         return $this->belongsTo(Department::class);
     }
 
-    public function inforHospital() {
+    public function inforHospital()
+    {
         return $this->belongsTo(InforHospital::class);
     }
 
-    public function user() {
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
-
 }

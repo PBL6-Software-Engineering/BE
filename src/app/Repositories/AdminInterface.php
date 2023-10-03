@@ -7,21 +7,11 @@ namespace App\Repositories;
  */
 interface AdminInterface extends RepositoryInterface
 {
-    public function getAllAdmin();
+    public function getAdmin();
 
-    public function addAdmin($admin);
-
-    public function changeRole($filter);
-
-    public function getAdminById($id);
-
-    public function ajaxSearchInforAdmin($search, $role);
+    public function findAdminByEmail($email);
 
     public function findAdminById($id);
 
-    public function updateInfor($admin, $filter);
-
-    public function updatePassword($admin, $password);
-
-    public function findAdminbyEmail($email);
+    public function findAdminByTokenVerifyEmail($token);
 }

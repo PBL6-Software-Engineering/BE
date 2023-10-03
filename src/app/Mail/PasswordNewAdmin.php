@@ -11,6 +11,7 @@ class PasswordNewAdmin extends Mailable
     use Queueable, SerializesModels;
 
     public $email;
+
     public $new_password;
 
     public function __construct($email, $new_password)

@@ -8,16 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class VacationSchedule extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'id',
         'id_doctor',
         'date',
         'shift_off',
-        'is_accept'
+        'is_accept',
     ];
 
-    public function inforDoctor() {
+    public function inforDoctor()
+    {
         return $this->belongsTo(InforDoctor::class);
     }
-
 }

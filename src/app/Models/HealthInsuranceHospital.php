@@ -8,18 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 class HealthInsuranceHospital extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'id',
         'id_hospital',
         'id_health_insurance',
     ];
 
-    public function inforHospital() {
+    public function inforHospital()
+    {
         return $this->belongsTo(InforHospital::class);
     }
 
-    public function healthInsurances() {
+    public function healthInsurances()
+    {
         return $this->belongsTo(HealthInsurances::class);
     }
-
 }

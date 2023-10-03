@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\Rule;
 
 class RequestUpdateAdmin extends FormRequest
@@ -30,7 +30,7 @@ class RequestUpdateAdmin extends FormRequest
 
         return [
             'name' => 'required|string|between:2,100',
-            'email' => ['required','string','email','max:100',Rule::unique('admins')->ignore($userId)],
+            'email' => ['required', 'string', 'email', 'max:100', Rule::unique('admins')->ignore($userId)],
             'address' => 'required|string|min:1',
             'date_of_birth' => 'required|string|min:1',
             'phone' => 'required|min:9|numeric',
@@ -41,19 +41,17 @@ class RequestUpdateAdmin extends FormRequest
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
-            'success'   => false,
-            'message'   => 'Validation errors',
-            'data'      => $validator->errors()
+            'success' => false,
+            'message' => 'Validation errors',
+            'data' => $validator->errors(),
         ]));
-
     }
 
     public function messages()
     {
         return [
             'title.required' => 'Title is required',
-            'body.required' => 'Body is required'
+            'body.required' => 'Body is required',
         ];
     }
-    
 }

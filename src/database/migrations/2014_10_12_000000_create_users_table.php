@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->string('avatar')->nullable();
             $table->boolean('is_accept')->nullable();
-            $table->string('role'); 
+            $table->string('role');
             $table->string('token_verify_email')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();

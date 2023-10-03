@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Model;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
@@ -39,22 +38,25 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(WorkSchedule::class);
     }
 
-    public function inforUser() {
+    public function inforUser()
+    {
         return $this->hasOne(InforUser::class);
     }
 
-    public function inforDoctor() {
+    public function inforDoctor()
+    {
         return $this->hasOne(InforDoctor::class);
     }
 
-    public function inforHospital() {
+    public function inforHospital()
+    {
         return $this->hasOne(InforHospital::class);
     }
 
     protected $hidden = [
         'password',
         'remember_token',
-        'token_verify_email'
+        'token_verify_email',
     ];
 
     protected $casts = [
@@ -70,5 +72,4 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
-    
 }

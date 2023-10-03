@@ -13,6 +13,7 @@ use Illuminate\Routing\Controller as BaseController;
  *    title="APIs For Thrift Store",
  *    version="1.0.0",
  * ),
+ *
  *   @OA\SecurityScheme(
  *       securityScheme="bearerAuth",
  *       in="header",
@@ -22,7 +23,6 @@ use Illuminate\Routing\Controller as BaseController;
  *       bearerFormat="JWT",
  *    ),
  */
-
 class Controller extends BaseController
 {
     use AuthorizesRequests;

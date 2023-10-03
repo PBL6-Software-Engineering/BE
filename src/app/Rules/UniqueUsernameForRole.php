@@ -9,7 +9,8 @@ class UniqueUsernameForRole implements Rule
 {
     public $role;
 
-    public function __construct($role){
+    public function __construct($role)
+    {
         $this->role = $role;
     }
 

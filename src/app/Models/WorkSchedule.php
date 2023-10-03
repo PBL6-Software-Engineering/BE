@@ -8,25 +8,28 @@ use Illuminate\Database\Eloquent\Model;
 class WorkSchedule extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'id',
         'id_doctor',
         'id_user',
         'id_service',
         'time',
-        'content'
+        'content',
     ];
 
-    public function inforUser() {
+    public function inforUser()
+    {
         return $this->belongsTo(InforUser::class);
     }
 
-    public function rating() {
+    public function rating()
+    {
         return $this->hasOne(Rating::class);
     }
 
-    public function inforDoctor() {
+    public function inforDoctor()
+    {
         return $this->belongsTo(InforDoctor::class);
     }
-
 }

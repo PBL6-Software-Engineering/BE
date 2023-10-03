@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class HospitalService extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'id',
         'id_hospital_department',
@@ -17,8 +18,8 @@ class HospitalService extends Model
         'infor',
     ];
 
-    public function hospitalDepartment() {
+    public function hospitalDepartment()
+    {
         return $this->belongsTo(HospitalDepartment::class);
     }
-    
 }

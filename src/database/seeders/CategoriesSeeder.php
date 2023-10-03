@@ -4,11 +4,10 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use Database\Factories\FakeImageFactory;
+use GuzzleHttp\Client;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use GuzzleHttp\Client;
 
 class CategoriesSeeder extends Seeder
 {
@@ -94,11 +93,11 @@ class CategoriesSeeder extends Seeder
             'Sức khỏe nam giới',
         ];
 
-        // Cách 1 : Chậm 
+        // Cách 1 : Chậm
         // $thumbnails = [];
 
-        // lệnh tạo ảnh đôi lúc có cái ảnh tạo được , có cái tạo không được nên phải dùng lệnh while 
-        // để đến khi nào có ảnh mới thôi 
+        // lệnh tạo ảnh đôi lúc có cái ảnh tạo được , có cái tạo không được nên phải dùng lệnh while
+        // để đến khi nào có ảnh mới thôi
 
         // foreach ($categoryNames as $index => $categoryName) {
         //     $thumbnail = FakeImageFactory::new()->createThumbnailCategory();
@@ -107,7 +106,7 @@ class CategoriesSeeder extends Seeder
         //     }
         //     $thumbnails[$index] = 'storage/image/thumbnail/categories/' . $thumbnail;
         // }
-        
+
         // foreach ($categoryNames as $index => $categoryName) {
         //     Category::create([
         //         'name' => $categoryName,
@@ -117,14 +116,14 @@ class CategoriesSeeder extends Seeder
         //     ]);
         // }
 
-        // Cách 2 : Nhanh hơn rất nhiều 
+        // Cách 2 : Nhanh hơn rất nhiều
         foreach ($categoryNames as $index => $categoryName) {
             try {
                 $pathFolder = 'storage/app/public/image/thumbnail/categories/';
                 if (!File::exists($pathFolder)) {
                     File::makeDirectory($pathFolder, 0755, true);
                 }
-                $client = new Client();
+                $client = new Client;
                 while (true) {
                     $response = $client->get('https://picsum.photos/200/200');
                     $imageContent = $response->getBody()->getContents();
@@ -140,8 +139,8 @@ class CategoriesSeeder extends Seeder
                         break;
                     }
                 }
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
         }
     }
 }
-

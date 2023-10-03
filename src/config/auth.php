@@ -41,13 +41,13 @@ return [
             'provider' => 'users',
         ],
         'user_api' => [
-            'driver'   => 'jwt',
+            'driver' => 'jwt',
             'provider' => 'users',
         ],
         'admin_api' => [
-            'driver'   => 'jwt',
+            'driver' => 'jwt',
             'provider' => 'admins',
-        ]
+        ],
     ],
 
     'providers' => [
@@ -58,7 +58,7 @@ return [
         'admins' => [
             'driver' => 'eloquent',
             'model' => App\Models\Admin::class,
-        ]
+        ],
     ],
 
     /*

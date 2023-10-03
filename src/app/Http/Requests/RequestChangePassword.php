@@ -2,10 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Validation\Rule;
 
 class RequestChangePassword extends FormRequest
 {
@@ -35,18 +34,17 @@ class RequestChangePassword extends FormRequest
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
-            'success'   => false,
-            'message'   => 'Validation errors',
-            'data'      => $validator->errors()
+            'success' => false,
+            'message' => 'Validation errors',
+            'data' => $validator->errors(),
         ]));
-
     }
 
     public function messages()
     {
         return [
             'title.required' => 'Title is required',
-            'body.required' => 'Body is required'
+            'body.required' => 'Body is required',
         ];
     }
 }

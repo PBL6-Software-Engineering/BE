@@ -4,9 +4,8 @@ namespace Database\Factories;
 
 use App\Models\Admin;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -23,12 +22,12 @@ class AdminFactory extends Factory
     public function definition()
     {
         $pathFolder = 'public/storage/image/avatars/admins';
-        if (!File::exists($pathFolder)) { // chưa có folder thì tạo 
+        if (!File::exists($pathFolder)) { // chưa có folder thì tạo
             File::makeDirectory($pathFolder, 0755, true);
         }
 
         $nameImage = $this->faker->image($pathFolder, 200, 200, null, false);
-        while(!$nameImage){ // đảm bảo chắc chắc chắn phải có được ảnh 
+        while (!$nameImage) { // đảm bảo chắc chắc chắn phải có được ảnh
             $nameImage = $this->faker->image($pathFolder, 200, 200, null, false);
         }
 

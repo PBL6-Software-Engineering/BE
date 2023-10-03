@@ -197,7 +197,7 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         'Debugbar' => Barryvdh\Debugbar\Facades\Debugbar::class,
-        'Toastr'  => Brian2694\Toastr\Facades\Toastr::class,
+        'Toastr' => Brian2694\Toastr\Facades\Toastr::class,
     ])->toArray(),
 
 ];

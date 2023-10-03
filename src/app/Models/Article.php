@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Article extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'id',
         'id_user',
@@ -19,11 +20,13 @@ class Article extends Model
         'is_show',
     ];
 
-    public function inforDoctor() {
+    public function inforDoctor()
+    {
         return $this->belongsTo(InforDoctor::class);
     }
 
-    public function inforHospital() {
+    public function inforHospital()
+    {
         return $this->belongsTo(InforHospital::class);
     }
 
@@ -31,5 +34,4 @@ class Article extends Model
     {
         return $this->belongsTo(Category::class);
     }
-
 }

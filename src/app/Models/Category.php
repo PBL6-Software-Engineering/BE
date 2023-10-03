@@ -8,16 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class Category extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'id',
         'name',
         'thumbnail',
-        'search_number'
+        'search_number',
     ];
 
     public function articles()
     {
         return $this->hasMany(Article::class);
     }
-
 }

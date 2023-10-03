@@ -4,11 +4,11 @@ namespace App\Rules;
 
 use App\Models\HospitalDepartment;
 use Illuminate\Contracts\Validation\Rule;
-use Illuminate\Support\Facades\DB;
 
 class UniqueHospitalDepartmentRule implements Rule
 {
     protected $id_department;
+
     protected $id_hospital;
 
     public function __construct($id_department, $id_hospital)

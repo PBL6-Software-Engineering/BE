@@ -2,11 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Validation\Rule;
 use Brian2694\Toastr\Facades\Toastr;
+use Illuminate\Foundation\Http\FormRequest;
 
 class RequestCreatePassword extends FormRequest
 {

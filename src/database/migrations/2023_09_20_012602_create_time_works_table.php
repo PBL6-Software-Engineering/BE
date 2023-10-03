@@ -24,6 +24,7 @@ return new class extends Migration
             $table->foreign('id_hospital')->references('id_hospital')->on('infor_hospitals')->onDelete('cascade');
         });
     }
+
     /**
      * Reverse the migrations.
      *

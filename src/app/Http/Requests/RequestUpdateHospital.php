@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\Rule;
 
 class RequestUpdateHospital extends FormRequest
@@ -30,32 +30,31 @@ class RequestUpdateHospital extends FormRequest
 
         return [
             'name' => 'required|string|between:2,100',
-            'email' => ['required','string','email','max:100',Rule::unique('users')->ignore($userId)],
-            'username' => ['required','string','max:100',Rule::unique('users')->ignore($userId)],
+            'email' => ['required', 'string', 'email', 'max:100', Rule::unique('users')->ignore($userId)],
+            'username' => ['required', 'string', 'max:100', Rule::unique('users')->ignore($userId)],
             'address' => 'required|string|min:1',
             'province_code' => 'required|integer',
             'phone' => 'required|min:9|numeric',
             'infrastructure' => 'required',
             'description' => 'required',
-            'location' => 'required'
+            'location' => 'required',
         ];
     }
 
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
-            'success'   => false,
-            'message'   => 'Validation errors',
-            'data'      => $validator->errors()
+            'success' => false,
+            'message' => 'Validation errors',
+            'data' => $validator->errors(),
         ]));
-
     }
 
     public function messages()
     {
         return [
             'title.required' => 'Title is required',
-            'body.required' => 'Body is required'
+            'body.required' => 'Body is required',
         ];
     }
 }

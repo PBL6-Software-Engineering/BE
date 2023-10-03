@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Notify extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'id',
         'id_user',
@@ -15,7 +16,8 @@ class Notify extends Model
         'content',
     ];
 
-    public function inforUser() {
+    public function inforUser()
+    {
         return $this->belongsTo(InforUser::class);
     }
 }
