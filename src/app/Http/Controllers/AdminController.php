@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\RequestChangePassword;
+use App\Http\Requests\RequestChangeRole;
 use App\Http\Requests\RequestCreateNewAdmin;
 use App\Http\Requests\RequestCreatePassword;
 use App\Http\Requests\RequestUpdateAdmin;
@@ -91,7 +92,7 @@ class AdminController extends Controller
         return $this->adminService->deleteAdmin($id);
     }
 
-    public function editRole(Request $request, $id)
+    public function editRole(RequestChangeRole $request, $id)
     {
         return $this->adminService->editRole($request, $id);
     }

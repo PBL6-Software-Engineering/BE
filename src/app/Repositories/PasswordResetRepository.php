@@ -36,4 +36,9 @@ class PasswordResetRepository extends BaseRepository implements PasswordResetInt
             throw $e;
         }
     }
+
+    public static function findByToken($token)
+    {
+        return (new self)->model->where('token', $token)->first();
+    }
 }

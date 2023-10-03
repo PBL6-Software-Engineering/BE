@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\UserEnum;
 use App\Http\Requests\RequestChangePassword;
+use App\Http\Requests\RequestChangeRole;
 use App\Http\Requests\RequestCreateNewAdmin;
 use App\Http\Requests\RequestCreatePassword;
 use App\Http\Requests\RequestUpdateAdmin;
@@ -12,7 +13,6 @@ use App\Jobs\SendMailNotify;
 use App\Jobs\SendPasswordNewAdmin;
 use App\Jobs\SendVerifyEmail;
 use App\Models\Admin;
-use App\Models\PasswordReset;
 use App\Models\User;
 use App\Repositories\AdminInterface;
 use App\Repositories\PasswordResetRepository;
@@ -20,6 +20,7 @@ use App\Repositories\UserRepository;
 use Brian2694\Toastr\Facades\Toastr;
 use Exception;
 use Faker\Factory;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -79,7 +80,9 @@ class AdminService
                     'message' => 'Mật khẩu của bạn không chính xác !',
                 ], 400);
             }
-            $admin->update(['password' => Hash::make($request->get('new_password'))]);
+
+            $data = ['password' => Hash::make($request->get('new_password'))];
+            $this->adminRepository->updateAdmin($admin->id, $data);
 
             return response()->json([
                 'message' => 'Thay đổi mật khẩu thành công !',
@@ -110,9 +113,10 @@ class AdminService
                     File::delete($admin->avatar);
                 }
                 $avatar = $this->saveAvatar($request);
-                $admin->update(array_merge($request->all(), ['avatar' => $avatar]));
+                $data = array_merge($request->all(), ['avatar' => $avatar]);
+                $admin = $this->adminRepository->updateAdmin($admin->id, $data);
             } else {
-                $admin->update($request->all());
+                $admin = $this->adminRepository->updateAdmin($admin->id, $request->all());
             }
             $message = 'Cập nhật thông tin tài khoản admin thành công !';
             // sendmail verify
@@ -122,17 +126,19 @@ class AdminService
                 Queue::push(new SendVerifyEmail($admin->email, $url));
                 $content = 'Tài khoản của bạn đã thay đổi email thành ' . $admin->email . '. Nếu bạn không làm điều này, hãy liên hệ với quản trị viên của hệ thống để được hỗ trợ . ';
                 Queue::push(new SendMailNotify($oldEmail, $content));
-                $admin->update([
+
+                $data = [
                     'token_verify_email' => $token,
                     'email_verified_at' => null,
-                ]);
+                ];
+                $admin = $this->adminRepository->updateAdmin($admin->id, $data);
                 $message = 'Cập nhật thông tin thành công . Một email xác nhận đã được gửi hãy kiểm tra mail và xác nhận nó !';
             }
             // sendmail verify
             return response()->json([
                 'message' => $message,
                 'admin' => $admin,
-            ], 201);
+            ], 200);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
@@ -143,10 +149,11 @@ class AdminService
     {
         $admin = $this->adminRepository->findAdminByTokenVerifyEmail($token);
         if ($admin) {
-            $admin->update([
+            $data = [
                 'email_verified_at' => now(),
                 'token_verify_email' => null,
-            ]);
+            ];
+            $admin = $this->adminRepository->updateAdmin($admin->id, $data);
             $status = true;
             Toastr::success('Email của bạn đã được xác nhận !');
         } else {
@@ -165,7 +172,7 @@ class AdminService
             return response()->json([
                 'message' => 'Lấy tất cả quản trị viên thành công !',
                 'admins' => $allAdmin,
-            ], 201);
+            ], 200);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
@@ -179,7 +186,7 @@ class AdminService
             return response()->json([
                 'message' => 'Lấy tất cả người dùng thành công !',
                 'users' => $allUser,
-            ], 201);
+            ], 200);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
@@ -213,10 +220,10 @@ class AdminService
     {
         try {
             $new_password = Hash::make($request->new_password);
-            $passwordReset = PasswordReset::where('token', $request->token)->first();
+            $passwordReset = PasswordResetRepository::findByToken($request->token);
             if ($passwordReset) { // user, doctor, hospital
                 if ($passwordReset->is_user == 1) {
-                    $user = User::where('email', $passwordReset->email)->first();
+                    $user = UserRepository::findUserByEmail($passwordReset->email);
                     if ($user) {
                         $user->update(['password' => $new_password]);
                         $passwordReset->delete();
@@ -229,7 +236,7 @@ class AdminService
 
                     return redirect()->route('form_reset_password');
                 } else { // admin, superamdin, manager
-                    $admin = Admin::where('email', $passwordReset->email)->first();
+                    $admin = $this->adminRepository->findAdminByEmail($passwordReset->email);
                     if ($admin) {
                         $admin->update(['password' => $new_password]);
                         $passwordReset->delete();
@@ -254,26 +261,54 @@ class AdminService
     public function addAdmin(RequestCreateNewAdmin $request)
     {
         try {
-            $faker = Factory::create();
-            $fakeImageUrl = $faker->imageUrl(200, 200, 'admins');
-            $imageContent = file_get_contents($fakeImageUrl);
-            $imageName = 'avatar_admin_' . time() . '.jpg';
-            Storage::put('public/image/avatars/admins/' . $imageName, $imageContent);
+            // Cách 1
+            // $faker = Factory::create();
+            // $fakeImageUrl = $faker->imageUrl(200, 200, 'admins');
+            // $imageContent = file_get_contents($fakeImageUrl);
+            // $imageName = 'avatar_admin_' . time() . '.jpg';
+            // Storage::put('public/image/avatars/admins/' . $imageName, $imageContent);
+            // $avatar = 'storage/image/avatars/admins/' . $imageName;
+
+            // Cách 2
+            $avatar = null;
+            $pathFolder = 'storage/image/avatars/admins';
+            if (!File::exists($pathFolder)) {
+                File::makeDirectory($pathFolder, 0755, true);
+            }
+            $client = new Client;
+            while (true) {
+                try {
+                    $response = $client->get('https://picsum.photos/200/200');
+                    $imageContent = $response->getBody()->getContents();
+                    $pathFolder = 'storage/image/avatars/admins/';
+                    $nameImage = uniqid() . '.jpg';
+                    $avatar = $pathFolder . $nameImage;
+                    file_put_contents($avatar, $imageContent);
+                    if (file_exists($avatar)) {
+                        break;
+                    }
+                } catch (Exception $e) {
+                }
+            }
 
             $new_password = Str::random(10);
-
-            Admin::create([
+            $data = [
                 'email' => $request->email,
                 'name' => $request->name,
                 'password' => Hash::make($new_password),
                 'role' => 'admin',
-                'avatar' => 'storage/image/avatars/admins/' . $imageName,
-            ]);
+                'avatar' => $avatar,
+                'token_verify_email' => null,
+                'email_verified_at' => now(),
+            ];
+
+            $newAdmin = $this->adminRepository->createAdmin($data);
             Queue::push(new SendPasswordNewAdmin($request->email, $new_password));
 
             return response()->json([
                 'message' => 'Thêm quản trị viên thành công !',
-            ], 200);
+                'new_admin' => $newAdmin,
+            ], 201);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
@@ -288,7 +323,7 @@ class AdminService
                     'message' => 'Bạn không có quyền, chỉ có quản trị viên cấp cao mới có quyền xóa !',
                 ], 400);
             } else {
-                $admin = Admin::where('id', $id)->first();
+                $admin = $this->adminRepository->findAdminById($id);
                 if ($admin->avatar) {
                     File::delete($admin->avatar);
                 }
@@ -303,24 +338,36 @@ class AdminService
         }
     }
 
-    public function editRole(Request $request, $id)
+    public function editRole(RequestChangeRole $request, $id)
     {
         try {
-            $role = auth('admin_api')->user()->role;
-            if ($role == 0) {
+            $adminLogin = auth('admin_api')->user();
+            $admin = $this->adminRepository->findAdminById($id);
+            if ($admin->role == 'manager') {
                 return response()->json([
-                    'message' => 'Bạn không có quyền , chỉ có quản trị viên cấp cao mới có quyền thay đổi role !',
+                    'message' => 'Không được phép chỉnh sửa quyền của giám đốc !',
                 ], 400);
-            } else {
-                $admin = Admin::where('id', $id)->first();
-                $admin->update([
-                    'role' => $request->role,
-                ]);
-
+            }
+            if ($request->role == $admin->role) {
                 return response()->json([
-                    'message' => 'Thay đổi role cho quản trị viên thành công !',
+                    'message' => 'Thay đổi role thành công !',
+                    'admin' => $admin,
                 ], 200);
             }
+            if ($adminLogin->role == 'superadmin') {
+                if ($request->role == 'admin') {
+                    return response()->json([
+                        'message' => 'Bạn không có quyền , chỉ có giám đốc mới có quyền thay đổi role từ superadmin xuống admin !',
+                    ], 400);
+                }
+            }
+            $data = ['role' => $request->role];
+            $admin = $this->adminRepository->updateAdmin($admin->id, $data);
+
+            return response()->json([
+                'message' => 'Thay đổi role cho quản trị viên thành công !',
+                'admin' => $admin,
+            ], 200);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
@@ -329,10 +376,9 @@ class AdminService
     public function changeAccept(Request $request, $id)
     {
         try {
-            $user = User::where('id', $id)->first();
-            $user->update([
-                'is_accept' => $request->is_accept,
-            ]);
+            $user = UserRepository::findUserById($id);
+            $data = ['is_accept' => $request->is_accept];
+            $user = UserRepository::updateUser($user->id, $data);
 
             return response()->json([
                 'message' => 'Thay đổi trạng thái của người dùng thành công !',

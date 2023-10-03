@@ -14,4 +14,8 @@ interface AdminInterface extends RepositoryInterface
     public function findAdminById($id);
 
     public function findAdminByTokenVerifyEmail($token);
+
+    public function createAdmin($data);
+
+    public function updateAdmin($id, $data);
 }
