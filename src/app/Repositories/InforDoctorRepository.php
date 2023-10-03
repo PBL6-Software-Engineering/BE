@@ -21,12 +21,13 @@ class InforDoctorRepository extends BaseRepository implements InforDoctorInterfa
 
     public static function getInforDoctor($filter)
     {
+        $filter = (object) $filter;
         $user = (new self)->model
             ->when(!empty($filter->id), function ($q) use ($filter) {
-                $q->where('id', '=', "$filter->id");
+                $q->where('id', $filter->id);
             })
             ->when(!empty($filter->id_doctor), function ($q) use ($filter) {
-                $q->where('id_doctor', '=', "$filter->id_doctor");
+                $q->where('id_doctor', $filter->id_doctor);
             });
 
         return $user;

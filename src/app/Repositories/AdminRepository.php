@@ -3,8 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\Admin;
-use Exception;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class AdminRepository extends BaseRepository implements AdminInterface
 {
@@ -41,7 +41,7 @@ class AdminRepository extends BaseRepository implements AdminInterface
             DB::commit();
 
             return $newAdmin;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             DB::rollback();
             throw $e;
         }
@@ -56,7 +56,7 @@ class AdminRepository extends BaseRepository implements AdminInterface
             DB::commit();
 
             return $admin;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             DB::rollback();
             throw $e;
         }

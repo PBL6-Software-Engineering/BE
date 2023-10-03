@@ -3,8 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\PasswordReset;
-use Exception;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 /**
  * Class ExampleRepository.
@@ -31,7 +31,7 @@ class PasswordResetRepository extends BaseRepository implements PasswordResetInt
                 'token' => $token,
             ]);
             DB::commit();
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             DB::rollback();
             throw $e;
         }
