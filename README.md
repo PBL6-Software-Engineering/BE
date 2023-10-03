@@ -40,6 +40,7 @@ $ docker-compose run --rm artisan db:seed --class=AdminsSeeder
 $ docker-compose run --rm artisan db:seed --class=CategoriesSeeder
 $ docker-compose run --rm artisan db:seed --class=DepartmentsSeeder
 $ docker-compose run --rm artisan db:seed --class=ProvincesSeeder
+$ docker-compose run --rm artisan queue:work 
 ```
 
 http://localhost:99
