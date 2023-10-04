@@ -48,4 +48,19 @@ class InforDoctorRepository extends BaseRepository implements InforDoctorInterfa
             throw $e;
         }
     }
+
+    public static function updateInforDoctor($id, $data)
+    {
+        DB::beginTransaction();
+        try {
+            $inforDoctor = (new self)->model->find($id);
+            $inforDoctor->update($data);
+            DB::commit();
+
+            return $inforDoctor;
+        } catch (Throwable $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
 }
