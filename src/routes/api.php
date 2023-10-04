@@ -124,7 +124,7 @@ Route::prefix('article')->controller(ArticleController::class)->group(function (
     });
 
     Route::get('/', 'all');
-    Route::get('/user/{id}', 'articleOfDoctor');
+    Route::get('/user/{id}', 'articleOfDoctorHospital');
     Route::get('/admin', 'articleOfAdmin');
     Route::get('/detail/{id}', 'details');
 });

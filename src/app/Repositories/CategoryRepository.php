@@ -55,6 +55,7 @@ class CategoryRepository extends BaseRepository implements CategoryInterface
 
     public static function searchCategory($filter)
     {
+        $filter = (object) $filter;
         $data = (new self)->model->orderBy($filter->orderBy, $filter->orderDirection)
             ->where('name', 'LIKE', '%' . $filter->search . '%');
 
