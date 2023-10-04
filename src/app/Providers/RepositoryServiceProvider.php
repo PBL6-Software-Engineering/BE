@@ -4,8 +4,16 @@ namespace App\Providers;
 
 use App\Repositories\AdminInterface;
 use App\Repositories\AdminRepository;
+use App\Repositories\CategoryInterface;
+use App\Repositories\CategoryRepository;
+use App\Repositories\DepartmentInterface;
+use App\Repositories\DepartmentRepository;
 use App\Repositories\ExampleInterface;
 use App\Repositories\ExampleRepository;
+use App\Repositories\HospitalDepartmentInterface;
+use App\Repositories\HospitalDepartmentRepository;
+use App\Repositories\HospitalServiceInterface;
+use App\Repositories\HospitalServiceRepository;
 use App\Repositories\InforDoctorInterface;
 use App\Repositories\InforDoctorRepository;
 use App\Repositories\InforHospitalInterface;
@@ -32,6 +40,10 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(InforHospitalInterface::class, InforHospitalRepository::class);
         $this->app->bind(InforDoctorInterface::class, InforDoctorRepository::class);
         $this->app->bind(PasswordResetInterface::class, PasswordResetRepository::class);
+        $this->app->bind(CategoryInterface::class, CategoryRepository::class);
+        $this->app->bind(DepartmentInterface::class, DepartmentRepository::class);
+        $this->app->bind(HospitalServiceInterface::class, HospitalServiceRepository::class);
+        $this->app->bind(HospitalDepartmentInterface::class, HospitalDepartmentRepository::class);
     }
 
     /**
