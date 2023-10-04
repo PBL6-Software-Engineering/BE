@@ -3,6 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\InforHospital;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 /**
  * Class ExampleRepository.
@@ -31,5 +33,34 @@ class InforHospitalRepository extends BaseRepository implements InforHospitalInt
             });
 
         return $user;
+    }
+
+    public static function createHospital($data)
+    {
+        DB::beginTransaction();
+        try {
+            $newHospital = (new self)->model->create($data);
+            DB::commit();
+
+            return $newHospital;
+        } catch (Throwable $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+
+    public static function updateInforHospital($id, $data)
+    {
+        DB::beginTransaction();
+        try {
+            $inforHospital = (new self)->model->find($id);
+            $inforHospital->update($data);
+            DB::commit();
+
+            return $inforHospital;
+        } catch (Throwable $e) {
+            DB::rollback();
+            throw $e;
+        }
     }
 }

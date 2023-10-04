@@ -8,4 +8,6 @@ namespace App\Repositories;
 interface InforDoctorInterface extends RepositoryInterface
 {
     public static function getInforDoctor($filter);
+
+    public static function createDoctor($data);
 }

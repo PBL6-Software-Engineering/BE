@@ -3,6 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\InforDoctor;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 /**
  * Class ExampleRepository.
@@ -31,5 +33,19 @@ class InforDoctorRepository extends BaseRepository implements InforDoctorInterfa
             });
 
         return $user;
+    }
+
+    public static function createDoctor($data)
+    {
+        DB::beginTransaction();
+        try {
+            $newDoctor = (new self)->model->create($data);
+            DB::commit();
+
+            return $newDoctor;
+        } catch (Throwable $e) {
+            DB::rollback();
+            throw $e;
+        }
     }
 }
