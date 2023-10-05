@@ -4,11 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RequestCreateHospitalDepartment;
 use App\Http\Requests\RequestUpdateHospitalDepartment;
-use App\Models\Department;
-use App\Models\HospitalDepartment;
-use App\Models\HospitalService;
 use App\Services\HospitalDepartmentService;
-use Throwable;
 
 class HospitalDepartmentController extends Controller
 {

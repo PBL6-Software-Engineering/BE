@@ -27,6 +27,23 @@ class InforDoctorService
         $this->inforDoctorRepository = $inforDoctorRepository;
     }
 
+    public function responseOK($status = 200, $data = null, $message = '')
+    {
+        return response()->json([
+            'message' => $message,
+            'data' => $data,
+            'status' => $status,
+        ], $status);
+    }
+
+    public function responseError($status = 400, $message = '')
+    {
+        return response()->json([
+            'message' => $message,
+            'status' => $status,
+        ], $status);
+    }
+
     public function saveAvatar(Request $request)
     {
         if ($request->hasFile('avatar')) {
@@ -44,11 +61,11 @@ class InforDoctorService
             $user = UserRepository::findUserById(auth('user_api')->user()->id);
             $inforUser = InforDoctorRepository::getInforDoctor(['id_doctor' => $user->id])->first();
 
-            return response()->json([
-                'doctor' => array_merge($user->toArray(), $inforUser->toArray()),
-            ]);
+            $doctor = array_merge($user->toArray(), $inforUser->toArray());
+
+            return $this->responseOK(200, $doctor, 'Xem thông tin cá nhân thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -94,12 +111,11 @@ class InforDoctorService
             }
             // sendmail verify
 
-            return response()->json([
-                'message' => $message,
-                'hospital' => array_merge($user->toArray(), $inforDoctor->toArray()),
-            ], 201);
+            $doctor = array_merge($user->toArray(), $inforDoctor->toArray());
+
+            return $this->responseOK(200, $doctor, $message);
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 }

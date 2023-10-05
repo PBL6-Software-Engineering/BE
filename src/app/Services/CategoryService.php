@@ -22,6 +22,23 @@ class CategoryService
         $this->categoryRepository = $categoryRepository;
     }
 
+    public function responseOK($status = 200, $data = null, $message = '')
+    {
+        return response()->json([
+            'message' => $message,
+            'data' => $data,
+            'status' => $status,
+        ], $status);
+    }
+
+    public function responseError($status = 400, $message = '')
+    {
+        return response()->json([
+            'message' => $message,
+            'status' => $status,
+        ], $status);
+    }
+
     public function saveAvatar(Request $request)
     {
         if ($request->hasFile('thumbnail')) {
@@ -43,12 +60,9 @@ class CategoryService
             ];
             $category = CategoryRepository::updateCategory($category->id, $data);
 
-            return response()->json([
-                'message' => 'Thêm danh mục thành công !',
-                'category' => $category,
-            ], 201);
+            return $this->responseOK(200, $category, 'Thêm danh mục thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -67,12 +81,9 @@ class CategoryService
                 $category = CategoryRepository::updateCategory($category->id, $request->all());
             }
 
-            return response()->json([
-                'message' => 'Cập nhật thông tin danh mục thành công !',
-                'category' => $category,
-            ], 201);
+            return $this->responseOK(200, $category, 'Cập nhật thông tin danh mục thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -89,16 +100,12 @@ class CategoryService
                 }
                 $category->delete();
 
-                return response()->json([
-                    'message' => 'Xóa danh mục thành công !',
-                ], 201);
+                return $this->responseOK(200, null, 'Xóa danh mục thành công !');
             } else {
-                return response()->json([
-                    'message' => 'Không tìm thấy danh mục !',
-                ], 404);
+                return $this->responseError(400, 'Không tìm thấy danh mục !');
             }
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -127,20 +134,14 @@ class CategoryService
                 ];
                 $categorys = CategoryRepository::searchCategory($filter)->paginate(15);
 
-                return response()->json([
-                    'message' => 'Xem tất cả danh mục thành công !',
-                    'category' => $categorys,
-                ], 201);
+                return $this->responseOK(200, $categorys, 'Xem tất cả danh mục thành công !');
             } else {
                 $categorys = CategoryRepository::getCategory([])->get();
 
-                return response()->json([
-                    'message' => 'Xem tất cả danh mục thành công !',
-                    'category' => $categorys,
-                ], 201);
+                return $this->responseOK(200, $categorys, 'Xem tất cả danh mục thành công !');
             }
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -149,17 +150,12 @@ class CategoryService
         try {
             $category = CategoryRepository::getCategory(['id' => $id])->first();
             if ($category) {
-                return response()->json([
-                    'message' => 'Xem danh mục chi tiết thành công !',
-                    'category' => $category,
-                ], 201);
+                return $this->responseOK(200, $category, 'Xem danh mục chi tiết thành công !');
             } else {
-                return response()->json([
-                    'message' => 'Không tìm thấy danh mục !',
-                ], 404);
+                return $this->responseError(400, 'Không tìm thấy danh mục !');
             }
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 }

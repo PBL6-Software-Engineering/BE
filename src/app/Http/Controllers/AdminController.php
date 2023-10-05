@@ -36,9 +36,10 @@ class AdminController extends Controller
     public function logout()
     {
         auth('admin_api')->logout();
+
         return response()->json([
             'message' => 'Đăng xuất thành công !',
-            'status' => 200
+            'status' => 200,
         ], 200);
     }
 

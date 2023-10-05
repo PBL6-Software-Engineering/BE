@@ -21,6 +21,23 @@ class DepartmentService
         $this->departmentRepository = $departmentRepository;
     }
 
+    public function responseOK($status = 200, $data = null, $message = '')
+    {
+        return response()->json([
+            'message' => $message,
+            'data' => $data,
+            'status' => $status,
+        ], $status);
+    }
+
+    public function responseError($status = 400, $message = '')
+    {
+        return response()->json([
+            'message' => $message,
+            'status' => $status,
+        ], $status);
+    }
+
     public function saveAvatar(Request $request)
     {
         if ($request->hasFile('thumbnail')) {
@@ -41,12 +58,9 @@ class DepartmentService
             $data = ['thumbnail' => $thumbnail];
             $department = $this->departmentRepository->updateDepartment($department, $data);
 
-            return response()->json([
-                'message' => 'Thêm khoa thành công !',
-                'department' => $department,
-            ], 201);
+            return $this->responseOK(200, $department, 'Thêm khoa thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -66,17 +80,12 @@ class DepartmentService
                     $department = $this->departmentRepository->updateDepartment($department, $request->all());
                 }
 
-                return response()->json([
-                    'message' => 'Cập nhật thông tin khoa thành công !',
-                    'department' => $department,
-                ], 201);
+                return $this->responseOK(200, $department, 'Cập nhật thông tin khoa thành công !');
             } else {
-                return response()->json([
-                    'message' => 'Không tìm thấy khoa !',
-                ], 404);
+                return $this->responseError(400, 'Không tìm thấy khoa !');
             }
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -89,14 +98,10 @@ class DepartmentService
                 $doctors = InforDoctorRepository::getInforDoctor(['id_department' => $id])->count();
                 $hospitalDepartment = HospitalDepartmentRepository::getHospitalDepartment(['id_department' => $id])->count();
                 if ($doctors > 0) {
-                    return response()->json([
-                        'message' => 'Không được xóa . Đang có bác sĩ thuộc khoa này !',
-                    ], 400);
+                    return $this->responseError(400, 'Không được xóa . Đang có bác sĩ thuộc khoa này !');
                 }
                 if ($hospitalDepartment > 0) {
-                    return response()->json([
-                        'message' => 'Không được xóa . Đang có bệnh viện chứa khoa này !',
-                    ], 400);
+                    return $this->responseError(400, 'Không được xóa . Đang có bệnh viện chứa khoa này !');
                 }
                 // InforDoctorRepository::updateResult($doctors, ['id_department' => null]);
                 // HospitalDepartmentRepository::updateHospitalDepartment($hospitalDepartment, ['id_department' => null]);
@@ -105,16 +110,12 @@ class DepartmentService
                 }
                 $department->delete();
 
-                return response()->json([
-                    'message' => 'Xóa khoa thành công !',
-                ], 201);
+                return $this->responseOK(200, null, 'Xóa khoa thành công !');
             } else {
-                return response()->json([
-                    'message' => 'Không tìm thấy khoa !',
-                ], 404);
+                return $this->responseError(400, 'Không tìm thấy khoa !');
             }
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -143,21 +144,15 @@ class DepartmentService
                 ];
                 $departments = $this->departmentRepository->searchDepartment($filter)->paginate(6);
 
-                return response()->json([
-                    'message' => 'Xem tất cả khoa thành công !',
-                    'department' => $departments,
-                ], 201);
+                return $this->responseOK(200, $departments, 'Xem tất cả khoa thành công !');
             } else {
                 $filter = (object) [];
                 $departments = $this->departmentRepository->searchDepartment($filter)->get();
 
-                return response()->json([
-                    'message' => 'Xem tất cả khoa thành công !',
-                    'department' => $departments,
-                ], 201);
+                return $this->responseOK(200, $departments, 'Xem tất cả khoa thành công !');
             }
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -166,17 +161,12 @@ class DepartmentService
         try {
             $department = $this->departmentRepository->findById($id);
             if ($department) {
-                return response()->json([
-                    'message' => 'Xem chi tiết khoa thành công !',
-                    'department' => $department,
-                ], 201);
+                return $this->responseOK(200, $department, 'Xem chi tiết khoa thành công !');
             } else {
-                return response()->json([
-                    'message' => 'Không tìm thấy khoa !',
-                ], 404);
+                return $this->responseError(400, 'Không tìm thấy khoa !');
             }
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 }

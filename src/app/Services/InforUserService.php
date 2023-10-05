@@ -37,6 +37,23 @@ class InforUserService
         return $this->respondWithToken(auth('user_api')->refresh());
     }
 
+    public function responseOK($status = 200, $data = null, $message = '')
+    {
+        return response()->json([
+            'message' => $message,
+            'data' => $data,
+            'status' => $status,
+        ], $status);
+    }
+
+    public function responseError($status = 400, $message = '')
+    {
+        return response()->json([
+            'message' => $message,
+            'status' => $status,
+        ], $status);
+    }
+
     protected function respondWithToken($token)
     {
         return response()->json([
@@ -67,7 +84,7 @@ class InforUserService
             $userEmail = UserRepository::findUser($filter)->first();
             if ($userEmail) {
                 if ($userEmail['password']) {
-                    return response()->json(['message' => 'Tài khoản đã tồn tại !'], 400);
+                    return $this->responseError(400, 'Tài khoản đã tồn tại !');
                 } else {
                     $avatar = $this->saveAvatar($request);
 
@@ -83,10 +100,9 @@ class InforUserService
                     $inforUser = InforUserRepository::getInforUser($filter)->first();
                     $inforUser = InforUserRepository::updateInforUser($inforUser->id, $request->all());
 
-                    return response()->json([
-                        'message' => 'Đăng kí tài khoản thành công !',
-                        'user' => array_merge($userEmail->toArray(), $inforUser->toArray()),
-                    ], 201);
+                    $user = array_merge($userEmail->toArray(), $inforUser->toArray());
+
+                    return $this->responseOK(200, $user, 'Đăng kí tài khoản thành công !');
                 }
             } else {
                 $avatar = $this->saveAvatar($request);
@@ -112,13 +128,12 @@ class InforUserService
                 $user = UserRepository::updateUser($user->id, $data);
                 // verify email
 
-                return response()->json([
-                    'message' => 'Đăng kí tài khoản thành công !',
-                    'user' => array_merge($user->toArray(), $inforUser->toArray()),
-                ], 201);
+                $user = array_merge($user->toArray(), $inforUser->toArray());
+
+                return $this->responseOK(200, $user, 'Đăng kí tài khoản thành công !');
             }
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -134,7 +149,7 @@ class InforUserService
             if ($inforUser) {
                 $user = UserRepository::findUserById($inforUser->id_user);
                 if ($user->is_accept == 0) {
-                    return response()->json(['message' => 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !'], 400);
+                    return $this->responseError(400, 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !');
                 } else {
                     Auth::login($user);
                     $this->token = auth()->guard('user_api')->login($user);
@@ -154,7 +169,7 @@ class InforUserService
                 $findEmail = UserRepository::findUser($filter)->first();
                 if ($findEmail) {
                     if ($findEmail->is_accept == 0) {
-                        return response()->json(['message' => 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !'], 400);
+                        return $this->responseError(400, 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !');
                     } else {
                         $filter = [
                             'id_user' => $findEmail->id ?? '',
@@ -205,7 +220,7 @@ class InforUserService
                 }
             }
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
     // Login by Google User
@@ -216,11 +231,11 @@ class InforUserService
             $user = UserRepository::findUserById(auth('user_api')->user()->id);
             $inforUser = InforUserRepository::getInforUser(['id_user' => $user->id])->first();
 
-            return response()->json([
-                'user' => array_merge($user->toArray(), $inforUser->toArray()),
-            ]);
+            $arrUser = array_merge($user->toArray(), $inforUser->toArray());
+
+            return $this->responseOK(200, $arrUser, 'Xem thông tin tài khoản thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -261,12 +276,11 @@ class InforUserService
             }
             // sendmail verify
 
-            return response()->json([
-                'message' => $message,
-                'user' => array_merge($user->toArray(), $inforUser->toArray()),
-            ], 200);
+            $arrUser = array_merge($user->toArray(), $inforUser->toArray());
+
+            return $this->responseOK(200, $arrUser, $message);
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -276,11 +290,9 @@ class InforUserService
             $user = UserRepository::findUserById(auth('user_api')->user()->id);
             $user = UserRepository::updateUser($user->id, ['password' => Hash::make($request->get('new_password'))]);
 
-            return response()->json([
-                'message' => 'Tạo mật khẩu thành công ! ',
-            ], 200);
+            return $this->responseOK(200, null, 'Tạo mật khẩu thành công ! ');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 }

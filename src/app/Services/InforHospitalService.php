@@ -35,6 +35,23 @@ class InforHospitalService
         $this->inforHospitalRepository = $inforHospitalRepository;
     }
 
+    public function responseOK($status = 200, $data = null, $message = '')
+    {
+        return response()->json([
+            'message' => $message,
+            'data' => $data,
+            'status' => $status,
+        ], $status);
+    }
+
+    public function responseError($status = 400, $message = '')
+    {
+        return response()->json([
+            'message' => $message,
+            'status' => $status,
+        ], $status);
+    }
+
     public function saveAvatar(Request $request)
     {
         if ($request->hasFile('avatar')) {
@@ -55,7 +72,7 @@ class InforHospitalService
             ];
             $userEmail = UserRepository::findUser($filter)->first();
             if ($userEmail) {
-                return response()->json(['message' => 'Tài khoản đã tồn tại !'], 400);
+                return $this->responseError(400, 'Tài khoản đã tồn tại !');
             } else {
                 $avatar = $this->saveAvatar($request);
                 $data = array_merge(
@@ -86,13 +103,12 @@ class InforHospitalService
                 $inforUser->infrastructure = json_decode($inforUser->infrastructure);
                 $inforUser->location = json_decode($inforUser->location);
 
-                return response()->json([
-                    'message' => 'Đăng kí tài khoản thành công !',
-                    'hospital' => array_merge($user->toArray(), $inforUser->toArray()),
-                ], 201);
+                $hospital = array_merge($user->toArray(), $inforUser->toArray());
+
+                return $this->responseOK(200, $hospital, 'Đăng kí tài khoản thành công !');
             }
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -104,11 +120,11 @@ class InforHospitalService
             $inforUser->infrastructure = json_decode($inforUser->infrastructure);
             $inforUser->location = json_decode($inforUser->location);
 
-            return response()->json([
-                'hospital' => array_merge($user->toArray(), $inforUser->toArray()),
-            ]);
+            $hospital = array_merge($user->toArray(), $inforUser->toArray());
+
+            return $this->responseOK(200, $hospital, 'Xem thông tin tài khoản thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -158,12 +174,11 @@ class InforHospitalService
             $inforHospital->infrastructure = json_decode($inforHospital->infrastructure);
             $inforHospital->location = json_decode($inforHospital->location);
 
-            return response()->json([
-                'message' => $message,
-                'hospital' => array_merge($user->toArray(), $inforHospital->toArray()),
-            ], 201);
+            $hospital = array_merge($user->toArray(), $inforHospital->toArray());
+
+            return $this->responseOK(200, $hospital, $message);
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -173,9 +188,7 @@ class InforHospitalService
         try {
             $department = DepartmentRepository::findById($request->id_department);
             if (empty($department)) {
-                return response()->json([
-                    'message' => 'Không tìm thấy khoa !',
-                ], 404);
+                return $this->responseError(400, 'Không tìm thấy khoa !');
             }
             $hospital = UserRepository::findUserById(auth('user_api')->user()->id);
 
@@ -236,15 +249,13 @@ class InforHospitalService
 
             DB::commit();
 
-            return response()->json([
-                'message' => 'Thêm tài khoản bác sĩ thành công !',
-                'hospital' => array_merge($doctor->toArray(), $inforDoctor->toArray()),
+            $hospital = array_merge($doctor->toArray(), $inforDoctor->toArray());
 
-            ], 200);
+            return $this->responseOK(200, $hospital, 'Thêm tài khoản bác sĩ thành công !');
         } catch (Throwable $e) {
             DB::rollback();
 
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 }

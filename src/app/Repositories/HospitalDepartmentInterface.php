@@ -9,9 +9,8 @@ interface HospitalDepartmentInterface extends RepositoryInterface
     public static function getHospitalDepartment($filter);
 
     public static function searchHospitalDepartment($filter);
-    
+
     public static function createHosDepart($data);
 
     public static function updateHospitalDepartment($result, $data);
-    
 }

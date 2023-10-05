@@ -47,25 +47,42 @@ class UserService
         ]);
     }
 
+    public function responseOK($status = 200, $data = null, $message = '')
+    {
+        return response()->json([
+            'message' => $message,
+            'data' => $data,
+            'status' => $status,
+        ], $status);
+    }
+
+    public function responseError($status = 400, $message = '')
+    {
+        return response()->json([
+            'message' => $message,
+            'status' => $status,
+        ], $status);
+    }
+
     public function login(Request $request)
     {
         try {
             $user = $this->userRepository->findUserByEmail($request->email);
             if (empty($user)) {
-                return response()->json(['message' => 'Email không tồn tại !'], 400);
+                return $this->responseError(400, 'Email không tồn tại !');
             } else {
                 $is_accept = $user->is_accept;
                 if ($is_accept == 0) {
-                    return response()->json(['message' => 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !'], 400);
+                    return $this->responseError(400, 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !');
                 }
                 if ($user->email_verified_at == null) {
-                    return response()->json(['message' => 'Email này chưa được xác nhận , hãy kiểm tra và xác nhận nó trước khi đăng nhập !'], 400);
+                    return $this->responseError(400, 'Email này chưa được xác nhận , hãy kiểm tra và xác nhận nó trước khi đăng nhập !');
                 }
             }
 
             $credentials = request(['email', 'password']);
             if (!$token = auth()->guard('user_api')->attempt($credentials)) {
-                return response()->json(['message' => 'Email hoặc mật khẩu không chính xác !'], 400);
+                return $this->responseError(400, 'Email hoặc mật khẩu không chính xác !');
             }
 
             $user->have_password = true;
@@ -88,12 +105,15 @@ class UserService
                 $inforUser = InforDoctorRepository::getInforDoctor($filter)->first();
             }
 
-            return response()->json([
-                'user' => array_merge($user->toArray(), $inforUser->toArray()),
-                'message' => $this->respondWithToken($token),
-            ]);
+            $user->access_token = $token;
+            $user->token_type = 'bearer';
+            $user->expires_in = auth()->guard('admin_api')->factory()->getTTL() * 60;
+
+            $arrUser = array_merge($user->toArray(), $inforUser->toArray());
+
+            return $this->responseOK(200, $arrUser, 'Đăng nhập thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -102,18 +122,14 @@ class UserService
         try {
             $user = UserRepository::findUserById(auth('user_api')->user()->id);
             if (!(Hash::check($request->get('current_password'), $user->password))) {
-                return response()->json([
-                    'message' => 'Mật khẩu không chính xác !',
-                ], 400);
+                return $this->responseError(400, 'Mật khẩu không chính xác !');
             }
             $data = ['password' => Hash::make($request->get('new_password'))];
             $user = UserRepository::updateUser($user->id, $data);
 
-            return response()->json([
-                'message' => 'Thay đổi mật khẩu thành công !',
-            ], 200);
+            return $this->responseOK(200, null, 'Thay đổi mật khẩu thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -134,11 +150,9 @@ class UserService
             Log::info("Add jobs to Queue , Email: $email with URL: $url");
             Queue::push(new SendForgotPasswordEmail($email, $url));
 
-            return response()->json([
-                'message' => 'Gửi mail đặt lại mật khẩu thành công !',
-            ], 200);
+            return $this->responseOK(200, null, 'Gửi mail đặt lại mật khẩu thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -212,16 +226,14 @@ class UserService
     public function getInforUser($id)
     {
         try {
-            $user = $this->userRepository->findUserById($id);
+            $user = User::find($id);
             if (empty($user)) {
-                return response()->json(['message' => 'Không tìm thấy tài khoản !'], 404);
+                return $this->responseError(400, 'Không tìm thấy tài khoản !');
             }
 
-            return response()->json([
-                'user' => $user,
-            ], 201);
+            return $this->responseOK(200, $user, 'Xem thông tin người dùng thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 }

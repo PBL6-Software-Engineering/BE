@@ -75,5 +75,4 @@ class HospitalDepartmentRepository extends BaseRepository implements HospitalDep
             throw $e;
         }
     }
-
 }

@@ -4,10 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RequestChangePassword;
 use App\Http\Requests\RequestCreatePassword;
-use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\Request;
-use Throwable;
 
 class UserController extends Controller
 {
@@ -27,7 +25,10 @@ class UserController extends Controller
     {
         auth('user_api')->logout();
 
-        return response()->json(['message' => 'Đăng xuất thành công !']);
+        return response()->json([
+            'message' => 'Đăng xuất thành công !',
+            'status' => 200,
+        ], 200);
     }
 
     public function changePassword(RequestChangePassword $request)
@@ -58,17 +59,6 @@ class UserController extends Controller
 
     public function getInforUser($id)
     {
-        try {
-            $user = User::find($id);
-            if (empty($user)) {
-                return response()->json(['message' => 'Không tìm thấy tài khoản !'], 404);
-            }
-
-            return response()->json([
-                'user' => $user,
-            ], 201);
-        } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
-        }
+        return $this->userService->getInforUser($id);
     }
 }

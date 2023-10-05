@@ -21,6 +21,23 @@ class ArticleService
         $this->articleRepository = $articleRepository;
     }
 
+    public function responseOK($status = 200, $data = null, $message = '')
+    {
+        return response()->json([
+            'message' => $message,
+            'data' => $data,
+            'status' => $status,
+        ], $status);
+    }
+
+    public function responseError($status = 400, $message = '')
+    {
+        return response()->json([
+            'message' => $message,
+            'status' => $status,
+        ], $status);
+    }
+
     public function saveAvatar(Request $request)
     {
         if ($request->hasFile('thumbnail')) {
@@ -37,9 +54,7 @@ class ArticleService
         try {
             $category = CategoryRepository::getCategory(['id' => $request->id_category])->first();
             if (empty($category)) {
-                return response()->json([
-                    'message' => 'Danh mục không tồn tại !',
-                ], 404);
+                return $this->responseError(400, 'Danh mục không tồn tại !');
             }
             $article = $this->articleRepository->createArticle($request->all());
             $thumbnail = $this->saveAvatar($request);
@@ -59,12 +74,9 @@ class ArticleService
             ];
             $article = $this->articleRepository->updateArticle($article, $data);
 
-            return response()->json([
-                'message' => 'Thêm bài viết thành công !',
-                'article' => $article,
-            ], 201);
+            return $this->responseOK(200, $article, 'Thêm bài viết thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -74,9 +86,7 @@ class ArticleService
             $user = UserRepository::findUserById(auth('user_api')->user()->id);
             $article = $this->articleRepository->findById($id);
             if ($user->id != $article->id_user) {
-                return response()->json([
-                    'message' => 'Bạn không có quyền chỉnh sửa bài viết này !',
-                ], 403);
+                return $this->responseError(400, 'Bạn không có quyền chỉnh sửa bài viết này !');
             }
             if ($request->hasFile('thumbnail')) {
                 if ($article->thumbnail) {
@@ -89,12 +99,9 @@ class ArticleService
                 $article = $this->articleRepository->updateArticle($article, $request->all());
             }
 
-            return response()->json([
-                'message' => 'Cập nhật bài viết thành công !',
-                'article' => $article,
-            ], 201);
+            return $this->responseOK(200, $article, 'Cập nhật bài viết thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -104,12 +111,9 @@ class ArticleService
             $article = $this->articleRepository->findById($id);
             $article = $this->articleRepository->updateArticle($article, ['is_show' => $request->is_show]);
 
-            return response()->json([
-                'message' => 'Thay đổi trạng thái hiển thị của bài viết thành công !',
-                'article' => $article,
-            ], 201);
+            return $this->responseOK(200, $article, 'Thay đổi trạng thái hiển thị của bài viết thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -119,12 +123,9 @@ class ArticleService
             $article = $this->articleRepository->findById($id);
             $article = $this->articleRepository->updateArticle($article, ['is_accept' => $request->is_accept]);
 
-            return response()->json([
-                'message' => 'Thay đổi trạng thái của bài viết thành công !',
-                'article' => $article,
-            ], 201);
+            return $this->responseOK(200, $article, 'Thay đổi trạng thái của bài viết thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -134,20 +135,16 @@ class ArticleService
             $user = UserRepository::findUserById(auth('user_api')->user()->id);
             $article = $this->articleRepository->findById($id);
             if ($user->id != $article->id_user) {
-                return response()->json([
-                    'message' => 'Bạn không có quyền xóa bài viết này !',
-                ], 403);
+                return $this->responseError(400, 'Bạn không có quyền xóa bài viết này !');
             }
             if ($article->thumbnail) {
                 File::delete($article->thumbnail);
             }
             $article->delete();
 
-            return response()->json([
-                'message' => 'Xóa bài viết thành công !',
-            ], 201);
+            return $this->responseOK(200, null, 'Xóa bài viết thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -183,12 +180,9 @@ class ArticleService
 
             $articles = $this->articleRepository->searchAll($filter)->paginate(6);
 
-            return response()->json([
-                'message' => 'Xem tất cả bài viết thành công !',
-                'article' => $articles,
-            ], 201);
+            return $this->responseOK(200, $articles, 'Xem tất cả bài viết thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -200,18 +194,12 @@ class ArticleService
             ];
             $article = $this->articleRepository->searchAll($filter)->first();
             if ($article) {
-                return response()->json([
-                    'message' => 'Xem bài viết chi tiết thành công !',
-                    'article' => $article,
-                ], 201);
+                return $this->responseOK(200, $article, 'Xem bài viết chi tiết thành công !');
             } else {
-                return response()->json([
-                    'message' => 'Not found article !',
-                    'article' => $article,
-                ], 404);
+                return $this->responseError(400, 'Không tìm thấy bài viết !');
             }
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -248,10 +236,7 @@ class ArticleService
         // leftjoin để khi mà id_category trong articles null thì vẫn kết hợp với bản categories để lấy ra
         $articles = $this->articleRepository->searchAll($filter)->paginate(6);
 
-        return response()->json([
-            'message' => 'Xem tất cả bài viết chi tiết thành công !',
-            'article' => $articles,
-        ], 201);
+        return $this->responseOK(200, $articles, 'Xem tất cả bài viết thành công !');
     }
 
     public function articleOfAdmin(Request $request)
@@ -283,12 +268,9 @@ class ArticleService
             ];
             $articles = $this->articleRepository->searchAll($filter)->paginate(6);
 
-            return response()->json([
-                'message' => 'Xem tất cả bài viết chi tiết thành công !',
-                'article' => $articles,
-            ], 201);
+            return $this->responseOK(200, $articles, 'Xem tất cả bài viết thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 }
