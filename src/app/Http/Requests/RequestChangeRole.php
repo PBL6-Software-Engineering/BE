@@ -32,11 +32,13 @@ class RequestChangeRole extends FormRequest
 
     public function failedValidation(Validator $validator)
     {
+        $errors = $validator->errors()->all();
         throw new HttpResponseException(response()->json([
             'success' => false,
             'message' => 'Validation errors',
-            'data' => $validator->errors(),
-        ]));
+            'data' => $errors,
+            'status' => 400,
+        ], 400));
     }
 
     public function messages()
