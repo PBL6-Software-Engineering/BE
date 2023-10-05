@@ -3,6 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\HospitalDepartment;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class HospitalDepartmentRepository extends BaseRepository implements HospitalDepartmentInterface
 {
@@ -15,19 +17,27 @@ class HospitalDepartmentRepository extends BaseRepository implements HospitalDep
     {
         $filter = (object) $filter;
         $data = (new self)->model
-            ->when(!empty($filter->email), function ($q) use ($filter) {
-                $q->where('email', '=', "$filter->email");
+            ->when(!empty($filter->id), function ($q) use ($filter) {
+                $q->where('id', $filter->id);
             })
-            ->when(!empty($filter->name), function ($q) use ($filter) {
-                $q->where('name', 'like', "%$filter->name%");
-            })
-            ->when(!empty($filter->start_at), function ($query) use ($filter) {
-                $query->whereDate('created_at', '>=', $filter->start_at);
-            })
-            ->when(!empty($filter->end_at), function ($query) use ($filter) {
-                $query->whereDate('created_at', '<=', $filter->end_at);
+            ->when(!empty($filter->id_department), function ($q) use ($filter) {
+                $q->where('id_department', $filter->id_department);
             });
 
         return $data;
+    }
+
+    public static function updateHospitalDepartment($result, $data)
+    {
+        DB::beginTransaction();
+        try {
+            $result->update($data);
+            DB::commit();
+
+            return $result;
+        } catch (Throwable $e) {
+            DB::rollback();
+            throw $e;
+        }
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Requests\RequestCreateNewDoctor;
 use App\Http\Requests\RequestUpdateHospital;
 use App\Jobs\SendMailNotify;
 use App\Jobs\SendVerifyEmail;
+use App\Repositories\DepartmentRepository;
 use App\Repositories\InforDoctorRepository;
 use App\Repositories\InforHospitalInterface;
 use App\Repositories\InforHospitalRepository;
@@ -16,6 +17,7 @@ use Database\Factories\FakeImageFactory;
 use Faker\Factory;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Queue;
@@ -167,7 +169,14 @@ class InforHospitalService
 
     public function addDoctor(RequestCreateNewDoctor $request)
     {
+        DB::beginTransaction();
         try {
+            $department = DepartmentRepository::findById($request->id_department);
+            if (empty($department)) {
+                return response()->json([
+                    'message' => 'Không tìm thấy khoa !',
+                ], 404);
+            }
             $hospital = UserRepository::findUserById(auth('user_api')->user()->id);
 
             // Cách 1 dùng Factory
@@ -225,12 +234,16 @@ class InforHospitalService
             $content = 'Dưới đây là thông tin tài khoản của bạn , hãy sử dụng nó để đăng nhập vào hệ thống , sau đó hãy tiến hành đổi mật khẩu để đảm bảo tính bảo mật cho tài khoản . <br> email: ' . $doctor->email . ' <br> password: ' . $new_password;
             Queue::push(new SendMailNotify($doctor->email, $content));
 
+            DB::commit();
+
             return response()->json([
                 'message' => 'Thêm tài khoản bác sĩ thành công !',
                 'hospital' => array_merge($doctor->toArray(), $inforDoctor->toArray()),
 
             ], 200);
         } catch (Throwable $e) {
+            DB::rollback();
+
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }

@@ -3,6 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\Department;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class DepartmentRepository extends BaseRepository implements DepartmentInterface
 {
@@ -11,23 +13,57 @@ class DepartmentRepository extends BaseRepository implements DepartmentInterface
         return Department::class;
     }
 
-    public static function getDepartment($filter)
+    public static function findById($id)
+    {
+        return (new self)->model->find($id);
+    }
+
+    public static function createDepartment($data)
+    {
+        DB::beginTransaction();
+        try {
+            $newDepartment = (new self)->model->create($data);
+            DB::commit();
+
+            return $newDepartment;
+        } catch (Throwable $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+
+    public static function updateDepartment($result, $data)
+    {
+        DB::beginTransaction();
+        try {
+            $result->update($data);
+            DB::commit();
+
+            return $result;
+        } catch (Throwable $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+
+    public static function searchDepartment($filter)
     {
         $filter = (object) $filter;
         $data = (new self)->model
-            ->when(!empty($filter->email), function ($q) use ($filter) {
-                $q->where('email', '=', "$filter->email");
+            ->when(!empty($filter->search), function ($q) use ($filter) {
+                $q->where(function ($query) use ($filter) {
+                    $query->where('name', 'LIKE', '%' . $filter->search . '%')
+                        ->orWhere('description', 'LIKE', '%' . $filter->search . '%');
+                });
             })
-            ->when(!empty($filter->name), function ($q) use ($filter) {
-                $q->where('name', 'like', "%$filter->name%");
-            })
-            ->when(!empty($filter->start_at), function ($query) use ($filter) {
-                $query->whereDate('created_at', '>=', $filter->start_at);
-            })
-            ->when(!empty($filter->end_at), function ($query) use ($filter) {
-                $query->whereDate('created_at', '<=', $filter->end_at);
+            ->when(!empty($filter->orderBy), function ($query) use ($filter) {
+                $query->orderBy($filter->orderBy, $filter->orderDirection);
             });
 
         return $data;
+    }
+
+    public static function getDepartment($filter)
+    {
     }
 }

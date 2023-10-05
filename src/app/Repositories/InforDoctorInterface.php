@@ -12,4 +12,6 @@ interface InforDoctorInterface extends RepositoryInterface
     public static function createDoctor($data);
 
     public static function updateInforDoctor($id, $data);
+
+    public static function updateResult($result, $data);
 }

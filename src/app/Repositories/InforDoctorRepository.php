@@ -24,15 +24,18 @@ class InforDoctorRepository extends BaseRepository implements InforDoctorInterfa
     public static function getInforDoctor($filter)
     {
         $filter = (object) $filter;
-        $user = (new self)->model
+        $doctor = (new self)->model
             ->when(!empty($filter->id), function ($q) use ($filter) {
                 $q->where('id', $filter->id);
             })
             ->when(!empty($filter->id_doctor), function ($q) use ($filter) {
                 $q->where('id_doctor', $filter->id_doctor);
+            })
+            ->when(!empty($filter->id_department), function ($q) use ($filter) {
+                $q->where('id_department', $filter->id_department);
             });
 
-        return $user;
+        return $doctor;
     }
 
     public static function createDoctor($data)
@@ -58,6 +61,20 @@ class InforDoctorRepository extends BaseRepository implements InforDoctorInterfa
             DB::commit();
 
             return $inforDoctor;
+        } catch (Throwable $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+
+    public static function updateResult($result, $data)
+    {
+        DB::beginTransaction();
+        try {
+            $result->update($data);
+            DB::commit();
+
+            return $result;
         } catch (Throwable $e) {
             DB::rollback();
             throw $e;
