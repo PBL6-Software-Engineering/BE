@@ -146,9 +146,9 @@ Route::prefix('hospital-department')->controller(HospitalDepartmentController::c
         Route::post('/add', 'add');
         Route::post('update/{id}', 'edit');
         Route::delete('/{id}', 'delete');
-        Route::get('/', 'departmentOfHospital');
-        Route::get('/detail/{id}', 'details');
     });
+    Route::get('/hospital/{id}', 'departmentOfHospital');
+    Route::get('/detail/{id}', 'details');
 });
 
 // HospitalService
