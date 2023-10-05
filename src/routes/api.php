@@ -35,7 +35,7 @@ Route::prefix('admin')->controller(AdminController::class)->group(function () {
     Route::post('forgot-pw-sendcode', 'forgotSend');
     Route::middleware('auth:admin_api')->group(function () {
         Route::get('logout', 'logout');
-        Route::get('me', 'me');
+        Route::get('profile', 'profile');
         Route::post('change-password', 'changePassword');
         Route::post('update/{admin}', 'updateProfile');
         Route::get('all-user', 'allUser');

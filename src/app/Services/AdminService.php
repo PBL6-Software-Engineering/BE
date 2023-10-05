@@ -48,26 +48,44 @@ class AdminService
         ]);
     }
 
+    public function responseOK($status = 200, $data = null, $message = '')
+    {
+        return response()->json([
+            'message' => $message,
+            'data' => $data,
+            'status' => $status,
+        ], $status);
+    }
+    
+    public function responseError($status = 400, $message = '')
+    {
+        return response()->json([
+            'message' => $message,
+            'status' => $status,
+        ], $status);
+    }
+
     public function login(Request $request)
     {
         try {
             $credentials = request(['email', 'password']);
             $user = $this->adminRepository->findAdminByEmail($request->email);
-
             if ($user->email_verified_at == null) {
-                return response()->json(['message' => 'Email này chưa được xác nhận , hãy kiểm tra và xác nhận nó trước khi đăng nhập !'], 400);
+                $message = 'Email này chưa được xác nhận , hãy kiểm tra và xác nhận nó trước khi đăng nhập !';
+                return $this->responseError(400,$message);
             }
 
             if (!$token = auth()->guard('admin_api')->attempt($credentials)) {
-                return response()->json(['message' => 'Email hoặc mật khẩu không đúng !'], 400);
+                return $this->responseError(400,'Email hoặc mật khẩu không đúng !');
             }
 
-            return response()->json([
-                'admin' => $user,
-                'message' => $this->respondWithToken($token),
-            ]);
+            $user->access_token = $token;
+            $user->token_type = 'bearer';
+            $user->expires_in = auth()->guard('admin_api')->factory()->getTTL() * 60;
+            return $this->responseOK(200, $user, 'Đăng nhập thành công !');
+
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -76,19 +94,14 @@ class AdminService
         try {
             $admin = $this->adminRepository->findAdminById(auth('admin_api')->user()->id);
             if (!(Hash::check($request->get('current_password'), $admin->password))) {
-                return response()->json([
-                    'message' => 'Mật khẩu của bạn không chính xác !',
-                ], 400);
+                return $this->responseError(400, 'Mật khẩu của bạn không chính xác !');
             }
 
             $data = ['password' => Hash::make($request->get('new_password'))];
             $this->adminRepository->updateAdmin($admin->id, $data);
-
-            return response()->json([
-                'message' => 'Thay đổi mật khẩu thành công !',
-            ], 200);
+            return $this->responseOK(200, null, 'Thay đổi mật khẩu thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -135,12 +148,9 @@ class AdminService
                 $message = 'Cập nhật thông tin thành công . Một email xác nhận đã được gửi hãy kiểm tra mail và xác nhận nó !';
             }
             // sendmail verify
-            return response()->json([
-                'message' => $message,
-                'admin' => $admin,
-            ], 200);
+            return $this->responseOK(200, $admin, $message);
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -168,13 +178,10 @@ class AdminService
     {
         try {
             $allAdmin = $this->adminRepository->getAdmin()->paginate(6);
+            return $this->responseOK(200, $allAdmin, 'Xem tất cả quản trị viên thành công !');
 
-            return response()->json([
-                'message' => 'Lấy tất cả quản trị viên thành công !',
-                'admins' => $allAdmin,
-            ], 200);
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -182,13 +189,9 @@ class AdminService
     {
         try {
             $allUser = UserRepository::getUser()->paginate(6);
-
-            return response()->json([
-                'message' => 'Lấy tất cả người dùng thành công !',
-                'users' => $allUser,
-            ], 200);
+            return $this->responseOK(200, $allUser, 'Xem tất cả người dùng thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -207,12 +210,9 @@ class AdminService
             $url = UserEnum::DOMAIN_PATH . 'admin/forgot-form?token=' . $token;
             Log::info("Add jobs to Queue , Email: $email with URL: $url");
             Queue::push(new SendForgotPasswordEmail($email, $url));
-
-            return response()->json([
-                'message' => 'Gửi mail đặt lại mật khẩu thành công , hãy kiểm tra mail !',
-            ], 200);
+            return $this->responseOK(200, null, 'Gửi mail đặt lại mật khẩu thành công , hãy kiểm tra mail !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -304,13 +304,9 @@ class AdminService
 
             $newAdmin = $this->adminRepository->createAdmin($data);
             Queue::push(new SendPasswordNewAdmin($request->email, $new_password));
-
-            return response()->json([
-                'message' => 'Thêm quản trị viên thành công !',
-                'new_admin' => $newAdmin,
-            ], 201);
+            return $this->responseOK(200, $newAdmin, 'Thêm quản trị viên thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -319,22 +315,18 @@ class AdminService
         try {
             $role = auth('admin_api')->user()->role;
             if ($role == 0) {
-                return response()->json([
-                    'message' => 'Bạn không có quyền, chỉ có quản trị viên cấp cao mới có quyền xóa !',
-                ], 400);
+                $message = 'Bạn không có quyền, chỉ có quản trị viên cấp cao mới có quyền xóa !';
+                return $this->responseError(400, $message);
             } else {
                 $admin = $this->adminRepository->findAdminById($id);
                 if ($admin->avatar) {
                     File::delete($admin->avatar);
                 }
                 $admin->delete();
-
-                return response()->json([
-                    'message' => 'Xóa tài khoản thành công !',
-                ], 200);
+                return $this->responseOK(200, null, 'Xóa tài khoản thành công !');
             }
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -344,32 +336,24 @@ class AdminService
             $adminLogin = auth('admin_api')->user();
             $admin = $this->adminRepository->findAdminById($id);
             if ($admin->role == 'manager') {
-                return response()->json([
-                    'message' => 'Không được phép chỉnh sửa quyền của giám đốc !',
-                ], 400);
+                return $this->responseError(400, 'Không được phép chỉnh sửa quyền của giám đốc !');
             }
             if ($request->role == $admin->role) {
-                return response()->json([
-                    'message' => 'Thay đổi role thành công !',
-                    'admin' => $admin,
-                ], 200);
+                return $this->responseOK(200, $admin, 'Thay đổi role thành công !');
             }
             if ($adminLogin->role == 'superadmin') {
                 if ($request->role == 'admin') {
-                    return response()->json([
-                        'message' => 'Bạn không có quyền , chỉ có giám đốc mới có quyền thay đổi role từ superadmin xuống admin !',
-                    ], 400);
+                    $message = 'Bạn không có quyền , chỉ có giám đốc mới có quyền thay đổi role từ superadmin xuống admin !';
+                    return $this->responseError(400, $message);
                 }
             }
             $data = ['role' => $request->role];
             $admin = $this->adminRepository->updateAdmin($admin->id, $data);
 
-            return response()->json([
-                'message' => 'Thay đổi role cho quản trị viên thành công !',
-                'admin' => $admin,
-            ], 200);
+            return $this->responseOK(200, $admin, 'Thay đổi role cho quản trị viên thành công !');
+
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 
@@ -379,12 +363,9 @@ class AdminService
             $user = UserRepository::findUserById($id);
             $data = ['is_accept' => $request->is_accept];
             $user = UserRepository::updateUser($user->id, $data);
-
-            return response()->json([
-                'message' => 'Thay đổi trạng thái của người dùng thành công !',
-            ], 200);
+            return $this->responseOK(200, null, 'Thay đổi trạng thái của người dùng thành công !');
         } catch (Throwable $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return $this->responseError(400, $e->getMessage());
         }
     }
 }

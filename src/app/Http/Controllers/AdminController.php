@@ -24,16 +24,22 @@ class AdminController extends Controller
         return $this->adminService->login($request);
     }
 
-    public function me()
+    public function profile()
     {
-        return response()->json(auth('admin_api')->user());
+        return response()->json([
+            'message' => 'Xem thông tin cá nhân thành công !',
+            'data' => auth('admin_api')->user(),
+            'status' => 200,
+        ], 200);
     }
 
     public function logout()
     {
         auth('admin_api')->logout();
-
-        return response()->json(['message' => 'Đăng xuất thành công !']);
+        return response()->json([
+            'message' => 'Đăng xuất thành công !',
+            'status' => 200
+        ], 200);
     }
 
     public function changePassword(RequestChangePassword $request)
