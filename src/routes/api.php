@@ -87,7 +87,7 @@ Route::prefix('infor-hospital')->controller(InforHospitalController::class)->gro
     });
 });
 
-// Hospital Infor
+// Doctor Infor
 Route::prefix('infor-doctor')->controller(InforDoctorController::class)->group(function () {
     Route::middleware(['auth:user_api', 'role:doctor'])->group(function () {
         Route::post('update/{user}', 'updateProfile');
@@ -157,9 +157,9 @@ Route::prefix('hospital-service')->controller(HospitalServiceController::class)-
         Route::post('/add', 'add');
         Route::post('update/{id}', 'edit');
         Route::delete('/{id}', 'delete');
-        Route::get('/', 'serviceOfHospital');
-        Route::get('/detail/{id}', 'details');
     });
+    Route::get('/hospital/{id}', 'serviceOfHospital');
+    Route::get('/detail/{id}', 'details');
 });
 
 // Seeder Value

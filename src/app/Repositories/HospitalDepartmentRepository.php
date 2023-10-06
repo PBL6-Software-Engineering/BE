@@ -27,6 +27,9 @@ class HospitalDepartmentRepository extends BaseRepository implements HospitalDep
             })
             ->when(!empty($filter->id_department), function ($q) use ($filter) {
                 $q->where('id_department', $filter->id_department);
+            })
+            ->when(!empty($filter->id_hospital), function ($q) use ($filter) {
+                $q->where('id_hospital', $filter->id_hospital);
             });
 
         return $data;
