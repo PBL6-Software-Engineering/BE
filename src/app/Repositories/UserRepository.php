@@ -95,6 +95,12 @@ class UserRepository extends BaseRepository implements UserInterface
             ->when(!empty($filter->role), function ($query) use ($filter) {
                 return $query->where('role', 'LIKE', '%' . $filter->role . '%');
             })
+            ->when(isset($filter->is_accept), function ($query) use ($filter) {
+                if ($filter->is_accept === 'both') {
+                } else {
+                    $query->where('is_accept', $filter->is_accept);
+                }
+            })
             ->when(!empty($filter->orderBy), function ($query) use ($filter) {
                 $query->orderBy($filter->orderBy, $filter->orderDirection);
             });

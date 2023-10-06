@@ -176,12 +176,40 @@ class AdminService
         return view('admin.status_verify_email', ['status' => $status]);
     }
 
-    public function allAdmin()
+    public function allAdmin(Request $request)
     {
         try {
-            $allAdmin = $this->adminRepository->getAdmin()->paginate(6);
+            if (!(empty($request->paginate))) {
+                $search = $request->search;
+                $orderBy = 'id';
+                $orderDirection = 'ASC';
+    
+                if ($request->sortlatest == 'true') {
+                    $orderBy = 'id';
+                    $orderDirection = 'DESC';
+                }
+    
+                if ($request->sortname == 'true') {
+                    $orderBy = 'name';
+                    $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+                }
+    
+                $filter = (object) [
+                    'search' => $search,
+                    'role' => $request->role ?? '',
+                    'orderBy' => $orderBy,
+                    'orderDirection' => $orderDirection,
+                ];
+                $allAdmin = $this->adminRepository->searchAdmin($filter)->paginate($request->paginate);
+    
+                return $this->responseOK(200, $allAdmin, 'Xem tất cả quản trị thành công !');
+            }
+            else {
+                $filter = (object) [];
+                $allAdmin = $this->adminRepository->searchAdmin($filter)->get();
+                return $this->responseOK(200, $allAdmin, 'Xem tất cả quản trị thành công !');
+            }
 
-            return $this->responseOK(200, $allAdmin, 'Xem tất cả quản trị viên thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -209,6 +237,7 @@ class AdminService
                     'search' => $search,
                     'role' => $request->role ?? '',
                     'orderBy' => $orderBy,
+                    'is_accept' => $request->is_accept ?? 'both',
                     'orderDirection' => $orderDirection,
                 ];
                 $allUser = UserRepository::searchUser($filter)->paginate($request->paginate);

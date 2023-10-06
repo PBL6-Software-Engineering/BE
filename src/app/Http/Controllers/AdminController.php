@@ -64,9 +64,9 @@ class AdminController extends Controller
         return $this->adminService->verifyEmail($token);
     }
 
-    public function allAdmin()
+    public function allAdmin(Request $request)
     {
-        return $this->adminService->allAdmin();
+        return $this->adminService->allAdmin($request);
     }
 
     public function allUser(Request $request)
