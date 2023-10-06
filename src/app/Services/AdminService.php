@@ -187,12 +187,40 @@ class AdminService
         }
     }
 
-    public function allUser()
+    public function allUser(Request $request)
     {
         try {
-            $allUser = UserRepository::getUser()->paginate(6);
+            if (!(empty($request->paginate))) {
+                $search = $request->search;
+                $orderBy = 'id';
+                $orderDirection = 'ASC';
+    
+                if ($request->sortlatest == 'true') {
+                    $orderBy = 'id';
+                    $orderDirection = 'DESC';
+                }
+    
+                if ($request->sortname == 'true') {
+                    $orderBy = 'name';
+                    $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+                }
+    
+                $filter = (object) [
+                    'search' => $search,
+                    'role' => $request->role ?? '',
+                    'orderBy' => $orderBy,
+                    'orderDirection' => $orderDirection,
+                ];
+                $allUser = UserRepository::searchUser($filter)->paginate($request->paginate);
+    
+                return $this->responseOK(200, $allUser, 'Xem tất cả người dùng thành công !');
+            }
+            else {
+                $filter = (object) [];
+                $allUser = UserRepository::searchUser($filter)->get();
+                return $this->responseOK(200, $allUser, 'Xem tất cả người dùng thành công !');
+            }
 
-            return $this->responseOK(200, $allUser, 'Xem tất cả người dùng thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }

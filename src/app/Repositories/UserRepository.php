@@ -78,4 +78,27 @@ class UserRepository extends BaseRepository implements UserInterface
             throw $e;
         }
     }
+
+    public static function searchUser($filter)
+    {
+        $filter = (object) $filter;
+        $data = (new self)->model
+            ->when(!empty($filter->search), function ($q) use ($filter) {
+                $q->where(function ($query) use ($filter) {
+                    $query->where('name', 'LIKE', '%' . $filter->search . '%')
+                        ->orWhere('address', 'LIKE', '%' . $filter->search . '%')
+                        ->orWhere('email', 'LIKE', '%' . $filter->search . '%')
+                        ->orWhere('phone', 'LIKE', '%' . $filter->search . '%')
+                        ->orWhere('username', 'LIKE', '%' . $filter->search . '%');
+                });
+            })
+            ->when(!empty($filter->role), function ($query) use ($filter) {
+                return $query->where('role', 'LIKE', '%' . $filter->role . '%');
+            })
+            ->when(!empty($filter->orderBy), function ($query) use ($filter) {
+                $query->orderBy($filter->orderBy, $filter->orderDirection);
+            });
+
+        return $data;
+    }
 }

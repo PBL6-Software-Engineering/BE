@@ -20,4 +20,6 @@ interface UserInterface extends RepositoryInterface
     public static function findUser($filter);
 
     public static function createUser($data);
+
+    public static function searchUser($filter);
 }

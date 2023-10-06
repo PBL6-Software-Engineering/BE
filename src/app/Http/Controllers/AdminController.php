@@ -69,9 +69,9 @@ class AdminController extends Controller
         return $this->adminService->allAdmin();
     }
 
-    public function allUser()
+    public function allUser(Request $request)
     {
-        return $this->adminService->allUser();
+        return $this->adminService->allUser($request);
     }
 
     public function forgotForm()

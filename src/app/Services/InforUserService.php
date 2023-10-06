@@ -102,14 +102,14 @@ class InforUserService
 
                     $user = array_merge($userEmail->toArray(), $inforUser->toArray());
 
-                    return $this->responseOK(200, $user, 'Đăng kí tài khoản thành công . Hãy kiểm tra mail và xác nhận nó !');
+                    return $this->responseOK(200, $user, 'Đăng kí tài khoản thành công . ');
                 }
             } else {
                 $avatar = $this->saveAvatar($request);
 
                 $data = array_merge(
                     $request->all(),
-                    ['password' => Hash::make($request->password), 'is_accept' => 0, 'role' => 'user', 'avatar' => $avatar]
+                    ['password' => Hash::make($request->password), 'is_accept' => 1, 'role' => 'user', 'avatar' => $avatar]
                 );
                 $user = UserRepository::createUser($data);
 
@@ -130,7 +130,7 @@ class InforUserService
 
                 $user = array_merge($user->toArray(), $inforUser->toArray());
 
-                return $this->responseOK(200, $user, 'Đăng kí tài khoản thành công !');
+                return $this->responseOK(200, $user, 'Đăng kí tài khoản thành công . Hãy kiểm tra mail và xác nhận nó !');
             }
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
