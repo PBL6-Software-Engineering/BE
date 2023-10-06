@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class RequestUpdateHealthInsurance extends FormRequest
 {
@@ -13,7 +16,7 @@ class RequestUpdateHealthInsurance extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,8 +26,31 @@ class RequestUpdateHealthInsurance extends FormRequest
      */
     public function rules()
     {
+        $id = $this->route('id');
+
         return [
-            //
+            'name' => ['required', 'string', Rule::unique('health_insurances')->ignore($id)],
+            'description' => 'required|string',
+        ];
+    }
+
+    public function failedValidation(Validator $validator)
+    {
+        $errors = $validator->errors()->all();
+        throw new HttpResponseException(response()->json([
+            'success' => false,
+            'message' => 'Validation errors',
+            'data' => $errors,
+            'errors' => $validator->errors(),
+            'status' => 400,
+        ], 400));
+    }
+
+    public function messages()
+    {
+        return [
+            'title.required' => 'Title is required',
+            'body.required' => 'Body is required',
         ];
     }
 }

@@ -102,7 +102,7 @@ class InforUserService
 
                     $user = array_merge($userEmail->toArray(), $inforUser->toArray());
 
-                    return $this->responseOK(200, $user, 'Đăng kí tài khoản thành công !');
+                    return $this->responseOK(200, $user, 'Đăng kí tài khoản thành công . Hãy kiểm tra mail và xác nhận nó !');
                 }
             } else {
                 $avatar = $this->saveAvatar($request);

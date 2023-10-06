@@ -105,7 +105,7 @@ class InforHospitalService
 
                 $hospital = array_merge($user->toArray(), $inforUser->toArray());
 
-                return $this->responseOK(200, $hospital, 'Đăng kí tài khoản thành công !');
+                return $this->responseOK(200, $hospital, 'Đăng kí tài khoản thành công . Hãy kiểm tra mail và xác nhận nó !');
             }
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());

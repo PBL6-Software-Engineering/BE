@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\HealthInsuranceController;
 use App\Http\Controllers\HospitalDepartmentController;
 use App\Http\Controllers\HospitalServiceController;
 use App\Http\Controllers\InforDoctorController;
@@ -159,6 +160,17 @@ Route::prefix('hospital-service')->controller(HospitalServiceController::class)-
         Route::delete('/{id}', 'delete');
     });
     Route::get('/hospital/{id}', 'serviceOfHospital');
+    Route::get('/detail/{id}', 'details');
+});
+
+// HealthInsurance
+Route::prefix('health-insurace')->controller(HealthInsuranceController::class)->group(function () {
+    Route::middleware('auth:admin_api')->group(function () {
+        Route::post('/add', 'add');
+        Route::post('update/{id}', 'edit');
+        Route::delete('/{id}', 'delete');
+    });
+    Route::get('/', 'all');
     Route::get('/detail/{id}', 'details');
 });
 

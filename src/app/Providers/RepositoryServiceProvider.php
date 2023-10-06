@@ -12,6 +12,10 @@ use App\Repositories\DepartmentInterface;
 use App\Repositories\DepartmentRepository;
 use App\Repositories\ExampleInterface;
 use App\Repositories\ExampleRepository;
+use App\Repositories\HealthInsuranceHospitalInterface;
+use App\Repositories\HealthInsuranceHospitalRepository;
+use App\Repositories\HealthInsuranceInterface;
+use App\Repositories\HealthInsuranceRepository;
 use App\Repositories\HospitalDepartmentInterface;
 use App\Repositories\HospitalDepartmentRepository;
 use App\Repositories\HospitalServiceInterface;
@@ -47,6 +51,8 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(DepartmentInterface::class, DepartmentRepository::class);
         $this->app->bind(HospitalServiceInterface::class, HospitalServiceRepository::class);
         $this->app->bind(HospitalDepartmentInterface::class, HospitalDepartmentRepository::class);
+        $this->app->bind(HealthInsuranceInterface::class, HealthInsuranceRepository::class);
+        $this->app->bind(HealthInsuranceHospitalInterface::class, HealthInsuranceHospitalRepository::class);
     }
 
     /**

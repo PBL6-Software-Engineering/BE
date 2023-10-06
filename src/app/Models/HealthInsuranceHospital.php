@@ -22,6 +22,6 @@ class HealthInsuranceHospital extends Model
 
     public function healthInsurances()
     {
-        return $this->belongsTo(HealthInsurances::class);
+        return $this->belongsTo(HealthInsurance::class);
     }
 }

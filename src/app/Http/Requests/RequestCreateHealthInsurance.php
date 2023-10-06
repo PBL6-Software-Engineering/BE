@@ -26,7 +26,7 @@ class RequestCreateHealthInsurance extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|unique:departments',
+            'name' => 'required|string|unique:health_insurances',
             'description' => 'required|string',
         ];
     }
