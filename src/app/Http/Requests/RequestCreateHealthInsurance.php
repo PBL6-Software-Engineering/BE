@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class RequestCreateDepartment extends FormRequest
+class RequestCreateHealthInsurance extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -28,7 +28,6 @@ class RequestCreateDepartment extends FormRequest
         return [
             'name' => 'required|string|unique:departments',
             'description' => 'required|string',
-            'thumbnail' => 'required|image',
         ];
     }
 
