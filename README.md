@@ -45,6 +45,15 @@ $ docker-compose run --rm artisan queue:work
 
 http://localhost:99
 
+### Run the after
+
+```bash
+$ git pull origin main 
+$ docker-compose up -d 
+$ docker-compose run --rm artisan queue:work 
+```
+
+
 ### Connect Database 
 ```bash
   Host     : 127.0.0.1 
