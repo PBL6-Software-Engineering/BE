@@ -266,12 +266,13 @@ class ArticleService
                 $orderBy = 'articles.title';
                 $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
             }
+            
             $filter = (object) [
                 'search' => $search,
                 'name_category' => $name_category,
                 'orderBy' => $orderBy,
                 'orderDirection' => $orderDirection,
-                'id_user' => null,
+                'id_user' => 'admin',
             ];
 
             if (!(empty($request->paginate))) {

@@ -6,6 +6,8 @@ use App\Models\Article;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
+use function PHPUnit\Framework\isNull;
+
 class ArticleRepository extends BaseRepository implements ArticleInterface
 {
     public function getModel()
@@ -88,7 +90,11 @@ class ArticleRepository extends BaseRepository implements ArticleInterface
 
             // doctor , admin
             ->when(!empty($filter->id_user), function ($query) use ($filter) {
-                $query->where('id_user', '=', $filter->id_user);
+                if($filter->id_user === 'admin') {
+                    $query->where('id_user', null);
+                } else {
+                    $query->where('id_user', $filter->id_user);
+                }
             });
 
         return $data;
