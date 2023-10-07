@@ -156,7 +156,6 @@ class ArticleService
             if (!empty($request->name_category)) {
                 $name_category = $request->name_category;
             }
-
             $search = $request->search;
             $orderBy = 'articles.id';
             $orderDirection = 'ASC';
@@ -178,9 +177,13 @@ class ArticleService
                 'orderDirection' => $orderDirection,
             ];
 
-            $articles = $this->articleRepository->searchAll($filter)->paginate(6);
-
-            return $this->responseOK(200, $articles, 'Xem tất cả bài viết thành công !');
+            if (!(empty($request->paginate))) {
+                $articles = $this->articleRepository->searchAll($filter)->paginate($request->paginate);
+            }
+            else {
+                $articles = $this->articleRepository->searchAll($filter)->get();
+            }
+            return $this->responseOK(200, $articles, 'Xem tất cả quản trị thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -233,9 +236,13 @@ class ArticleService
             'id_user' => $id,
         ];
 
+        if (!(empty($request->paginate))) {
+            $articles = $this->articleRepository->searchAll($filter)->paginate($request->paginate);
+        }
+        else {
+            $articles = $this->articleRepository->searchAll($filter)->get();
+        }
         // leftjoin để khi mà id_category trong articles null thì vẫn kết hợp với bản categories để lấy ra
-        $articles = $this->articleRepository->searchAll($filter)->paginate(6);
-
         return $this->responseOK(200, $articles, 'Xem tất cả bài viết thành công !');
     }
 
@@ -266,7 +273,13 @@ class ArticleService
                 'orderDirection' => $orderDirection,
                 'id_user' => null,
             ];
-            $articles = $this->articleRepository->searchAll($filter)->paginate(6);
+
+            if (!(empty($request->paginate))) {
+                $articles = $this->articleRepository->searchAll($filter)->paginate($request->paginate);
+            }
+            else {
+                $articles = $this->articleRepository->searchAll($filter)->get();
+            }
 
             return $this->responseOK(200, $articles, 'Xem tất cả bài viết thành công !');
         } catch (Throwable $e) {

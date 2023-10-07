@@ -88,35 +88,33 @@ class HealthInsuranceService
     public function all(Request $request)
     {
         try {
-            if ($request->paginate == true) {
-                $search = $request->search;
+
+            $search = $request->search;
+            $orderBy = 'id';
+            $orderDirection = 'ASC';
+
+            if ($request->sortlatest == 'true') {
                 $orderBy = 'id';
-                $orderDirection = 'ASC';
-
-                if ($request->sortlatest == 'true') {
-                    $orderBy = 'id';
-                    $orderDirection = 'DESC';
-                }
-
-                if ($request->sortname == 'true') {
-                    $orderBy = 'name';
-                    $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
-                }
-
-                $filter = (object) [
-                    'search' => $search ?? '',
-                    'orderBy' => $orderBy,
-                    'orderDirection' => $orderDirection,
-                ];
-                $departments = $this->healthInsurRepository->searchHealthInsur($filter)->paginate(6);
-
-                return $this->responseOK(200, $departments, 'Xem tất cả bảo hiểm thành công !');
-            } else {
-                $filter = (object) [];
-                $departments = $this->healthInsurRepository->searchHealthInsur($filter)->get();
-
-                return $this->responseOK(200, $departments, 'Xem tất cả bảo hiểm thành công !');
+                $orderDirection = 'DESC';
             }
+
+            if ($request->sortname == 'true') {
+                $orderBy = 'name';
+                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            }
+
+            $filter = (object) [
+                'search' => $search ?? '',
+                'orderBy' => $orderBy,
+                'orderDirection' => $orderDirection,
+            ];
+
+            if (!(empty($request->paginate))) {
+                $departments = $this->healthInsurRepository->searchHealthInsur($filter)->paginate($request->paginate);
+            } else {
+                $departments = $this->healthInsurRepository->searchHealthInsur($filter)->get();
+            }
+            return $this->responseOK(200, $departments, 'Xem tất cả bảo hiểm thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }

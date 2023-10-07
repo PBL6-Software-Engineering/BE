@@ -112,34 +112,33 @@ class CategoryService
     public function all(Request $request)
     {
         try {
-            if ($request->paginate == true) { // lấy cho category
-                $search = $request->search;
+
+            $search = $request->search;
+            $orderBy = 'id';
+            $orderDirection = 'ASC';
+
+            if ($request->sortlatest == 'true') {
                 $orderBy = 'id';
-                $orderDirection = 'ASC';
-
-                if ($request->sortlatest == 'true') {
-                    $orderBy = 'id';
-                    $orderDirection = 'DESC';
-                }
-
-                if ($request->sortname == 'true') {
-                    $orderBy = 'name';
-                    $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
-                }
-
-                $filter = (object) [
-                    'orderBy' => $orderBy,
-                    'orderDirection' => $orderDirection,
-                    'search' => $search,
-                ];
-                $categorys = CategoryRepository::searchCategory($filter)->paginate(15);
-
-                return $this->responseOK(200, $categorys, 'Xem tất cả danh mục thành công !');
-            } else {
-                $categorys = CategoryRepository::getCategory([])->get();
-
-                return $this->responseOK(200, $categorys, 'Xem tất cả danh mục thành công !');
+                $orderDirection = 'DESC';
             }
+
+            if ($request->sortname == 'true') {
+                $orderBy = 'name';
+                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            }
+
+            $filter = (object) [
+                'orderBy' => $orderBy,
+                'orderDirection' => $orderDirection,
+                'search' => $search,
+            ];
+
+            if (!(empty($request->paginate))) {// lấy cho category
+                $categorys = CategoryRepository::searchCategory($filter)->paginate($request->paginate);
+            } else {
+                $categorys = CategoryRepository::getCategory($filter)->get();
+            }
+            return $this->responseOK(200, $categorys, 'Xem tất cả danh mục thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }

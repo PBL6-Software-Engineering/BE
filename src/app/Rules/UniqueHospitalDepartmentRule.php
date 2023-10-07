@@ -28,6 +28,6 @@ class UniqueHospitalDepartmentRule implements Rule
 
     public function message()
     {
-        return 'The combination of id_hospital and id_department already exists.';
+        return 'Bệnh viện đã có khoa này rồi !';
     }
 }

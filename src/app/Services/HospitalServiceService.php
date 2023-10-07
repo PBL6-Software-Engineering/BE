@@ -130,45 +130,40 @@ class HospitalServiceService
                 return $this->responseError(400, 'Không tìm thấy bệnh viện !');
             }
 
-            if ($request->paginate == true) { // paginate
-                $search = $request->search;
+            $search = $request->search;
+            $orderBy = 'id_hospital_service';
+            $orderDirection = 'ASC';
+
+            if ($request->sortlatest == 'true') {
                 $orderBy = 'id_hospital_service';
-                $orderDirection = 'ASC';
+                $orderDirection = 'DESC';
+            }
 
-                if ($request->sortlatest == 'true') {
-                    $orderBy = 'id_hospital_service';
-                    $orderDirection = 'DESC';
-                }
+            if ($request->sortname == 'true') {
+                $orderBy = 'name';
+                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            }
 
-                if ($request->sortname == 'true') {
-                    $orderBy = 'name';
-                    $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
-                }
+            $filter = (object) [
+                'search' => $search,
+                'orderBy' => $orderBy,
+                'orderDirection' => $orderDirection,
+                'id_hospital' => $user->id,
+            ];
 
-                $filter = (object) [
-                    'search' => $search,
-                    'orderBy' => $orderBy,
-                    'orderDirection' => $orderDirection,
-                    'id_hospital' => $user->id,
-                ];
-
-                $hospitalServices = $this->hospitalService->searchAll($filter)->paginate(6);
+            if (!empty($request->paginate)) {
+                $hospitalServices = $this->hospitalService->searchAll($filter)->paginate($request->paginate);
                 foreach ($hospitalServices as $index => $hospitalService) {
                     $hospitalService->infor = json_decode($hospitalService->infor);
                 }
-
-                return $this->responseOK(200, $hospitalServices, 'Xem tất cả dịch vụ của bệnh viện thành công !');
             } else { // all
-                $filter = (object) [
-                    'id_hospital' => $user->id,
-                ];
                 $hospitalServices = $this->hospitalService->searchAll($filter)->get();
                 foreach ($hospitalServices as $index => $hospitalService) {
                     $hospitalService->infor = json_decode($hospitalService->infor);
                 }
-
-                return $this->responseOK(200, $hospitalServices, 'Xem tất cả dịch vụ của bệnh viện thành công !');
             }
+            return $this->responseOK(200, $hospitalServices, 'Xem tất cả dịch vụ của bệnh viện thành công !');
+
         } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }

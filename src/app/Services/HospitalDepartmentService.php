@@ -131,7 +131,7 @@ class HospitalDepartmentService
                 return $this->responseError(400, 'Không tìm thấy khoa trong bệnh viện !');
             }
 
-            return $this->responseOK(200, $hospitalDepartment, 'Lấy tất cả khoa của bệnh viện thành công !');
+            return $this->responseOK(200, $hospitalDepartment, 'Xem chi tiết khoa của bệnh viện thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }

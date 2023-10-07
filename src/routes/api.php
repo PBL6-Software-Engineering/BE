@@ -5,6 +5,7 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\HealthInsuranceController;
+use App\Http\Controllers\HealthInsuranceHospitalController;
 use App\Http\Controllers\HospitalDepartmentController;
 use App\Http\Controllers\HospitalServiceController;
 use App\Http\Controllers\InforDoctorController;
@@ -173,6 +174,18 @@ Route::prefix('health-insurace')->controller(HealthInsuranceController::class)->
     Route::get('/', 'all');
     Route::get('/detail/{id}', 'details');
 });
+
+// HealthInsuranceHospital
+Route::prefix('health-insurace-hospital')->controller(HealthInsuranceHospitalController::class)->group(function () {
+    Route::middleware(['auth:user_api', 'role:hospital'])->group(function () {
+        Route::post('/add', 'add');
+        Route::post('update/{id}', 'edit');
+        Route::delete('/{id}', 'delete');
+    });
+    Route::get('/hospital/{id}', 'ofHospital');
+    Route::get('/detail/{id}', 'details');
+});
+
 
 // Seeder Value
 Route::get('province', [ProvinceController::class, 'all']);
