@@ -7,6 +7,7 @@ use App\Http\Requests\RequestChangePassword;
 use App\Http\Requests\RequestChangeRole;
 use App\Http\Requests\RequestCreateNewAdmin;
 use App\Http\Requests\RequestCreatePassword;
+use App\Http\Requests\RequestSendForgot;
 use App\Http\Requests\RequestUpdateAdmin;
 use App\Jobs\SendForgotPasswordEmail;
 use App\Jobs\SendMailNotify;
@@ -255,7 +256,7 @@ class AdminService
         }
     }
 
-    public function forgotSend(Request $request)
+    public function forgotSend(RequestSendForgot $request)
     {
         try {
             $email = $request->email;

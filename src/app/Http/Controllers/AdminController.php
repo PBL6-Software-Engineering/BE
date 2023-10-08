@@ -6,6 +6,7 @@ use App\Http\Requests\RequestChangePassword;
 use App\Http\Requests\RequestChangeRole;
 use App\Http\Requests\RequestCreateNewAdmin;
 use App\Http\Requests\RequestCreatePassword;
+use App\Http\Requests\RequestSendForgot;
 use App\Http\Requests\RequestUpdateAdmin;
 use App\Services\AdminService;
 use Illuminate\Http\Request;
@@ -79,7 +80,7 @@ class AdminController extends Controller
         return view('admin.reset_password');
     }
 
-    public function forgotSend(Request $request)
+    public function forgotSend(RequestSendForgot $request)
     {
         return $this->adminService->forgotSend($request);
     }

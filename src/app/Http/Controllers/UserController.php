@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RequestChangePassword;
 use App\Http\Requests\RequestCreatePassword;
+use App\Http\Requests\RequestSendForgot;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 
@@ -41,7 +42,7 @@ class UserController extends Controller
         return view('user.reset_password');
     }
 
-    public function forgotSend(Request $request)
+    public function forgotSend(RequestSendForgot $request)
     {
         return $this->userService->forgotSend($request);
     }

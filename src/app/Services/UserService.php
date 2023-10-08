@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\UserEnum;
 use App\Http\Requests\RequestChangePassword;
 use App\Http\Requests\RequestCreatePassword;
+use App\Http\Requests\RequestSendForgot;
 use App\Jobs\SendForgotPasswordEmail;
 use App\Models\Admin;
 use App\Models\User;
@@ -133,7 +134,7 @@ class UserService
         }
     }
 
-    public function forgotSend(Request $request)
+    public function forgotSend(RequestSendForgot $request)
     {
         try {
             $email = $request->email;
