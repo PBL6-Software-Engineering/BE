@@ -29,12 +29,12 @@ class RequestCreateInforUser extends FormRequest
         return [
             'name' => 'required|string|between:2,100',
             'email' => 'required|string|email|max:100',
-            'username' => 'required|string|max:100|unique:users',
+            'username' => 'string|max:100|unique:users',
             'password' => 'required|string|confirmed|min:6',
-            'address' => 'required|string|min:1',
-            'date_of_birth' => 'required|string|min:1',
-            'phone' => 'required|min:9|numeric',
-            'gender' => 'required|in:0,1,2',
+            'address' => 'string|min:1',
+            'date_of_birth' => 'string|min:1',
+            'phone' => 'min:9|numeric',
+            'gender' => 'in:0,1,2',
             // 'username' => ['required', 'string', 'max:100', new UniqueUsernameForRole('user')],
         ];
     }
