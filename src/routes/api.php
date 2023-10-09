@@ -12,6 +12,7 @@ use App\Http\Controllers\InforDoctorController;
 use App\Http\Controllers\InforHospitalController;
 use App\Http\Controllers\InforUserController;
 use App\Http\Controllers\ProvinceController;
+use App\Http\Controllers\TimeWorkController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -186,6 +187,15 @@ Route::prefix('health-insurace-hospital')->controller(HealthInsuranceHospitalCon
     Route::get('/detail/{id}', 'details');
 });
 
+// TimeWork
+Route::prefix('time-work')->controller(TimeWorkController::class)->group(function () {
+    Route::middleware(['auth:user_api', 'role:hospital'])->group(function () {
+        Route::post('update', 'edit');
+        Route::get('detail', 'detail');
+    });
+    Route::get('/advise', 'advise');
+    Route::get('/service', 'service');
+});
 
 // Seeder Value
 Route::get('province', [ProvinceController::class, 'all']);

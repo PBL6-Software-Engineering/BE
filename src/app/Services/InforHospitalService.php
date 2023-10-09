@@ -12,6 +12,7 @@ use App\Repositories\DepartmentRepository;
 use App\Repositories\InforDoctorRepository;
 use App\Repositories\InforHospitalInterface;
 use App\Repositories\InforHospitalRepository;
+use App\Repositories\TimeWorkRepository;
 use App\Repositories\UserRepository;
 use Database\Factories\FakeImageFactory;
 use Faker\Factory;
@@ -103,7 +104,44 @@ class InforHospitalService
                 $inforUser->infrastructure = json_decode($inforUser->infrastructure);
                 $inforUser->location = json_decode($inforUser->location);
 
-                $hospital = array_merge($user->toArray(), $inforUser->toArray());
+                // addTimeWork 
+                $timeDefault = [
+                    'enable' => true,
+                    'morning' => [
+                        'enable' => true,
+                        'time' => ['7:30', '11:30']
+                    ],
+                    'afternoon' => [
+                        'enable' => true,
+                        'time' => ['13:30', '17:30']
+                    ],
+                    'night' => [
+                        'enable' => true,
+                        'time' => ['18:00', '20:00']
+                    ]
+                ];
+                
+                $dataTimeWork = [
+                    'id_hospital' => $user->id,
+                    'enable' => true,
+                    'note' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                    'times' => json_encode([
+                        'monday' => $timeDefault,
+                        'tuesday' => $timeDefault,
+                        'wednesday' => $timeDefault,
+                        'thursday' => $timeDefault,
+                        'friday' => $timeDefault,
+                        'saturday' => $timeDefault,
+                        'sunday' => $timeDefault,
+                    ])
+                ];
+                $timeWork = TimeWorkRepository::createTimeWork($dataTimeWork);
+                $timeWork->times = json_decode($timeWork->times);
+                // addTimeWork 
+
+                $hospital = array_merge($user->toArray(), $inforUser->toArray(), $timeWork->toArray());
 
                 return $this->responseOK(200, $hospital, 'Đăng kí tài khoản thành công . Hãy kiểm tra mail và xác nhận nó !');
             }

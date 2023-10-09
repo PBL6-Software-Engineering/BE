@@ -15,10 +15,10 @@ return new class extends Migration
     {
         Schema::create('time_works', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_hospital');
+            $table->unsignedBigInteger('id_hospital')->unique();
             $table->json('times');
             $table->boolean('enable')->default(true);
-            $table->text('note');
+            $table->text('note')->nullable();
             $table->timestamps();
 
             $table->foreign('id_hospital')->references('id_hospital')->on('infor_hospitals')->onDelete('cascade');

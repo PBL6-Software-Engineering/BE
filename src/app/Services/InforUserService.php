@@ -100,12 +100,6 @@ class InforUserService
                     $inforUser = InforUserRepository::getInforUser($filter)->first();
                     $inforUser = InforUserRepository::updateInforUser($inforUser->id, $request->all());
 
-                    // login
-                    Auth::login($userEmail);
-                    $this->token = auth()->guard('user_api')->login($userEmail);
-                    $userEmail->access_token = $token = $this->respondWithToken($this->token)->getData()->access_token;
-                    // login
-
                     $user = array_merge($userEmail->toArray(), $inforUser->toArray());
 
                     return $this->responseOK(200, $user, 'Đăng kí tài khoản thành công . ');
@@ -133,12 +127,6 @@ class InforUserService
                 $data = ['token_verify_email' => $token];
                 $user = UserRepository::updateUser($user->id, $data);
                 // verify email
-
-                // login
-                Auth::login($user);
-                $this->token = auth()->guard('user_api')->login($user);
-                $user->access_token = $token = $this->respondWithToken($this->token)->getData()->access_token;
-                // login
 
                 $user = array_merge($user->toArray(), $inforUser->toArray());
 

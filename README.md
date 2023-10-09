@@ -88,6 +88,8 @@ $ docker-compose run --rm composer analyze
 $ docker-compose run --rm composer fix-format . 
 $ docker-compose run --rm composer analyze PATH_FOLDER_OR_FILE 
 $ docker-compose run --rm composer fix-format PATH_FOLDER_OR_FILE
+$ docker-compose run --rm  artisan migrate:rollback --path=database/migrations/file.php
+$ docker-compose run --rm  artisan migrate --path=database/migrations/file.php
 ```
 
 ## Container structures
