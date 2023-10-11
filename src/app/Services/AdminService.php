@@ -332,26 +332,26 @@ class AdminService
             // $avatar = 'storage/image/avatars/admins/' . $imageName;
 
             // Cách 2
-            $avatar = null;
-            $pathFolder = 'storage/image/avatars/admins';
-            if (!File::exists($pathFolder)) {
-                File::makeDirectory($pathFolder, 0755, true);
-            }
-            $client = new Client;
-            while (true) {
-                try {
-                    $response = $client->get('https://picsum.photos/200/200');
-                    $imageContent = $response->getBody()->getContents();
-                    $pathFolder = 'storage/image/avatars/admins/';
-                    $nameImage = uniqid() . '.jpg';
-                    $avatar = $pathFolder . $nameImage;
-                    file_put_contents($avatar, $imageContent);
-                    if (file_exists($avatar)) {
-                        break;
-                    }
-                } catch (Throwable $e) {
-                }
-            }
+            // $avatar = null;
+            // $pathFolder = 'storage/image/avatars/admins';
+            // if (!File::exists($pathFolder)) {
+            //     File::makeDirectory($pathFolder, 0755, true);
+            // }
+            // $client = new Client;
+            // while (true) {
+            //     try {
+            //         $response = $client->get('https://picsum.photos/200/200');
+            //         $imageContent = $response->getBody()->getContents();
+            //         $pathFolder = 'storage/image/avatars/admins/';
+            //         $nameImage = uniqid() . '.jpg';
+            //         $avatar = $pathFolder . $nameImage;
+            //         file_put_contents($avatar, $imageContent);
+            //         if (file_exists($avatar)) {
+            //             break;
+            //         }
+            //     } catch (Throwable $e) {
+            //     }
+            // }
 
             $new_password = Str::random(10);
             $data = [
@@ -359,7 +359,7 @@ class AdminService
                 'name' => $request->name,
                 'password' => Hash::make($new_password),
                 'role' => 'admin',
-                'avatar' => $avatar,
+                'avatar' => null,
                 'token_verify_email' => null,
                 'email_verified_at' => now(),
             ];
