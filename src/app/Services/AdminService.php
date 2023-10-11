@@ -376,20 +376,19 @@ class AdminService
     public function deleteAdmin($id)
     {
         try {
-            $role = auth('admin_api')->user()->role;
-            if ($role == 0) {
-                $message = 'Bạn không có quyền, chỉ có quản trị viên cấp cao mới có quyền xóa !';
-
-                return $this->responseError(400, $message);
-            } else {
-                $admin = $this->adminRepository->findAdminById($id);
-                if ($admin->avatar) {
-                    File::delete($admin->avatar);
-                }
-                $admin->delete();
-
-                return $this->responseOK(200, null, 'Xóa tài khoản thành công !');
+            $adminLogin = auth('admin_api')->user();
+            $admin = $this->adminRepository->findAdminById($id);
+            if ($admin->role == 'manager') {
+                return $this->responseError(400, 'Không được phép xóa tài khoản giám đốc !');
             }
+            if ($admin->role == 'superadmin' && $adminLogin->role == 'superadmin') {
+                return $this->responseError(400, 'Bạn không có quyền , chỉ có giám đốc mới có quyền xóa superadmin !');
+            }
+            if ($admin->avatar) {
+                File::delete($admin->avatar);
+            }
+            $admin->delete();
+            return $this->responseOK(200, null, 'Xóa tài khoản thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }

@@ -50,8 +50,6 @@ Route::prefix('admin')->controller(AdminController::class)->group(function () {
         Route::get('all-admin', 'allAdmin');
         Route::post('add-admin', 'addAdmin');
         Route::patch('{id}', 'editRole');
-    });
-    Route::middleware(['auth:admin_api', 'role:manager'])->group(function () {
         Route::delete('{id}', 'deleteAdmin');
     });
 });
