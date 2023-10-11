@@ -239,33 +239,33 @@ class InforHospitalService
             // $avatar = 'storage/image/avatars/doctors/' . $avatar;
 
             // Cách 2 dùng "guzzlehttp/guzzle": "^7.8"
-            $avatar = null;
-            $pathFolder = 'storage/image/avatars/doctors';
-            if (!File::exists($pathFolder)) {
-                File::makeDirectory($pathFolder, 0755, true);
-            }
-            $client = new Client;
-            while (true) {
-                try {
-                    $response = $client->get('https://picsum.photos/200/200');
-                    $imageContent = $response->getBody()->getContents();
-                    $pathFolder = 'storage/image/avatars/doctors/';
-                    $nameImage = uniqid() . '.jpg';
-                    $avatar = $pathFolder . $nameImage;
-                    file_put_contents($avatar, $imageContent);
-                    if (file_exists($avatar)) {
-                        break;
-                    }
-                } catch (Throwable $e) {
-                }
-            }
+            // $avatar = null;
+            // $pathFolder = 'storage/image/avatars/doctors';
+            // if (!File::exists($pathFolder)) {
+            //     File::makeDirectory($pathFolder, 0755, true);
+            // }
+            // $client = new Client;
+            // while (true) {
+            //     try {
+            //         $response = $client->get('https://picsum.photos/200/200');
+            //         $imageContent = $response->getBody()->getContents();
+            //         $pathFolder = 'storage/image/avatars/doctors/';
+            //         $nameImage = uniqid() . '.jpg';
+            //         $avatar = $pathFolder . $nameImage;
+            //         file_put_contents($avatar, $imageContent);
+            //         if (file_exists($avatar)) {
+            //             break;
+            //         }
+            //     } catch (Throwable $e) {
+            //     }
+            // }
 
             $new_password = Str::random(10);
             $data = [
                 'email' => $request->email,
                 'password' => Hash::make($new_password),
                 'name' => $request->name,
-                'avatar' => $avatar,
+                'avatar' => null,
                 'is_accept' => true,
                 'role' => 'doctor',
                 'token_verify_email' => null,
