@@ -114,10 +114,7 @@ Route::prefix('article')->controller(ArticleController::class)->group(function (
     Route::middleware(['auth:admin_api,user_api', 'role:admin,superadmin,manager,doctor,hospital'])->group(function () {
         Route::post('/add', 'add');
         Route::post('update/{id}', 'edit');
-    });
-
-    Route::middleware(['auth:user_api', 'role:doctor,hospital'])->group(function () {
-        Route::delete('delete/{id}', 'delete');
+        Route::delete('delete', 'delete');
     });
 
     Route::middleware('auth:admin_api')->group(function () {

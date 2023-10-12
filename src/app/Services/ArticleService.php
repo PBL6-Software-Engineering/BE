@@ -129,19 +129,27 @@ class ArticleService
         }
     }
 
-    public function delete($id)
+    public function delete(Request $request)
     {
         try {
-            $user = UserRepository::findUserById(auth('user_api')->user()->id);
+            $id = $request->id;
+            $user = Auth::user();
             $article = $this->articleRepository->findById($id);
+            if(in_array($user->role, ['admin', 'superadmin', 'manager']) && $article->id_user == null){
+                if ($article->thumbnail) {
+                    File::delete($article->thumbnail);
+                }
+                $article->delete();
+                return $this->responseOK(200, null, 'Xóa bài viết thành công !');
+            }
             if ($user->id != $article->id_user) {
                 return $this->responseError(400, 'Bạn không có quyền xóa bài viết này !');
             }
+            
             if ($article->thumbnail) {
                 File::delete($article->thumbnail);
             }
             $article->delete();
-
             return $this->responseOK(200, null, 'Xóa bài viết thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
