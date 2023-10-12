@@ -68,6 +68,7 @@ class ArticleRepository extends BaseRepository implements ArticleInterface
         $filter = (object) $filter;
         $data = (new self)->model->selectRaw('articles.*, categories.*, articles.id AS id_article, 
             articles.thumbnail AS thumbnail_article, categories.thumbnail AS thumbnail_categorie, categories.id AS id_category, 
+            articles.search_number AS search_number_article,
             articles.created_at AS created_at_article, categories.created_at AS created_at_category,
             articles.updated_at AS updated_at_article, categories.updated_at AS updated_at_category')
             ->leftJoin('categories', 'articles.id_category', '=', 'categories.id')

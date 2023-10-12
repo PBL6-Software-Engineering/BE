@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('content');
             $table->string('thumbnail')->nullable();
+            $table->integer('search_number')->default(0);
             $table->boolean('is_accept')->nullable();
             $table->boolean('is_show')->nullable();
             $table->timestamps();

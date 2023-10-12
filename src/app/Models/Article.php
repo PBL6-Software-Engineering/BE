@@ -16,6 +16,7 @@ class Article extends Model
         'title',
         'content',
         'thumbnail',
+        'search_number',
         'is_accept',
         'is_show',
     ];

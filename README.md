@@ -50,6 +50,7 @@ http://localhost:99
 ```bash
 $ git pull origin main 
 $ docker-compose up -d 
+$ docker-compose run --rm artisan migrate:refresh --path=database/migrations/2023_09_20_010040_create_articles_table.php
 $ docker-compose run --rm artisan queue:work 
 ```
 
