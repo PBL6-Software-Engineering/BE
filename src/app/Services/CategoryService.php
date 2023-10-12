@@ -109,6 +109,36 @@ class CategoryService
         }
     }
 
+    public function deleteMany(Request $request)
+    {
+        try {
+            $list_id = $request->list_id;
+            // dd($list_id); // vẫn là một mảng , nếu k lưu vào database thì k cần encode 
+            $categories = CategoryRepository::getCategory(['list_id' => $list_id])->get();
+            if (!$categories->isEmpty()) { // hay 
+                $articles = ArticleRepository::getArticle(['list_id' => $list_id]);
+                ArticleRepository::updateArticle($articles, ['id_category' => null]);
+                foreach ($categories as $category) {
+                    if ($category->thumbnail) {
+                        // Kiểm tra và xóa tệp
+                        if (File::delete($category->thumbnail)) {
+                            $category->delete(); // xóa tửng bảng ghi cũng được 
+                        } else {
+                            return $this->responseError(400, 'Lỗi khi xóa tệp liên quan đến danh mục.');
+                        }
+                    }
+                }
+                return $this->responseOK(200, null, 'Xóa các danh mục thành công!');
+            } else {
+                return $this->responseError(400, 'Không tìm thấy danh mục nào để xóa.');
+            }
+        } catch (Throwable $e) {
+            // Ghi log lỗi hoặc trả về thông báo lỗi
+            return $this->responseError(400, $e->getMessage());
+        }
+    }
+    
+    
     public function all(Request $request)
     {
         try {

@@ -175,7 +175,18 @@ class ArticleService
                 'name_category' => $name_category,
                 'orderBy' => $orderBy,
                 'orderDirection' => $orderDirection,
+                'is_accept' => $request->is_accept ?? 'both',
+                'is_show' => $request->is_show ?? 'both',
             ];
+
+            if(!empty($request->id_user) && $request->id_user == 'admin'){
+                $filter->id_user = 'admin';
+            } 
+            else if(!empty($request->id_user) && $request->id_user != 'admin') {
+                $user = UserRepository::findUserById( $request->id_user);
+                if(empty($user)) return $this->responseError(400, 'Không tìm thấy người dùng !');
+                $filter->id_user = $request->id_user;
+            } else {}
 
             if (!(empty($request->paginate))) {
                 $articles = $this->articleRepository->searchAll($filter)->paginate($request->paginate);
@@ -183,7 +194,7 @@ class ArticleService
             else {
                 $articles = $this->articleRepository->searchAll($filter)->get();
             }
-            return $this->responseOK(200, $articles, 'Xem tất cả quản trị thành công !');
+            return $this->responseOK(200, $articles, 'Xem tất cả bài viết thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -201,88 +212,6 @@ class ArticleService
             } else {
                 return $this->responseError(400, 'Không tìm thấy bài viết !');
             }
-        } catch (Throwable $e) {
-            return $this->responseError(400, $e->getMessage());
-        }
-    }
-
-    public function articleOfDoctorHospital(Request $request, $id)
-    {
-        // search theo name của category thì search theo select , option
-        $name_category = '';
-        if (!empty($request->name_category)) {
-            $name_category = $request->name_category;
-        }
-
-        $search = $request->search;
-        $orderBy = 'articles.id';
-        $orderDirection = 'ASC';
-
-        if ($request->sortlatest == 'true') {
-            $orderBy = 'articles.id';
-            $orderDirection = 'DESC';
-        }
-
-        if ($request->sortname == 'true') {
-            $orderBy = 'articles.title';
-            $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
-        }
-
-        $filter = (object) [
-            'search' => $search,
-            'name_category' => $name_category,
-            'orderBy' => $orderBy,
-            'orderDirection' => $orderDirection,
-            'id_user' => $id,
-        ];
-
-        if (!(empty($request->paginate))) {
-            $articles = $this->articleRepository->searchAll($filter)->paginate($request->paginate);
-        }
-        else {
-            $articles = $this->articleRepository->searchAll($filter)->get();
-        }
-        // leftjoin để khi mà id_category trong articles null thì vẫn kết hợp với bản categories để lấy ra
-        return $this->responseOK(200, $articles, 'Xem tất cả bài viết thành công !');
-    }
-
-    public function articleOfAdmin(Request $request)
-    {
-        try {
-            // search theo name của category thì search theo select , option
-            $name_category = '';
-            if (!empty($request->name_category)) {
-                $name_category = $request->name_category;
-            }
-            $search = $request->search;
-            $orderBy = 'articles.id';
-            $orderDirection = 'ASC';
-
-            if ($request->sortlatest == 'true') {
-                $orderBy = 'articles.id';
-                $orderDirection = 'DESC';
-            }
-            if ($request->sortname == 'true') {
-                $orderBy = 'articles.title';
-                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
-            }
-            
-            $filter = (object) [
-                'search' => $search,
-                'name_category' => $name_category,
-                'orderBy' => $orderBy,
-                'orderDirection' => $orderDirection,
-                'id_user' => 'admin',
-            ];
-
-            if (!(empty($request->paginate))) {
-                $articles = $this->articleRepository->searchAll($filter)->paginate($request->paginate);
-            }
-            else {
-                $articles = $this->articleRepository->searchAll($filter)->get();
-            }
-
-            return $this->responseOK(200, $articles, 'Xem tất cả bài viết thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }

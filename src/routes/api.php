@@ -103,6 +103,7 @@ Route::prefix('category')->controller(CategoryController::class)->group(function
         Route::post('/add', 'add');
         Route::post('update/{id}', 'edit');
         Route::delete('delete/{id}', 'delete');
+        Route::delete('deletes', 'deleteMany');
     });
     Route::get('/', 'all');
     Route::get('/detail/{id}', 'details');
@@ -125,8 +126,6 @@ Route::prefix('article')->controller(ArticleController::class)->group(function (
     });
 
     Route::get('/', 'all');
-    Route::get('/user/{id}', 'articleOfDoctorHospital');
-    Route::get('/admin', 'articleOfAdmin');
     Route::get('/detail/{id}', 'details');
 });
 

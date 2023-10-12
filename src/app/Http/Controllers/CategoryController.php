@@ -31,6 +31,11 @@ class CategoryController extends Controller
         return $this->categoryService->delete($id);
     }
 
+    public function deleteMany(Request $request)
+    {
+        return $this->categoryService->deleteMany($request);
+    }
+
     public function all(Request $request)
     {
         return $this->categoryService->all($request);

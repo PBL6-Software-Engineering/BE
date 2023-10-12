@@ -50,14 +50,4 @@ class ArticleController extends Controller
     {
         return $this->articleService->details($request, $id);
     }
-
-    public function articleOfDoctorHospital(Request $request, $id)
-    {
-        return $this->articleService->articleOfDoctorHospital($request, $id);
-    }
-
-    public function articleOfAdmin(Request $request)
-    {
-        return $this->articleService->articleOfAdmin($request);
-    }
 }

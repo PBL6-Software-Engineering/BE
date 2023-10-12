@@ -21,6 +21,9 @@ class ArticleRepository extends BaseRepository implements ArticleInterface
         $data = (new self)->model
             ->when(!empty($filter->id_category), function ($q) use ($filter) {
                 $q->where('id_category', $filter->id_category);
+            })
+            ->when(!empty($filter->list_id), function ($q) use ($filter) {
+                $q->whereIn('id_category', $filter->list_id);
             });
 
         return $data;
@@ -81,6 +84,19 @@ class ArticleRepository extends BaseRepository implements ArticleInterface
             })
             ->when(!empty($filter->orderBy), function ($query) use ($filter) {
                 $query->orderBy($filter->orderBy, $filter->orderDirection);
+            })
+
+            ->when(isset($filter->is_accept), function ($query) use ($filter) {
+                if ($filter->is_accept === 'both') {
+                } else {
+                    $query->where('is_accept', $filter->is_accept);
+                }
+            })
+            ->when(isset($filter->is_show), function ($query) use ($filter) {
+                if ($filter->is_show === 'both') {
+                } else {
+                    $query->where('is_show', $filter->is_show);
+                }
             })
 
             // detail

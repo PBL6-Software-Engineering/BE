@@ -19,6 +19,9 @@ class CategoryRepository extends BaseRepository implements CategoryInterface
         $data = (new self)->model
             ->when(!empty($filter->id), function ($q) use ($filter) {
                 $q->where('id', $filter->id);
+            })
+            ->when(!empty($filter->list_id), function ($q) use ($filter) {
+                $q->whereIn('id', $filter->list_id);
             });
 
         return $data;
