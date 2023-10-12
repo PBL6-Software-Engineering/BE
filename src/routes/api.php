@@ -115,11 +115,17 @@ Route::prefix('article')->controller(ArticleController::class)->group(function (
         Route::post('/add', 'add');
         Route::post('update/{id}', 'edit');
         Route::delete('delete', 'delete');
+        Route::get('/detail-private/{id}', 'detailPrivate');
     });
 
     Route::middleware('auth:admin_api')->group(function () {
         Route::post('hide-show/{id}', 'hideShow');
         Route::post('change-accept/{id}', 'changeAccept');
+        Route::get('/admin', 'adminManage');
+    });
+
+    Route::middleware(['auth:user_api', 'role:doctor,hospital'])->group(function () {
+        Route::get('/user', 'articleOfUser');
     });
 
     Route::get('/', 'all');

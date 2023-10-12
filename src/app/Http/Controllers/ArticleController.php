@@ -41,6 +41,16 @@ class ArticleController extends Controller
         return $this->articleService->delete($request);
     }
 
+    public function adminManage(Request $request)
+    {
+        return $this->articleService->adminManage($request);
+    }
+
+    public function articleOfUser(Request $request)
+    {
+        return $this->articleService->articleOfUser($request);
+    }
+
     public function all(Request $request)
     {
         return $this->articleService->all($request);
@@ -49,5 +59,10 @@ class ArticleController extends Controller
     public function details(Request $request, $id)
     {
         return $this->articleService->details($request, $id);
+    }
+
+    public function detailPrivate(Request $request, $id)
+    {
+        return $this->articleService->detailPrivate($request, $id);
     }
 }

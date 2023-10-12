@@ -156,7 +156,52 @@ class ArticleService
         }
     }
 
+    // home 
     public function all(Request $request)
+    {
+        try {
+            $name_category = '';
+            if (!empty($request->name_category)) {
+                $name_category = $request->name_category;
+            }
+            $search = $request->search;
+            $orderBy = 'articles.id';
+            $orderDirection = 'ASC';
+
+            if ($request->sortlatest == 'true') {
+                $orderBy = 'articles.id';
+                $orderDirection = 'DESC';
+            }
+
+            if ($request->sortname == 'true') {
+                $orderBy = 'articles.title';
+                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            }
+
+            $filter = (object) [
+                'search' => $search,
+                'name_category' => $name_category,
+                'orderBy' => $orderBy,
+                'orderDirection' => $orderDirection,
+                'is_accept' => 1,
+                'is_show' => 1,
+            ];
+
+            if (!(empty($request->paginate))) {
+                $articles = $this->articleRepository->searchAll($filter)->paginate($request->paginate);
+            }
+            else {
+                $articles = $this->articleRepository->searchAll($filter)->get();
+            }
+            return $this->responseOK(200, $articles, 'Xem tất cả bài viết thành công !');
+        } catch (Throwable $e) {
+            return $this->responseError(400, $e->getMessage());
+        }
+    }
+
+
+    // admin manage all article 
+    public function adminManage(Request $request)
     {
         try {
             // search theo name của category thì search theo select , option
@@ -185,16 +230,56 @@ class ArticleService
                 'orderDirection' => $orderDirection,
                 'is_accept' => $request->is_accept ?? 'both',
                 'is_show' => $request->is_show ?? 'both',
+                'role' => $request->role ,
             ];
 
-            if(!empty($request->id_user) && $request->id_user == 'admin'){
-                $filter->id_user = 'admin';
-            } 
-            else if(!empty($request->id_user) && $request->id_user != 'admin') {
-                $user = UserRepository::findUserById( $request->id_user);
-                if(empty($user)) return $this->responseError(400, 'Không tìm thấy người dùng !');
-                $filter->id_user = $request->id_user;
-            } else {}
+            if (!(empty($request->paginate))) {
+                $articles = $this->articleRepository->searchAll($filter)->paginate($request->paginate);
+            }
+            else {
+                $articles = $this->articleRepository->searchAll($filter)->get();
+            }
+            return $this->responseOK(200, $articles, 'Xem tất cả bài viết thành công !');
+        } catch (Throwable $e) {
+            return $this->responseError(400, $e->getMessage());
+        }
+    }
+
+    // doctor , hospital 
+    public function articleOfUser(Request $request)
+    {
+        try {
+
+            $user = UserRepository::findUserById(auth('user_api')->user()->id);
+            if(empty($user)) return $this->responseError(400, 'Không tìm thấy người dùng !');
+
+            $name_category = '';
+            if (!empty($request->name_category)) {
+                $name_category = $request->name_category;
+            }
+            $search = $request->search;
+            $orderBy = 'articles.id';
+            $orderDirection = 'ASC';
+
+            if ($request->sortlatest == 'true') {
+                $orderBy = 'articles.id';
+                $orderDirection = 'DESC';
+            }
+
+            if ($request->sortname == 'true') {
+                $orderBy = 'articles.title';
+                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            }
+
+            $filter = (object) [
+                'search' => $search,
+                'name_category' => $name_category,
+                'orderBy' => $orderBy,
+                'orderDirection' => $orderDirection,
+                'is_accept' => $request->is_accept ?? 'both',
+                'is_show' => $request->is_show ?? 'both',
+                'id_user' => auth('user_api')->user()->id,
+            ];
 
             if (!(empty($request->paginate))) {
                 $articles = $this->articleRepository->searchAll($filter)->paginate($request->paginate);
@@ -213,12 +298,43 @@ class ArticleService
         try {
             $filter = (object) [
                 'id' => $id,
+                'is_accept' => 1,
+                'is_show' => 1,
             ];
             $article = $this->articleRepository->searchAll($filter)->first();
             if ($article) {
                 return $this->responseOK(200, $article, 'Xem bài viết chi tiết thành công !');
             } else {
                 return $this->responseError(400, 'Không tìm thấy bài viết !');
+            }
+        } catch (Throwable $e) {
+            return $this->responseError(400, $e->getMessage());
+        }
+    }
+
+    public function detailPrivate(Request $request, $id)
+    {
+        try {
+            $user = Auth::user();
+            $articlePrivate = $this->articleRepository->findById($id);
+            if (empty($articlePrivate)) return $this->responseError(404, 'Không tìm thấy bài viết !');
+
+            if(
+                (in_array($user->role, ['doctor','hospital'])) 
+                && ($user->id != $articlePrivate->id_user) 
+                && ($articlePrivate->is_accept != 1 || $articlePrivate->is_show != 1)
+            ) {
+                return $this->responseError(403, 'Bạn không có quyền xem nó !');
+            }
+
+            $filter = (object) [
+                'id' => $id,
+            ];
+            $article = $this->articleRepository->searchAll($filter)->first();
+            if ($article) {
+                return $this->responseOK(200, $article, 'Xem bài viết chi tiết thành công !');
+            } else {
+                return $this->responseError(404, 'Không tìm thấy bài viết !');
             }
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());

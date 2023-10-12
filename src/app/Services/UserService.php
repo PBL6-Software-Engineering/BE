@@ -73,7 +73,7 @@ class UserService
                 return $this->responseError(400, 'Email không tồn tại !');
             } else {
                 $is_accept = $user->is_accept;
-                if ($is_accept == 0) {
+                if ($is_accept != 1) {
                     return $this->responseError(400, 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !');
                 }
                 if ($user->email_verified_at == null) {
