@@ -70,14 +70,19 @@ class ArticleRepository extends BaseRepository implements ArticleInterface
             articles.thumbnail AS thumbnail_article, categories.thumbnail AS thumbnail_categorie, categories.id AS id_category, 
             articles.search_number AS search_number_article,
             articles.created_at AS created_at_article, categories.created_at AS created_at_category,
-            articles.updated_at AS updated_at_article, categories.updated_at AS updated_at_category')
+            articles.updated_at AS updated_at_article, categories.updated_at AS updated_at_category,
+            users.name as name_user,users.role as role_user')
             ->leftJoin('categories', 'articles.id_category', '=', 'categories.id')
+
+            // left join thêm bảng user để lấy ta name và role 
+            ->leftJoin('users', 'articles.id_user', '=', 'users.id')
 
             // all
             ->when(!empty($filter->search), function ($q) use ($filter) {
                 $q->where(function ($query) use ($filter) {
                     $query->where('title', 'LIKE', '%' . $filter->search . '%')
-                        ->orWhere('content', 'LIKE', '%' . $filter->search . '%');
+                        ->orWhere('content', 'LIKE', '%' . $filter->search . '%')
+                        ->orWhere('users.name', 'LIKE', '%' . $filter->search . '%');
                 });
             })
             ->when(!empty($filter->name_category), function ($query) use ($filter) {
@@ -90,13 +95,13 @@ class ArticleRepository extends BaseRepository implements ArticleInterface
             ->when(isset($filter->is_accept), function ($query) use ($filter) {
                 if ($filter->is_accept === 'both') {
                 } else {
-                    $query->where('is_accept', $filter->is_accept);
+                    $query->where('articles.is_accept', $filter->is_accept);
                 }
             })
             ->when(isset($filter->is_show), function ($query) use ($filter) {
                 if ($filter->is_show === 'both') {
                 } else {
-                    $query->where('is_show', $filter->is_show);
+                    $query->where('articles.is_show', $filter->is_show);
                 }
             })
 
