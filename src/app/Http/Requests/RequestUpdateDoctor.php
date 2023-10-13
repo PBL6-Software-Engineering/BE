@@ -6,6 +6,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class RequestUpdateDoctor extends FormRequest
 {
@@ -26,7 +27,8 @@ class RequestUpdateDoctor extends FormRequest
      */
     public function rules()
     {
-        $userId = $this->route('user');
+        // $userId = $this->route('user');
+        $userId = Auth::guard('user_api')->user()->id;
 
         return [
             'name' => 'required|string|between:2,100',
