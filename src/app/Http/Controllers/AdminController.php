@@ -54,9 +54,9 @@ class AdminController extends Controller
         return $this->adminService->saveAvatar($request);
     }
 
-    public function updateProfile(RequestUpdateAdmin $request, $id_admin)
+    public function updateProfile(RequestUpdateAdmin $request)
     {
-        return $this->adminService->updateProfile($request, $id_admin);
+        return $this->adminService->updateProfile($request);
     }
 
     // verify email
