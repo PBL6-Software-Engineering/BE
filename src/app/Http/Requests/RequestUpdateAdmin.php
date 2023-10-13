@@ -6,6 +6,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class RequestUpdateAdmin extends FormRequest
 {
@@ -27,6 +28,7 @@ class RequestUpdateAdmin extends FormRequest
     public function rules()
     {
         $userId = $this->route('admin');
+        $userId = Auth::guard('admin_api')->user()->id;
 
         return [
             'name' => 'required|string|between:2,100',
