@@ -14,6 +14,7 @@ class InforUser extends Model
         'id_user',
         'date_of_birth',
         'google_id',
+        'facebook_id',
         'gender',
     ];
 

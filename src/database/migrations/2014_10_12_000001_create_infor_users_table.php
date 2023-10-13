@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_user');
             $table->date('date_of_birth')->nullable();
             $table->string('google_id')->nullable();
+            $table->string('facebook_id')->nullable();
             $table->integer('gender')->nullable();
             $table->timestamps();
 

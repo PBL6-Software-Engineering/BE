@@ -295,4 +295,168 @@ class InforUserService
             return $this->responseError(400, $e->getMessage());
         }
     }
+
+    // Login by Google 
+    public function loginGoogle(Request $request)
+    {
+        try {
+            $ggUser = (object) [
+                'id' => $request->id,
+                'name' => $request->name,
+                'email' => $request->email,
+                'avatar' => $request->avatar,
+            ];
+            $filter = [
+                'google_id' => $ggUser->id ?? '',
+            ];
+            $inforUser = InforUserRepository::getInforUser($filter)->first();
+            if ($inforUser) {
+                $user = UserRepository::findUserById($inforUser->id_user);
+                if ($user->is_accept != 1) {
+                    return $this->responseError(400, 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !');
+                } else {
+                    Auth::login($user);
+                    $user->access_token = auth()->guard('user_api')->login($user);
+                    $user->token_type = 'bearer';
+                    $user->expires_in = auth()->guard('user_api')->factory()->getTTL() * 60;
+                    $arrUser = array_merge($user->toArray(), $inforUser->toArray());
+                    return $this->responseOK(200, $arrUser, 'Đăng nhập bằng google thành công !');
+                }
+            } else {
+                $filter = [
+                    'email' => $ggUser->email ?? '',
+                    'role' => 'user',
+                ];
+                $findEmail = UserRepository::findUser($filter)->first();
+                if ($findEmail) {
+                    if ($findEmail->is_accept != 1) {
+                        return $this->responseError(400, 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !');
+                    } else {
+                        $filter = [
+                            'id_user' => $findEmail->id ?? '',
+                        ];
+                        $inforUser = InforUserRepository::getInforUser($filter)->first();
+                        $data = [
+                            'google_id' => $ggUser->id,
+                        ];
+                        $inforUser = InforUserRepository::updateInforUser($inforUser->id, $data);
+                        Auth::login($findEmail);
+                        $findEmail->access_token = auth()->guard('user_api')->login($findEmail);
+                        $findEmail->token_type = 'bearer';
+                        $findEmail->expires_in = auth()->guard('user_api')->factory()->getTTL() * 60;
+                        $arrUser = array_merge($findEmail->toArray(), $inforUser->toArray());
+                        return $this->responseOK(200, $arrUser, 'Đăng nhập bằng google thành công !');
+                    }
+                } else {
+                    $data = [
+                        'name' => $ggUser->name,
+                        'email' => $ggUser->email,
+                        'username' => 'user_' . $ggUser->id,
+                        'avatar' => $ggUser->avatar,
+                        'is_accept' => 1,
+                        'role' => 'user',
+                        'email_verified_at' => now(),
+                    ];
+                    $newUser = UserRepository::createUser($data);
+                    $data = [
+                        'id_user' => $newUser->id,
+                        'google_id' => $ggUser->id,
+                        'gender' => 2,
+                    ];
+                    $newInforUser = InforUserRepository::createInforUser($data);
+                    Auth::login($newUser);
+                    $newUser->access_token = auth()->guard('user_api')->login($newUser);
+                    $newUser->token_type = 'bearer';
+                    $newUser->expires_in = auth()->guard('user_api')->factory()->getTTL() * 60;
+                    $arrUser = array_merge($newUser->toArray(), $newInforUser->toArray());
+                    return $this->responseOK(200, $arrUser, 'Đăng kí bằng google thành công !');
+                }
+            }
+        } catch (Throwable $e) {
+            return $this->responseError(400, $e->getMessage());
+        }
+    }
+    // Login by Google 
+
+    // Login by Facebook 
+    public function loginFacebook(Request $request)
+    {
+        try {
+            $fbUser = (object) [
+                'id' => $request->id,
+                'name' => $request->name,
+                'email' => $request->email,
+                'avatar' => $request->avatar,
+            ];
+            $filter = [
+                'facebook_id' => $fbUser->id ?? '',
+            ];
+            $inforUser = InforUserRepository::getInforUser($filter)->first();
+            if ($inforUser) {
+                $user = UserRepository::findUserById($inforUser->id_user);
+                if ($user->is_accept != 1) {
+                    return $this->responseError(400, 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !');
+                } else {
+                    Auth::login($user);
+                    $user->access_token = auth()->guard('user_api')->login($user);
+                    $user->token_type = 'bearer';
+                    $user->expires_in = auth()->guard('user_api')->factory()->getTTL() * 60;
+                    $arrUser = array_merge($user->toArray(), $inforUser->toArray());
+                    return $this->responseOK(200, $arrUser, 'Đăng nhập bằng facebook thành công !');
+                }
+            } else {
+                $filter = [
+                    'email' => $fbUser->email ?? '',
+                    'role' => 'user',
+                ];
+                $findEmail = UserRepository::findUser($filter)->first();
+                if ($findEmail) {
+                    if ($findEmail->is_accept != 1) {
+                        return $this->responseError(400, 'Tài khoản của bạn đã bị khóa hoặc chưa được phê duyệt !');
+                    } else {
+                        $filter = [
+                            'id_user' => $findEmail->id ?? '',
+                        ];
+                        $inforUser = InforUserRepository::getInforUser($filter)->first();
+                        $data = [
+                            'facebook_id' => $fbUser->id,
+                        ];
+                        $inforUser = InforUserRepository::updateInforUser($inforUser->id, $data);
+                        Auth::login($findEmail);
+                        $findEmail->access_token = auth()->guard('user_api')->login($findEmail);
+                        $findEmail->token_type = 'bearer';
+                        $findEmail->expires_in = auth()->guard('user_api')->factory()->getTTL() * 60;
+                        $arrUser = array_merge($findEmail->toArray(), $inforUser->toArray());
+                        return $this->responseOK(200, $arrUser, 'Đăng nhập bằng facebook thành công !');
+                    }
+                } else {
+                    $data = [
+                        'name' => $fbUser->name,
+                        'email' => $fbUser->email,
+                        'username' => 'user_' . $fbUser->id,
+                        'avatar' => $fbUser->avatar,
+                        'is_accept' => 1,
+                        'role' => 'user',
+                        'email_verified_at' => now(),
+                    ];
+                    $newUser = UserRepository::createUser($data);
+                    $data = [
+                        'id_user' => $newUser->id,
+                        'facebook_id' => $fbUser->id,
+                        'gender' => 2,
+                    ];
+                    $newInforUser = InforUserRepository::createInforUser($data);
+                    Auth::login($newUser);
+                    $newUser->access_token = auth()->guard('user_api')->login($newUser);
+                    $newUser->token_type = 'bearer';
+                    $newUser->expires_in = auth()->guard('user_api')->factory()->getTTL() * 60;
+                    $arrUser = array_merge($newUser->toArray(), $newInforUser->toArray());
+                    return $this->responseOK(200, $arrUser, 'Đăng kí bằng facebook thành công !');
+                }
+            }
+        } catch (Throwable $e) {
+            return $this->responseError(400, $e->getMessage());
+        }
+    }
+    // Login by Facebook
 }

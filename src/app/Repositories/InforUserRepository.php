@@ -33,6 +33,9 @@ class InforUserRepository extends BaseRepository implements InforUserInterface
             })
             ->when(!empty($filter->google_id), function ($q) use ($filter) {
                 $q->where('google_id', $filter->google_id);
+            })
+            ->when(!empty($filter->facebook_id), function ($q) use ($filter) {
+                $q->where('facebook_id', $filter->facebook_id);
             });
 
         return $user;

@@ -108,7 +108,7 @@ class UserService
 
             $user->access_token = $token;
             $user->token_type = 'bearer';
-            $user->expires_in = auth()->guard('admin_api')->factory()->getTTL() * 60;
+            $user->expires_in = auth()->guard('user_api')->factory()->getTTL() * 60;
 
             $arrUser = array_merge($user->toArray(), $inforUser->toArray());
 

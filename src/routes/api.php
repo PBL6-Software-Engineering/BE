@@ -68,6 +68,8 @@ Route::prefix('user')->controller(UserController::class)->group(function () {
 // User Infor
 Route::prefix('infor-user')->controller(InforUserController::class)->group(function () {
     Route::post('register', 'register');
+    Route::post('login-google', 'loginGoogle');
+    Route::post('login-facebook', 'loginFacebook');
     Route::get('authorized/google', [InforUserController::class, 'redirectToGoogle'])->name('google');
     Route::get('authorized/google/callback', [InforUserController::class, 'handleGoogleCallback']);
     Route::middleware(['auth:user_api', 'role:user'])->group(function () {
@@ -115,17 +117,21 @@ Route::prefix('article')->controller(ArticleController::class)->group(function (
         Route::post('/add', 'add');
         Route::post('update/{id}', 'edit');
         Route::delete('delete', 'delete');
+        Route::post('hide-show/{id}', 'hideShow');
         Route::get('/detail-private/{id}', 'detailPrivate');
     });
 
     Route::middleware('auth:admin_api')->group(function () {
-        Route::post('hide-show/{id}', 'hideShow');
         Route::post('change-accept/{id}', 'changeAccept');
         Route::get('/admin', 'adminManage');
     });
 
-    Route::middleware(['auth:user_api', 'role:doctor,hospital'])->group(function () {
-        Route::get('/user', 'articleOfUser');
+    Route::middleware(['auth:user_api', 'role:hospital'])->group(function () {
+        Route::get('/user', 'articleOfHospital');
+    });
+
+    Route::middleware(['auth:user_api', 'role:doctor'])->group(function () {
+        Route::get('/user', 'articleOfDoctor');
     });
 
     Route::get('/', 'all');

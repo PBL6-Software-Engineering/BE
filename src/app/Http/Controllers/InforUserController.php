@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RequestCreateInforUser;
 use App\Http\Requests\RequestCreatePassword;
+use App\Http\Requests\RequestOAuth2;
 use App\Http\Requests\RequestUpdateUser;
 use App\Services\InforUserService;
 use Laravel\Socialite\Facades\Socialite;
@@ -48,4 +49,16 @@ class InforUserController extends Controller
     {
         return $this->inforUserService->createPassword($request);
     }
+
+    public function loginGoogle(RequestOAuth2 $request)
+    {
+        return $this->inforUserService->loginGoogle($request);
+    }
+
+    public function loginFacebook(RequestOAuth2 $request)
+    {
+        return $this->inforUserService->loginFacebook($request);
+    }
+
+    
 }

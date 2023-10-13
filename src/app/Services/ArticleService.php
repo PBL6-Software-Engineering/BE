@@ -64,6 +64,8 @@ class ArticleService
             $user = Auth::user();
             if (in_array($user->role, ['doctor', 'hospital'])) {
                 $id_user = $user->id;
+            }
+            if($user->role == 'doctor') {
                 $is_accept = false;
             }
             $data = [
@@ -83,7 +85,15 @@ class ArticleService
     public function edit(RequestUpdateArticle $request, $id)
     {
         try {
-            $user = UserRepository::findUserById(auth('user_api')->user()->id);
+
+            $user = Auth::user();
+            $article = $this->articleRepository->findById($id);
+            if (empty($article)) return $this->responseError(404, 'Không tìm thấy bài viết !');
+
+            if(in_array($user->role, ['doctor','hospital']) && ($user->id != $article->id_user)) {
+                
+            }
+
             $article = $this->articleRepository->findById($id);
             if ($user->id != $article->id_user) {
                 return $this->responseError(400, 'Bạn không có quyền chỉnh sửa bài viết này !');
@@ -107,6 +117,24 @@ class ArticleService
 
     public function hideShow(Request $request, $id)
     {
+        try {
+            $user = Auth::user();
+            $article = $this->articleRepository->findById($id);
+            if (empty($article)) return $this->responseError(404, 'Không tìm thấy bài viết !');
+
+            if(in_array($user->role, ['doctor','hospital']) && ($user->id != $article->id_user)) {
+                return $this->responseError(403, 'Bạn không có quyền chỉnh sửa nó !');
+            }
+
+            if ($article) {
+                return $this->responseOK(200, $article, 'Xem bài viết chi tiết thành công !');
+            } else {
+                return $this->responseError(404, 'Không tìm thấy bài viết !');
+            }
+        } catch (Throwable $e) {
+            return $this->responseError(400, $e->getMessage());
+        }
+
         try {
             $article = $this->articleRepository->findById($id);
             $article = $this->articleRepository->updateArticle($article, ['is_show' => $request->is_show]);
@@ -331,11 +359,8 @@ class ArticleService
                 'id' => $id,
             ];
             $article = $this->articleRepository->searchAll($filter)->first();
-            if ($article) {
-                return $this->responseOK(200, $article, 'Xem bài viết chi tiết thành công !');
-            } else {
-                return $this->responseError(404, 'Không tìm thấy bài viết !');
-            }
+            return $this->responseOK(200, $article, 'Xem bài viết chi tiết thành công !');
+            
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
