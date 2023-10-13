@@ -119,9 +119,10 @@ class AdminService
         }
     }
 
-    public function updateProfile(RequestUpdateAdmin $request, $id_admin)
+    public function updateProfile(RequestUpdateAdmin $request)
     {
         try {
+            $id_admin = auth('admin_api')->user()->id;
             $admin = $this->adminRepository->findAdminById($id_admin);
             $oldEmail = $admin->email;
             if ($request->hasFile('avatar')) {
