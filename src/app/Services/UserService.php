@@ -91,19 +91,14 @@ class UserService
                 $user->have_password = false;
             } // login by gg chưa có password
 
-            $filter = (object) [
-                'id_user' => $user->id ?? '',
-                'id_doctor' => $user->id ?? '',
-                'id_hospital' => $user->id ?? '',
-            ];
-            $inforUser = InforUserRepository::getInforUser($filter)->first();
+            $inforUser = InforUserRepository::getInforUser(['id_user' => $user->id])->first();
             if ($user->role == 'hospital') {
-                $inforUser = InforHospitalRepository::getInforHospital($filter)->first();
+                $inforUser = InforHospitalRepository::getInforHospital(['id_hospital' => $user->id])->first();
                 $inforUser->infrastructure = json_decode($inforUser->infrastructure);
                 $inforUser->location = json_decode($inforUser->location);
             }
             if ($user->role == 'doctor') {
-                $inforUser = InforDoctorRepository::getInforDoctor($filter)->first();
+                $inforUser = InforDoctorRepository::getInforDoctor(['id_doctor' => $user->id])->first();
             }
 
             $user->access_token = $token;
