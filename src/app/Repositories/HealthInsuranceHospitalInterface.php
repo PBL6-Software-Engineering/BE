@@ -14,5 +14,4 @@ interface HealthInsuranceHospitalInterface extends RepositoryInterface
     public static function createHealInsurHos($data);
 
     public static function searchHealInsurHos($filter);
-
 }

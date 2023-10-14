@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Http\Requests\RequestCreateArticle;
 use App\Http\Requests\RequestUpdateArticle;
-use App\Models\InforDoctor;
 use App\Repositories\ArticleInterface;
 use App\Repositories\CategoryRepository;
 use App\Repositories\InforDoctorRepository;
@@ -68,7 +67,7 @@ class ArticleService
             }
 
             $is_accept = true;
-            if($user->role == 'doctor') {
+            if ($user->role == 'doctor') {
                 $is_accept = false;
             }
             $data = [
@@ -90,12 +89,14 @@ class ArticleService
         try {
             $user = Auth::user();
             $article = $this->articleRepository->findById($id);
-            if (empty($article)) return $this->responseError(404, 'Không tìm thấy bài viết !');
+            if (empty($article)) {
+                return $this->responseError(404, 'Không tìm thấy bài viết !');
+            }
 
-            if(in_array($user->role, ['doctor','hospital']) && ($user->id != $article->id_user)) {
+            if (in_array($user->role, ['doctor', 'hospital']) && ($user->id != $article->id_user)) {
                 return $this->responseError(403, 'Bạn không có quyền chỉnh sửa bài viết này !');
-            } 
-            if (in_array($user->role, ['admin','superadmin', 'manager']) && ($article->id_user != null)) {
+            }
+            if (in_array($user->role, ['admin', 'superadmin', 'manager']) && ($article->id_user != null)) {
                 return $this->responseError(403, 'Bạn không có quyền chỉnh sửa bài viết này !');
             }
 
@@ -121,18 +122,21 @@ class ArticleService
         try {
             $user = Auth::user();
             $article = $this->articleRepository->findById($id);
-            if (empty($article)) return $this->responseError(404, 'Không tìm thấy bài viết !');
+            if (empty($article)) {
+                return $this->responseError(404, 'Không tìm thấy bài viết !');
+            }
 
-            if(in_array($user->role, ['doctor','hospital']) && ($user->id != $article->id_user)) {
+            if (in_array($user->role, ['doctor', 'hospital']) && ($user->id != $article->id_user)) {
                 return $this->responseError(403, 'Bạn không có quyền xóa bài viết này !');
-            } 
-            if (in_array($user->role, ['admin','superadmin', 'manager']) && ($article->id_user != null)) {
+            }
+            if (in_array($user->role, ['admin', 'superadmin', 'manager']) && ($article->id_user != null)) {
                 return $this->responseError(403, 'Bạn không có quyền xóa bài viết này !');
             }
             if ($article->thumbnail) {
                 File::delete($article->thumbnail);
             }
             $article->delete();
+
             return $this->responseOK(200, null, 'Xóa bài viết thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
@@ -144,27 +148,29 @@ class ArticleService
         try {
             $user = Auth::user();
             $articlePrivate = $this->articleRepository->findById($id);
-            if (empty($articlePrivate)) return $this->responseError(404, 'Không tìm thấy bài viết !');
+            if (empty($articlePrivate)) {
+                return $this->responseError(404, 'Không tìm thấy bài viết !');
+            }
 
-            if(($user->role == 'doctor') && ($user->id != $articlePrivate->id_user)){
+            if (($user->role == 'doctor') && ($user->id != $articlePrivate->id_user)) {
                 return $this->responseError(403, 'Bạn không có quyền thay đổi trạng thái hiển thị bài viết này !');
             }
-            
-            if($user->role == 'hospital') {
+
+            if ($user->role == 'hospital') {
                 $doctors = InforDoctorRepository::getInforDoctor(['id_hospital' => $user->id])->get();
                 $idDoctorHospitals = [];
                 $idDoctorHospitals[] = $user->id;
                 foreach ($doctors as $doctor) {
                     $idDoctorHospitals[] = $doctor->id_doctor;
                 }
-                if((!in_array($articlePrivate->id_user, $idDoctorHospitals))) {
+                if ((!in_array($articlePrivate->id_user, $idDoctorHospitals))) {
                     return $this->responseError(403, 'Bạn không có quyền thay đổi trạng thái hiển thị bài viết này !');
                 }
             }
 
             $articlePrivate = $this->articleRepository->updateArticle($articlePrivate, ['is_show' => $request->is_show]);
-            return $this->responseOK(200, $articlePrivate, 'Thay đổi trạng thái hiển thị của bài viết thành công !');
 
+            return $this->responseOK(200, $articlePrivate, 'Thay đổi trạng thái hiển thị của bài viết thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -175,7 +181,9 @@ class ArticleService
         try {
             $user = Auth::user();
             $articlePrivate = $this->articleRepository->findById($id);
-            if (empty($articlePrivate)) return $this->responseError(404, 'Không tìm thấy bài viết !');
+            if (empty($articlePrivate)) {
+                return $this->responseError(404, 'Không tìm thấy bài viết !');
+            }
 
             $doctors = InforDoctorRepository::getInforDoctor(['id_hospital' => $user->id])->get();
             $idDoctorHospitals = [];
@@ -184,20 +192,19 @@ class ArticleService
                 $idDoctorHospitals[] = $doctor->id_doctor;
             }
 
-            if((!in_array($articlePrivate->id_user, $idDoctorHospitals))) {
+            if ((!in_array($articlePrivate->id_user, $idDoctorHospitals))) {
                 return $this->responseError(403, 'Bạn không có quyền thay đổi trạng thái hiển thị bài viết này !');
             }
 
             $articlePrivate = $this->articleRepository->updateArticle($articlePrivate, ['is_accept' => $request->is_accept]);
 
             return $this->responseOK(200, $articlePrivate, 'Thay đổi trạng thái của bài viết thành công !');
-
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
     }
 
-    // admin manage all article 
+    // admin manage all article
     public function adminManage(Request $request)
     {
         try {
@@ -227,29 +234,30 @@ class ArticleService
                 'orderDirection' => $orderDirection,
                 'is_accept' => $request->is_accept ?? 'both',
                 'is_show' => $request->is_show ?? 'both',
-                'role' => $request->role ,
+                'role' => $request->role,
             ];
 
             if (!(empty($request->paginate))) {
                 $articles = $this->articleRepository->searchAll($filter)->paginate($request->paginate);
-            }
-            else {
+            } else {
                 $articles = $this->articleRepository->searchAll($filter)->get();
             }
+
             return $this->responseOK(200, $articles, 'Xem tất cả bài viết thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
     }
 
-    // hospital 
+    // hospital
     public function articleOfHospital(Request $request)
     {
         try {
-
             $user = UserRepository::findUserById(auth('user_api')->user()->id);
-            if(empty($user)) return $this->responseError(404, 'Không tìm thấy người dùng !');
-            
+            if (empty($user)) {
+                return $this->responseError(404, 'Không tìm thấy người dùng !');
+            }
+
             $doctors = InforDoctorRepository::getInforDoctor(['id_hospital' => $user->id])->get();
             $idDoctorHospitals = [];
             $idDoctorHospitals[] = $user->id;
@@ -283,28 +291,29 @@ class ArticleService
                 'is_accept' => $request->is_accept ?? 'both',
                 'is_show' => $request->is_show ?? 'both',
                 'id_doctor_hospital' => $idDoctorHospitals,
-                'role' => $request->role ,
+                'role' => $request->role,
             ];
 
             if (!(empty($request->paginate))) {
                 $articles = $this->articleRepository->searchAll($filter)->paginate($request->paginate);
-            }
-            else {
+            } else {
                 $articles = $this->articleRepository->searchAll($filter)->get();
             }
+
             return $this->responseOK(200, $articles, 'Xem tất cả bài viết thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
     }
 
-    // doctor 
+    // doctor
     public function articleOfDoctor(Request $request)
     {
         try {
-
             $user = UserRepository::findUserById(auth('user_api')->user()->id);
-            if(empty($user)) return $this->responseError(404, 'Không tìm thấy người dùng !');
+            if (empty($user)) {
+                return $this->responseError(404, 'Không tìm thấy người dùng !');
+            }
 
             $name_category = '';
             if (!empty($request->name_category)) {
@@ -336,17 +345,17 @@ class ArticleService
 
             if (!(empty($request->paginate))) {
                 $articles = $this->articleRepository->searchAll($filter)->paginate($request->paginate);
-            }
-            else {
+            } else {
                 $articles = $this->articleRepository->searchAll($filter)->get();
             }
+
             return $this->responseOK(200, $articles, 'Xem tất cả bài viết thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
     }
 
-    // home 
+    // home
     public function articleHome(Request $request)
     {
         try {
@@ -379,10 +388,10 @@ class ArticleService
 
             if (!(empty($request->paginate))) {
                 $articles = $this->articleRepository->searchAll($filter)->paginate($request->paginate);
-            }
-            else {
+            } else {
                 $articles = $this->articleRepository->searchAll($filter)->get();
             }
+
             return $this->responseOK(200, $articles, 'Xem tất cả bài viết thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
@@ -413,21 +422,23 @@ class ArticleService
         try {
             $user = Auth::user();
             $articlePrivate = $this->articleRepository->findById($id);
-            if (empty($articlePrivate)) return $this->responseError(404, 'Không tìm thấy bài viết !');
+            if (empty($articlePrivate)) {
+                return $this->responseError(404, 'Không tìm thấy bài viết !');
+            }
 
-            if($articlePrivate->is_accept != 1 || $articlePrivate->is_show != 1) {
-                if(($user->role == 'doctor') && ($user->id != $articlePrivate->id_user)){
+            if ($articlePrivate->is_accept != 1 || $articlePrivate->is_show != 1) {
+                if (($user->role == 'doctor') && ($user->id != $articlePrivate->id_user)) {
                     return $this->responseError(403, 'Bạn không có quyền xem nó !');
                 }
-                
-                if($user->role == 'hospital') {
+
+                if ($user->role == 'hospital') {
                     $doctors = InforDoctorRepository::getInforDoctor(['id_hospital' => $user->id])->get();
                     $idDoctorHospitals = [];
                     $idDoctorHospitals[] = $user->id;
                     foreach ($doctors as $doctor) {
                         $idDoctorHospitals[] = $doctor->id_doctor;
                     }
-                    if((!in_array($articlePrivate->id_user, $idDoctorHospitals))) {
+                    if ((!in_array($articlePrivate->id_user, $idDoctorHospitals))) {
                         return $this->responseError(403, 'Bạn không có quyền xem nó !');
                     }
                 }
@@ -437,6 +448,7 @@ class ArticleService
                 'id' => $id,
             ];
             $article = $this->articleRepository->searchAll($filter)->first();
+
             return $this->responseOK(200, $article, 'Xem bài viết chi tiết thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());

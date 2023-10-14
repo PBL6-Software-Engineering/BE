@@ -104,23 +104,23 @@ class InforHospitalService
                 $inforUser->infrastructure = json_decode($inforUser->infrastructure);
                 $inforUser->location = json_decode($inforUser->location);
 
-                // addTimeWork 
+                // addTimeWork
                 $timeDefault = [
                     'enable' => true,
                     'morning' => [
                         'enable' => true,
-                        'time' => ['7:30', '11:30']
+                        'time' => ['7:30', '11:30'],
                     ],
                     'afternoon' => [
                         'enable' => true,
-                        'time' => ['13:30', '17:30']
+                        'time' => ['13:30', '17:30'],
                     ],
                     'night' => [
                         'enable' => true,
-                        'time' => ['18:00', '20:00']
-                    ]
+                        'time' => ['18:00', '20:00'],
+                    ],
                 ];
-                
+
                 $dataTimeWork = [
                     'id_hospital' => $user->id,
                     'enable' => true,
@@ -135,11 +135,11 @@ class InforHospitalService
                         'friday' => $timeDefault,
                         'saturday' => $timeDefault,
                         'sunday' => $timeDefault,
-                    ])
+                    ]),
                 ];
                 $timeWork = TimeWorkRepository::createTimeWork($dataTimeWork);
                 $timeWork->times = json_decode($timeWork->times);
-                // addTimeWork 
+                // addTimeWork
 
                 $hospital = array_merge($user->toArray(), $inforUser->toArray(), $timeWork->toArray());
 

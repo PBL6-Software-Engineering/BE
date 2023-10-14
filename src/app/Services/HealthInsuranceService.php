@@ -88,7 +88,6 @@ class HealthInsuranceService
     public function all(Request $request)
     {
         try {
-
             $search = $request->search;
             $orderBy = 'id';
             $orderDirection = 'ASC';
@@ -114,6 +113,7 @@ class HealthInsuranceService
             } else {
                 $departments = $this->healthInsurRepository->searchHealthInsur($filter)->get();
             }
+
             return $this->responseOK(200, $departments, 'Xem tất cả bảo hiểm thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());

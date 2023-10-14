@@ -5,8 +5,8 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class RequestUpdateUser extends FormRequest
 {
@@ -27,7 +27,6 @@ class RequestUpdateUser extends FormRequest
      */
     public function rules()
     {
-
         // $userId = $this->route('user');
         $userId = Auth::guard('user_api')->user()->id;
 

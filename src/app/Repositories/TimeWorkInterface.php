@@ -11,5 +11,4 @@ interface TimeWorkInterface extends RepositoryInterface
     public static function getTimeWork($filter);
 
     public static function updateTimeWork($result, $data);
-
 }

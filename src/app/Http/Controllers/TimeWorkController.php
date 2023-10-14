@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RequestCreateTimeWork;
 use App\Http\Requests\RequestUpdateTimeWork;
 use App\Services\TimeWorkService;
-use Illuminate\Http\Request;
 
 class TimeWorkController extends Controller
 {

@@ -3,7 +3,6 @@
 namespace App\Rules;
 
 use App\Models\HealthInsuranceHospital;
-use App\Models\HospitalDepartment;
 use Illuminate\Contracts\Validation\Rule;
 
 class UniqueHealthInsuranceHospitalRule implements Rule

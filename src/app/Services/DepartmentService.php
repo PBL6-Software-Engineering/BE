@@ -122,7 +122,6 @@ class DepartmentService
     public function all(Request $request)
     {
         try {
-
             $search = $request->search;
             $orderBy = 'id';
             $orderDirection = 'ASC';
@@ -147,8 +146,8 @@ class DepartmentService
             } else {
                 $departments = $this->departmentRepository->searchDepartment($filter)->get();
             }
-            return $this->responseOK(200, $departments, 'Xem tất cả khoa thành công !');
 
+            return $this->responseOK(200, $departments, 'Xem tất cả khoa thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }

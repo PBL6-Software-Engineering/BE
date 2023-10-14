@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-use App\Models\HospitalService;
 use App\Models\TimeWork;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -57,6 +56,4 @@ class TimeWorkRepository extends BaseRepository implements TimeWorkInterface
             throw $e;
         }
     }
-
-    
 }

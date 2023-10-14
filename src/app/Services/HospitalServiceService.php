@@ -162,8 +162,8 @@ class HospitalServiceService
                     $hospitalService->infor = json_decode($hospitalService->infor);
                 }
             }
-            return $this->responseOK(200, $hospitalServices, 'Xem tất cả dịch vụ của bệnh viện thành công !');
 
+            return $this->responseOK(200, $hospitalServices, 'Xem tất cả dịch vụ của bệnh viện thành công !');
         } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }

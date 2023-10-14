@@ -2,10 +2,8 @@
 
 namespace App\Services;
 
-use App\Repositories\ExampleInterface;
-use App\Repositories\HealthInsuranceHospitalInterface;
 use App\Http\Requests\RequestCreateHealthInsuranceHospital;
-use App\Http\Requests\RequestUpdateHealthInsuranceHospital;
+use App\Repositories\HealthInsuranceHospitalInterface;
 use App\Repositories\HealthInsuranceRepository;
 use App\Repositories\InforHospitalRepository;
 use Illuminate\Http\Request;
@@ -48,7 +46,7 @@ class HealthInsuranceHospitalService
 
             $data = [
                 'id_hospital' => $user->id,
-                'id_health_insurance' => $request->id_health_insurance
+                'id_health_insurance' => $request->id_health_insurance,
             ];
             $healInsurHos = $this->healInsurHosRepository->createHealInsurHos($data);
 
@@ -64,13 +62,14 @@ class HealthInsuranceHospitalService
             $user = auth()->guard('user_api')->user();
             $filter = [
                 'id' => $id,
-                'id_hospital' => $user->id
+                'id_hospital' => $user->id,
             ];
             $healInsurHos = $this->healInsurHosRepository->getHealInsurHos($filter)->first();
             if (empty($healInsurHos)) {
                 return $this->responseError(404, 'Không có bảo hiểm này trong danh sách chấp thuận !');
             }
             $healInsurHos->delete();
+
             return $this->responseOK(200, null, 'Bệnh viện hủy chấp thuận thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
@@ -107,9 +106,11 @@ class HealthInsuranceHospitalService
                     return $this->responseError(404, 'Không tìm thấy bệnh viện !');
                 }
                 $healInsurHos = $this->healInsurHosRepository->searchHealInsurHos($filter)->paginate($request->paginate);
+
                 return $this->responseOK(200, $healInsurHos, 'Xem tất cả bảo hiểm của bệnh viện thành công !');
             } else {
                 $healInsurHos = $this->healInsurHosRepository->searchHealInsurHos($filter)->get();
+
                 return $this->responseOK(200, $healInsurHos, 'Xem tất cả bảo hiểm của bệnh viện thành công !');
             }
         } catch (Throwable $e) {

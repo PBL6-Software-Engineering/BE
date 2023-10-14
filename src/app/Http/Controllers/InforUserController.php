@@ -59,6 +59,4 @@ class InforUserController extends Controller
     {
         return $this->inforUserService->loginFacebook($request);
     }
-
-    
 }

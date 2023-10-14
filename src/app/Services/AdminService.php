@@ -181,7 +181,6 @@ class AdminService
     public function allAdmin(Request $request)
     {
         try {
-
             $search = $request->search;
             $orderBy = 'id';
             $orderDirection = 'ASC';
@@ -205,13 +204,13 @@ class AdminService
 
             if (!(empty($request->paginate))) {
                 $allAdmin = $this->adminRepository->searchAdmin($filter)->paginate($request->paginate);
-                return $this->responseOK(200, $allAdmin, 'Xem tất cả quản trị thành công !');
-            }
-            else {
-                $allAdmin = $this->adminRepository->searchAdmin($filter)->get();
-                return $this->responseOK(200, $allAdmin, 'Xem tất cả quản trị thành công !');
-            }
 
+                return $this->responseOK(200, $allAdmin, 'Xem tất cả quản trị thành công !');
+            } else {
+                $allAdmin = $this->adminRepository->searchAdmin($filter)->get();
+
+                return $this->responseOK(200, $allAdmin, 'Xem tất cả quản trị thành công !');
+            }
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -220,7 +219,6 @@ class AdminService
     public function allUser(Request $request)
     {
         try {
-
             $search = $request->search;
             $orderBy = 'id';
             $orderDirection = 'ASC';
@@ -245,13 +243,13 @@ class AdminService
 
             if (!(empty($request->paginate))) {
                 $allUser = UserRepository::searchUser($filter)->paginate($request->paginate);
-                return $this->responseOK(200, $allUser, 'Xem tất cả người dùng thành công !');
-            }
-            else {
-                $allUser = UserRepository::searchUser($filter)->get();
-                return $this->responseOK(200, $allUser, 'Xem tất cả người dùng thành công !');
-            }
 
+                return $this->responseOK(200, $allUser, 'Xem tất cả người dùng thành công !');
+            } else {
+                $allUser = UserRepository::searchUser($filter)->get();
+
+                return $this->responseOK(200, $allUser, 'Xem tất cả người dùng thành công !');
+            }
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -389,6 +387,7 @@ class AdminService
                 File::delete($admin->avatar);
             }
             $admin->delete();
+
             return $this->responseOK(200, null, 'Xóa tài khoản thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());

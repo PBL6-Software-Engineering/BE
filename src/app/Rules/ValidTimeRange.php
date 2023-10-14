@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Rules;
+
 use Illuminate\Contracts\Validation\Rule;
 
 class ValidTimeRange implements Rule
@@ -9,14 +10,14 @@ class ValidTimeRange implements Rule
     {
         $startTime = strtotime($value[0]);
         $endTime = strtotime($value[1]);
-        $minTime = strtotime("00:00");
-        $maxTime = strtotime("24:00");
+        $minTime = strtotime('00:00');
+        $maxTime = strtotime('24:00');
 
         if ($startTime === false || $endTime === false) {
             return false; // Thời gian không hợp lệ
         }
 
-        // Kiểm tra thời gian theo yêu cầu của bạn 
+        // Kiểm tra thời gian theo yêu cầu của bạn
         if ($startTime >= $endTime || $startTime < $minTime || $endTime > $maxTime) { // (điều kiện sai)
             return false;
         }

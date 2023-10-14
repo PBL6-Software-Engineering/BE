@@ -223,7 +223,9 @@ class UserService
     {
         try {
             $user = UserRepository::findUserById($id);
-            if (empty($user)) return $this->responseError(404, 'Không tìm thấy tài khoản !');
+            if (empty($user)) {
+                return $this->responseError(404, 'Không tìm thấy tài khoản !');
+            }
             $inforUser = InforUserRepository::getInforUser(['id_user' => $user->id])->first();
             if ($user->role == 'hospital') {
                 $inforUser = InforHospitalRepository::getInforHospital(['id_hospital' => $user->id])->first();
@@ -234,6 +236,7 @@ class UserService
                 $inforUser = InforDoctorRepository::getInforDoctor(['id_doctor' => $user->id])->first();
             }
             $arrUser = array_merge($user->toArray(), $inforUser->toArray());
+
             return $this->responseOK(200, $arrUser, 'Xem thông tin người dùng thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());

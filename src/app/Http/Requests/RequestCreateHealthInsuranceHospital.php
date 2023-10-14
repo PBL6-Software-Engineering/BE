@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use App\Rules\UniqueHealthInsuranceHospitalRule;
-use App\Rules\UniqueHospitalDepartmentRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -35,7 +34,7 @@ class RequestCreateHealthInsuranceHospital extends FormRequest
                 'required',
                 'integer',
                 new UniqueHealthInsuranceHospitalRule($this->id_health_insurance, $id_hospital),
-            ]
+            ],
         ];
     }
 

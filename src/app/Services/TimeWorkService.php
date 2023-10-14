@@ -2,16 +2,8 @@
 
 namespace App\Services;
 
-use App\Http\Requests\RequestCreateHospitalService;
-use App\Http\Requests\RequestCreateTimeWork;
-use App\Http\Requests\RequestUpdateHospitalService;
 use App\Http\Requests\RequestUpdateTimeWork;
-use App\Models\WorkSchedule;
-use App\Repositories\HospitalDepartmentRepository;
-use App\Repositories\HospitalServiceInterface;
 use App\Repositories\TimeWorkInterface;
-use App\Repositories\UserRepository;
-use Illuminate\Http\Request;
 use Throwable;
 
 class TimeWorkService
@@ -53,6 +45,7 @@ class TimeWorkService
             ]);
             $timeWork = $this->timeWorkRepository->updateTimeWork($timeWork, $request->all());
             $timeWork->times = json_decode($timeWork->times);
+
             return $this->responseOK(200, $timeWork, 'Chỉnh sửa lịch làm việc thành công !');
         } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
@@ -68,6 +61,7 @@ class TimeWorkService
             ];
             $timeWork = $this->timeWorkRepository->getTimeWork($filter)->first();
             $timeWork->times = json_decode($timeWork->times);
+
             return $this->responseOK(200, $timeWork, 'Xem chi tiết lịch làm việc thành công !');
         } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);

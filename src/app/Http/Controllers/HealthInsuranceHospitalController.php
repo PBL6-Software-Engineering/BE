@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\RequestCreateHealthInsuranceHospital;
-use App\Http\Requests\RequestUpdateHealthInsuranceHospital;
 use App\Services\HealthInsuranceHospitalService;
 use Illuminate\Http\Request;
 

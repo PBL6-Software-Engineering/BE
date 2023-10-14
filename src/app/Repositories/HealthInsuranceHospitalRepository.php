@@ -54,25 +54,23 @@ class HealthInsuranceHospitalRepository extends BaseRepository implements Health
         $filter = (object) $filter;
         $data = (new self)->model->selectRaw('health_insurance_hospitals.id as id_health_insurance_hospital,
         health_insurances.id as id_health_insurance, health_insurance_hospitals.* , health_insurances.*')
-        ->join('health_insurances', 'health_insurance_hospitals.id_health_insurance', '=', 'health_insurances.id')
-        ->when(!empty($filter->search), function ($q) use ($filter) {
-            $q->where(function ($query) use ($filter) {
-                $query->where('name', 'LIKE', '%' . $filter->search . '%')
-                    ->orWhere('description', 'LIKE', '%' . $filter->search . '%');
+            ->join('health_insurances', 'health_insurance_hospitals.id_health_insurance', '=', 'health_insurances.id')
+            ->when(!empty($filter->search), function ($q) use ($filter) {
+                $q->where(function ($query) use ($filter) {
+                    $query->where('name', 'LIKE', '%' . $filter->search . '%')
+                        ->orWhere('description', 'LIKE', '%' . $filter->search . '%');
+                });
+            })
+            ->when(!empty($filter->id_hospital), function ($q) use ($filter) {
+                $q->where('health_insurance_hospitals.id_hospital', $filter->id_hospital);
+            })
+            ->when(!empty($filter->id), function ($q) use ($filter) {
+                $q->where('health_insurance_hospitals.id', $filter->id);
+            })
+            ->when(!empty($filter->orderBy), function ($query) use ($filter) {
+                $query->orderBy($filter->orderBy, $filter->orderDirection);
             });
-        })
-        ->when(!empty($filter->id_hospital), function ($q) use ($filter) {
-            $q->where('health_insurance_hospitals.id_hospital', $filter->id_hospital);
-        })
-        ->when(!empty($filter->id), function ($q) use ($filter) {
-            $q->where('health_insurance_hospitals.id', $filter->id);
-        })            
-        ->when(!empty($filter->orderBy), function ($query) use ($filter) {
-            $query->orderBy($filter->orderBy, $filter->orderDirection);
-        });
 
         return $data;
     }
-
-
 }

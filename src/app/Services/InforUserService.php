@@ -296,7 +296,7 @@ class InforUserService
         }
     }
 
-    // Login by Google 
+    // Login by Google
     public function loginGoogle(Request $request)
     {
         try {
@@ -320,6 +320,7 @@ class InforUserService
                     $user->token_type = 'bearer';
                     $user->expires_in = auth()->guard('user_api')->factory()->getTTL() * 60;
                     $arrUser = array_merge($user->toArray(), $inforUser->toArray());
+
                     return $this->responseOK(200, $arrUser, 'Đăng nhập bằng google thành công !');
                 }
             } else {
@@ -345,6 +346,7 @@ class InforUserService
                         $findEmail->token_type = 'bearer';
                         $findEmail->expires_in = auth()->guard('user_api')->factory()->getTTL() * 60;
                         $arrUser = array_merge($findEmail->toArray(), $inforUser->toArray());
+
                         return $this->responseOK(200, $arrUser, 'Đăng nhập bằng google thành công !');
                     }
                 } else {
@@ -369,6 +371,7 @@ class InforUserService
                     $newUser->token_type = 'bearer';
                     $newUser->expires_in = auth()->guard('user_api')->factory()->getTTL() * 60;
                     $arrUser = array_merge($newUser->toArray(), $newInforUser->toArray());
+
                     return $this->responseOK(201, $arrUser, 'Đăng kí bằng google thành công !');
                 }
             }
@@ -376,9 +379,9 @@ class InforUserService
             return $this->responseError(400, $e->getMessage());
         }
     }
-    // Login by Google 
+    // Login by Google
 
-    // Login by Facebook 
+    // Login by Facebook
     public function loginFacebook(Request $request)
     {
         try {
@@ -402,6 +405,7 @@ class InforUserService
                     $user->token_type = 'bearer';
                     $user->expires_in = auth()->guard('user_api')->factory()->getTTL() * 60;
                     $arrUser = array_merge($user->toArray(), $inforUser->toArray());
+
                     return $this->responseOK(200, $arrUser, 'Đăng nhập bằng facebook thành công !');
                 }
             } else {
@@ -427,6 +431,7 @@ class InforUserService
                         $findEmail->token_type = 'bearer';
                         $findEmail->expires_in = auth()->guard('user_api')->factory()->getTTL() * 60;
                         $arrUser = array_merge($findEmail->toArray(), $inforUser->toArray());
+
                         return $this->responseOK(200, $arrUser, 'Đăng nhập bằng facebook thành công !');
                     }
                 } else {
@@ -451,6 +456,7 @@ class InforUserService
                     $newUser->token_type = 'bearer';
                     $newUser->expires_in = auth()->guard('user_api')->factory()->getTTL() * 60;
                     $arrUser = array_merge($newUser->toArray(), $newInforUser->toArray());
+
                     return $this->responseOK(201, $arrUser, 'Đăng kí bằng facebook thành công !');
                 }
             }
