@@ -166,7 +166,7 @@ class InforHospitalService
         }
     }
 
-    public function updateProfile(RequestUpdateHospital $request, $id_user)
+    public function updateProfile(RequestUpdateHospital $request)
     {
         try {
             $user = UserRepository::findUserById(auth('user_api')->user()->id);

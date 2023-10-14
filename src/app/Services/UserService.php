@@ -222,12 +222,19 @@ class UserService
     public function getInforUser($id)
     {
         try {
-            $user = User::find($id);
-            if (empty($user)) {
-                return $this->responseError(400, 'Không tìm thấy tài khoản !');
+            $user = UserRepository::findUserById($id);
+            if (empty($user)) return $this->responseError(400, 'Không tìm thấy tài khoản !');
+            $inforUser = InforUserRepository::getInforUser(['id_user' => $user->id])->first();
+            if ($user->role == 'hospital') {
+                $inforUser = InforHospitalRepository::getInforHospital(['id_hospital' => $user->id])->first();
+                $inforUser->infrastructure = json_decode($inforUser->infrastructure);
+                $inforUser->location = json_decode($inforUser->location);
             }
-
-            return $this->responseOK(200, $user, 'Xem thông tin người dùng thành công !');
+            if ($user->role == 'doctor') {
+                $inforUser = InforDoctorRepository::getInforDoctor(['id_doctor' => $user->id])->first();
+            }
+            $arrUser = array_merge($user->toArray(), $inforUser->toArray());
+            return $this->responseOK(200, $arrUser, 'Xem thông tin người dùng thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }

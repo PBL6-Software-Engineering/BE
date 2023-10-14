@@ -69,7 +69,7 @@ class InforDoctorService
         }
     }
 
-    public function updateProfile(RequestUpdateDoctor $request, $id_user)
+    public function updateProfile(RequestUpdateDoctor $request)
     {
         try {
             $user = UserRepository::findUserById(auth('user_api')->user()->id);

@@ -26,9 +26,9 @@ class InforHospitalController extends Controller
         return $this->inforHospitalService->profile();
     }
 
-    public function updateProfile(RequestUpdateHospital $request, $id_user)
+    public function updateProfile(RequestUpdateHospital $request)
     {
-        return $this->inforHospitalService->updateProfile($request, $id_user);
+        return $this->inforHospitalService->updateProfile($request);
     }
 
     public function addDoctor(RequestCreateNewDoctor $request)

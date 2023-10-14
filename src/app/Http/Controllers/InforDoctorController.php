@@ -19,8 +19,8 @@ class InforDoctorController extends Controller
         return $this->inforDoctorService->profile();
     }
 
-    public function updateProfile(RequestUpdateDoctor $request, $id_user)
+    public function updateProfile(RequestUpdateDoctor $request)
     {
-        return $this->inforDoctorService->updateProfile($request, $id_user);
+        return $this->inforDoctorService->updateProfile($request);
     }
 }

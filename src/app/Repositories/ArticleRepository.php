@@ -86,7 +86,7 @@ class ArticleRepository extends BaseRepository implements ArticleInterface
                 });
             })
             ->when(!empty($filter->name_category), function ($query) use ($filter) {
-                return $query->where('name', '=', $filter->name_category);
+                return $query->where('categories.name', '=', $filter->name_category);
             })
             ->when(!empty($filter->orderBy), function ($query) use ($filter) {
                 $query->orderBy($filter->orderBy, $filter->orderDirection);
@@ -119,6 +119,12 @@ class ArticleRepository extends BaseRepository implements ArticleInterface
                 }
             })
 
+            // hospital 
+            ->when(!empty($filter->id_doctor_hospital), function ($query) use ($filter) {
+                $query->whereIn('articles.id_user', $filter->id_doctor_hospital);
+            })
+
+            // doctor 
             ->when(!empty($filter->id_user), function ($query) use ($filter) {
                 $query->where('articles.id_user', $filter->id_user);
             });

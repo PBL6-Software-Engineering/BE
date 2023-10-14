@@ -27,7 +27,7 @@ class RequestUpdateAdmin extends FormRequest
      */
     public function rules()
     {
-        $userId = $this->route('admin');
+        // $userId = $this->route('admin');
         $userId = Auth::guard('admin_api')->user()->id;
 
         return [
