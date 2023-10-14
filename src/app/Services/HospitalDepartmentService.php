@@ -43,13 +43,13 @@ class HospitalDepartmentService
             $user = auth()->guard('user_api')->user();
             $department = DepartmentRepository::findById($request->id_department);
             if (empty($department)) {
-                return $this->responseError(400, 'Không tìm thấy khoa !');
+                return $this->responseError(404, 'Không tìm thấy khoa !');
             }
 
             $data = array_merge($request->all(), ['id_hospital' => $user->id]);
             $hospitalDepartment = $this->hospitalDepartment->createHosDepart($data);
 
-            return $this->responseOK(200, $hospitalDepartment, 'Thêm khoa cho bệnh viện thành công !');
+            return $this->responseOK(201, $hospitalDepartment, 'Thêm khoa cho bệnh viện thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -61,11 +61,11 @@ class HospitalDepartmentService
             $user = auth()->guard('user_api')->user();
             $hospitalDepartment = $this->hospitalDepartment->findById($id);
             if (empty($hospitalDepartment)) {
-                return $this->responseError(400, 'Không tìm thấy khoa này của bệnh viện !');
+                return $this->responseError(404, 'Không tìm thấy khoa này của bệnh viện !');
             }
 
             if ($user->id != $hospitalDepartment->id_hospital) {
-                return $this->responseError(400, 'Bạn không có quyền chỉnh sửa !');
+                return $this->responseError(403, 'Bạn không có quyền chỉnh sửa !');
             }
 
             $hospitalDepartment = $this->hospitalDepartment->updateHospitalDepartment($hospitalDepartment, $request->all());
@@ -82,11 +82,11 @@ class HospitalDepartmentService
             $user = auth()->guard('user_api')->user();
             $hospitalDepartment = $this->hospitalDepartment->findById($id);
             if (empty($hospitalDepartment)) {
-                return $this->responseError(400, 'Không tìm thấy khoa trong bệnh viện !');
+                return $this->responseError(404, 'Không tìm thấy khoa trong bệnh viện !');
             }
 
             if ($user->id != $hospitalDepartment->id_hospital) {
-                return $this->responseError(400, 'Bạn không có quyền !');
+                return $this->responseError(403, 'Bạn không có quyền !');
             }
 
             $count = HospitalServiceRepository::getHospitalService(['id_hospital_department' => $id])->count();
@@ -107,7 +107,7 @@ class HospitalDepartmentService
         try {
             $hospital = InforHospitalRepository::getInforHospital(['id_hospital' => $id])->first();
             if (empty($hospital)) {
-                return $this->responseError(400, 'Không tìm thấy bệnh viện !');
+                return $this->responseError(404, 'Không tìm thấy bệnh viện !');
             }
             $filter = (object) [
                 'id_hospital' => $id,
@@ -128,7 +128,7 @@ class HospitalDepartmentService
             ];
             $hospitalDepartment = $this->hospitalDepartment->searchHospitalDepartment($filter)->first();
             if (empty($hospitalDepartment)) {
-                return $this->responseError(400, 'Không tìm thấy khoa trong bệnh viện !');
+                return $this->responseError(404, 'Không tìm thấy khoa trong bệnh viện !');
             }
 
             return $this->responseOK(200, $hospitalDepartment, 'Xem chi tiết khoa của bệnh viện thành công !');

@@ -152,7 +152,7 @@ class AdminService
                 $message = 'Cập nhật thông tin thành công . Một email xác nhận đã được gửi hãy kiểm tra mail và xác nhận nó !';
             }
             // sendmail verify
-            return $this->responseOK(200, $admin, $message);
+            return $this->responseOK(201, $admin, $message);
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -273,7 +273,7 @@ class AdminService
             Log::info("Add jobs to Queue , Email: $email with URL: $url");
             Queue::push(new SendForgotPasswordEmail($email, $url));
 
-            return $this->responseOK(200, null, 'Gửi mail đặt lại mật khẩu thành công , hãy kiểm tra mail !');
+            return $this->responseOK(201, null, 'Gửi mail đặt lại mật khẩu thành công , hãy kiểm tra mail !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -368,7 +368,7 @@ class AdminService
             $newAdmin = $this->adminRepository->createAdmin($data);
             Queue::push(new SendPasswordNewAdmin($request->email, $new_password));
 
-            return $this->responseOK(200, $newAdmin, 'Thêm quản trị viên thành công !');
+            return $this->responseOK(201, $newAdmin, 'Thêm quản trị viên thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -383,7 +383,7 @@ class AdminService
                 return $this->responseError(400, 'Không được phép xóa tài khoản giám đốc !');
             }
             if ($admin->role == 'superadmin' && $adminLogin->role == 'superadmin') {
-                return $this->responseError(400, 'Bạn không có quyền , chỉ có giám đốc mới có quyền xóa superadmin !');
+                return $this->responseError(403, 'Bạn không có quyền , chỉ có giám đốc mới có quyền xóa superadmin !');
             }
             if ($admin->avatar) {
                 File::delete($admin->avatar);
@@ -410,7 +410,7 @@ class AdminService
                 if ($request->role == 'admin') {
                     $message = 'Bạn không có quyền , chỉ có giám đốc mới có quyền thay đổi role từ superadmin xuống admin !';
 
-                    return $this->responseError(400, $message);
+                    return $this->responseError(403, $message);
                 }
             }
             $data = ['role' => $request->role];

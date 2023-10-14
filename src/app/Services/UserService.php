@@ -146,7 +146,7 @@ class UserService
             Log::info("Add jobs to Queue , Email: $email with URL: $url");
             Queue::push(new SendForgotPasswordEmail($email, $url));
 
-            return $this->responseOK(200, null, 'Gửi mail đặt lại mật khẩu thành công !');
+            return $this->responseOK(201, null, 'Gửi mail đặt lại mật khẩu thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -223,7 +223,7 @@ class UserService
     {
         try {
             $user = UserRepository::findUserById($id);
-            if (empty($user)) return $this->responseError(400, 'Không tìm thấy tài khoản !');
+            if (empty($user)) return $this->responseError(404, 'Không tìm thấy tài khoản !');
             $inforUser = InforUserRepository::getInforUser(['id_user' => $user->id])->first();
             if ($user->role == 'hospital') {
                 $inforUser = InforHospitalRepository::getInforHospital(['id_hospital' => $user->id])->first();

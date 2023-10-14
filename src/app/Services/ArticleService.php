@@ -79,7 +79,7 @@ class ArticleService
             ];
             $article = $this->articleRepository->updateArticle($article, $data);
 
-            return $this->responseOK(200, $article, 'Thêm bài viết thành công !');
+            return $this->responseOK(201, $article, 'Thêm bài viết thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -93,10 +93,10 @@ class ArticleService
             if (empty($article)) return $this->responseError(404, 'Không tìm thấy bài viết !');
 
             if(in_array($user->role, ['doctor','hospital']) && ($user->id != $article->id_user)) {
-                return $this->responseError(400, 'Bạn không có quyền chỉnh sửa bài viết này !');
+                return $this->responseError(403, 'Bạn không có quyền chỉnh sửa bài viết này !');
             } 
             if (in_array($user->role, ['admin','superadmin', 'manager']) && ($article->id_user != null)) {
-                return $this->responseError(400, 'Bạn không có quyền chỉnh sửa bài viết này !');
+                return $this->responseError(403, 'Bạn không có quyền chỉnh sửa bài viết này !');
             }
 
             if ($request->hasFile('thumbnail')) {
@@ -124,10 +124,10 @@ class ArticleService
             if (empty($article)) return $this->responseError(404, 'Không tìm thấy bài viết !');
 
             if(in_array($user->role, ['doctor','hospital']) && ($user->id != $article->id_user)) {
-                return $this->responseError(400, 'Bạn không có quyền xóa bài viết này !');
+                return $this->responseError(403, 'Bạn không có quyền xóa bài viết này !');
             } 
             if (in_array($user->role, ['admin','superadmin', 'manager']) && ($article->id_user != null)) {
-                return $this->responseError(400, 'Bạn không có quyền xóa bài viết này !');
+                return $this->responseError(403, 'Bạn không có quyền xóa bài viết này !');
             }
             if ($article->thumbnail) {
                 File::delete($article->thumbnail);
@@ -138,7 +138,7 @@ class ArticleService
             return $this->responseError(400, $e->getMessage());
         }
     }
-    
+
     public function hideShow(Request $request, $id)
     {
         try {
@@ -248,7 +248,7 @@ class ArticleService
         try {
 
             $user = UserRepository::findUserById(auth('user_api')->user()->id);
-            if(empty($user)) return $this->responseError(400, 'Không tìm thấy người dùng !');
+            if(empty($user)) return $this->responseError(404, 'Không tìm thấy người dùng !');
             
             $doctors = InforDoctorRepository::getInforDoctor(['id_hospital' => $user->id])->get();
             $idDoctorHospitals = [];
@@ -304,7 +304,7 @@ class ArticleService
         try {
 
             $user = UserRepository::findUserById(auth('user_api')->user()->id);
-            if(empty($user)) return $this->responseError(400, 'Không tìm thấy người dùng !');
+            if(empty($user)) return $this->responseError(404, 'Không tìm thấy người dùng !');
 
             $name_category = '';
             if (!empty($request->name_category)) {
@@ -401,7 +401,7 @@ class ArticleService
             if ($article) {
                 return $this->responseOK(200, $article, 'Xem bài viết chi tiết thành công !');
             } else {
-                return $this->responseError(400, 'Không tìm thấy bài viết !');
+                return $this->responseError(404, 'Không tìm thấy bài viết !');
             }
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());

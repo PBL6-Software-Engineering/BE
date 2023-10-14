@@ -45,7 +45,7 @@ class HealthInsuranceService
         try {
             $healthInsurance = $this->healthInsurRepository->createHealthInsur($request->all());
 
-            return $this->responseOK(200, $healthInsurance, 'Thêm bảo hiểm thành công thành công !');
+            return $this->responseOK(201, $healthInsurance, 'Thêm bảo hiểm thành công thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -60,7 +60,7 @@ class HealthInsuranceService
 
                 return $this->responseOK(200, $healthInsurance, 'Cập nhật thông tin bảo hiểm thành công !');
             } else {
-                return $this->responseError(400, 'Không tìm thấy bảo hiểm !');
+                return $this->responseError(404, 'Không tìm thấy bảo hiểm !');
             }
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
@@ -78,7 +78,7 @@ class HealthInsuranceService
 
                 return $this->responseOK(200, null, 'Xóa bảo hiểm thành công !');
             } else {
-                return $this->responseError(400, 'Không tìm thấy bảo hiểm !');
+                return $this->responseError(404, 'Không tìm thấy bảo hiểm !');
             }
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
@@ -127,7 +127,7 @@ class HealthInsuranceService
             if ($department) {
                 return $this->responseOK(200, $department, 'Xem chi tiết bảo hiểm thành công !');
             } else {
-                return $this->responseError(400, 'Không tìm thấy bảo hiểm !');
+                return $this->responseError(404, 'Không tìm thấy bảo hiểm !');
             }
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
