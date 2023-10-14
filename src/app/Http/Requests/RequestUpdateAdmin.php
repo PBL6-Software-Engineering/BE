@@ -36,7 +36,7 @@ class RequestUpdateAdmin extends FormRequest
             'address' => 'required|string|min:1',
             'date_of_birth' => 'required|string|min:1',
             'phone' => 'required|min:9|numeric',
-            'gender' => 'required|in:1,0',
+            'gender' => 'required|in:1,0,2',
         ];
     }
 
