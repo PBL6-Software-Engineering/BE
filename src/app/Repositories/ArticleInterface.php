@@ -11,6 +11,8 @@ interface ArticleInterface extends RepositoryInterface
 
     public static function findById($id);
 
+    public static function getRawArticle($filter);
+
     public static function createArticle($data);
 
     public static function updateArticle($result, $data);

@@ -110,7 +110,7 @@ class ArticleService
             } else {
                 $article = $this->articleRepository->updateArticle($article, $request->all());
             }
-
+            $article = $this->articleRepository->getRawArticle(['id' => $id])->first();
             return $this->responseOK(200, $article, 'Cập nhật bài viết thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
@@ -140,6 +140,33 @@ class ArticleService
             return $this->responseOK(200, null, 'Xóa bài viết thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
+        }
+    }
+
+    public function deleteMany(Request $request)
+    {
+        try {
+            $list_id = $request->list_id ?? [0];
+            $user = Auth::user();
+            $filter = [
+                'list_id' => $list_id 
+            ];
+            if (in_array($user->role, ['doctor', 'hospital'])) $filter['id_user'] = $user->id;
+            else $filter['id_user'] = 'admin';
+            $articles = $this->articleRepository->getRawArticle($filter)->get();
+
+            if(count($articles) > 0) {
+                foreach ($articles as $article) {
+                    File::delete($article->thumbnail_article);
+                    $article = $this->articleRepository->findById($article->id_article)->delete();
+                }
+            }
+            else {
+                return $this->responseError(200, 'Không tìm thấy bài viết nào !');
+            }
+            return $this->responseOK(200, null, 'Xóa nhiều bài viết thành công !');
+        } catch (Throwable $e) {
+            return $this->responseError(404, $e->getMessage());
         }
     }
 

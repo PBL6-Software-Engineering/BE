@@ -30,7 +30,7 @@ class RequestUpdateArticle extends FormRequest
         return [
             'title' => 'string|min:1',
             'content' => 'string|min:1',
-            'id_category' => 'integer',
+            // 'id_category' => 'integer',
             'thumbnail' => 'image',
         ];
     }

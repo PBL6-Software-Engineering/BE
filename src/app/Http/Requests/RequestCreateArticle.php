@@ -29,7 +29,7 @@ class RequestCreateArticle extends FormRequest
             'title' => 'required|string',
             'content' => 'required|string',
             'thumbnail' => 'required|image',
-            'id_category' => 'required|integer',
+            // 'id_category' => 'required|integer',
         ];
     }
 

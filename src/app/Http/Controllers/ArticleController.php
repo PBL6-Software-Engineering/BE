@@ -41,6 +41,11 @@ class ArticleController extends Controller
         return $this->articleService->delete($id);
     }
 
+    public function deleteMany(Request $request)
+    {
+        return $this->articleService->deleteMany($request);
+    }
+
     public function adminManage(Request $request)
     {
         return $this->articleService->adminManage($request);

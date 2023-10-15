@@ -60,6 +60,37 @@ class ArticleRepository extends BaseRepository implements ArticleInterface
         return (new self)->model->find($id);
     }
 
+    public static function getRawArticle($filter)
+    {
+        $filter = (object) $filter;
+        $data = (new self)->model->selectRaw('articles.*, categories.*, articles.id AS id_article, 
+        articles.thumbnail AS thumbnail_article, categories.thumbnail AS thumbnail_categorie, categories.id AS id_category, 
+        articles.search_number AS search_number_article,
+        articles.created_at AS created_at_article, categories.created_at AS created_at_category,
+        articles.updated_at AS updated_at_article, categories.updated_at AS updated_at_category,
+        users.name as name_user,users.role as role_user,
+        categories.name as name_category')
+        ->leftJoin('categories', 'articles.id_category', '=', 'categories.id')
+        ->leftJoin('users', 'articles.id_user', '=', 'users.id')
+        
+        ->when(!empty($filter->id), function ($query) use ($filter) {
+            return $query->where('articles.id', $filter->id);
+        })
+
+        // delete many 
+        ->when(!empty($filter->list_id), function ($q) use ($filter) {
+            $q->whereIn('articles.id', $filter->list_id);
+        })
+        ->when(!empty($filter->id_user), function ($query) use ($filter) {
+            if ($filter->id_user === 'admin') {
+                $query->where('articles.id_user', null);
+            } else {
+                $query->where('articles.id_user', $filter->id_user);
+            }
+        });
+        return $data;
+    }
+
     public static function searchAll($filter)
     {
         // leftjoin để khi mà id_category trong articles null thì vẫn kết hợp với bản categories để lấy ra
@@ -69,7 +100,8 @@ class ArticleRepository extends BaseRepository implements ArticleInterface
             articles.search_number AS search_number_article,
             articles.created_at AS created_at_article, categories.created_at AS created_at_category,
             articles.updated_at AS updated_at_article, categories.updated_at AS updated_at_category,
-            users.name as name_user,users.role as role_user')
+            users.name as name_user,users.role as role_user,
+            categories.name as name_category')
             ->leftJoin('categories', 'articles.id_category', '=', 'categories.id')
 
             // left join thêm bảng user để lấy ta name và role
