@@ -404,6 +404,12 @@ class ArticleService
                 $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
             }
 
+            // sắp xếp theo bài viết nổi bật 
+            if ($request->sort_search_number == 'true') {
+                $orderBy = 'articles.search_number';
+                $orderDirection = 'DESC' ;
+            }
+
             $filter = (object) [
                 'search' => $search,
                 'name_category' => $name_category,

@@ -100,7 +100,7 @@ class ArticleRepository extends BaseRepository implements ArticleInterface
             articles.search_number AS search_number_article,
             articles.created_at AS created_at_article, categories.created_at AS created_at_category,
             articles.updated_at AS updated_at_article, categories.updated_at AS updated_at_category,
-            users.name as name_user,users.role as role_user,
+            users.name as name_user,users.role as role_user,users.avatar as avatar_user,
             categories.name as name_category')
             ->leftJoin('categories', 'articles.id_category', '=', 'categories.id')
 
