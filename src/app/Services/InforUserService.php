@@ -319,12 +319,13 @@ class InforUserService
                     $user->access_token = auth()->guard('user_api')->login($user);
                     $user->token_type = 'bearer';
                     $user->expires_in = auth()->guard('user_api')->factory()->getTTL() * 60;
-                    $arrUser = array_merge($user->toArray(), $inforUser->toArray());
 
                     $user->have_password = true;
                     if (!$user->password) {
                         $user->have_password = false;
                     } 
+
+                    $arrUser = array_merge($user->toArray(), $inforUser->toArray());
                     return $this->responseOK(200, $arrUser, 'Đăng nhập bằng google thành công !');
                 }
             } else {
@@ -349,12 +350,13 @@ class InforUserService
                         $findEmail->access_token = auth()->guard('user_api')->login($findEmail);
                         $findEmail->token_type = 'bearer';
                         $findEmail->expires_in = auth()->guard('user_api')->factory()->getTTL() * 60;
-                        $arrUser = array_merge($findEmail->toArray(), $inforUser->toArray());
 
                         $findEmail->have_password = true;
                         if (!$findEmail->password) {
                             $findEmail->have_password = false;
                         } 
+
+                        $arrUser = array_merge($findEmail->toArray(), $inforUser->toArray());
                         return $this->responseOK(200, $arrUser, 'Đăng nhập bằng google thành công !');
                     }
                 } else {
@@ -378,12 +380,13 @@ class InforUserService
                     $newUser->access_token = auth()->guard('user_api')->login($newUser);
                     $newUser->token_type = 'bearer';
                     $newUser->expires_in = auth()->guard('user_api')->factory()->getTTL() * 60;
-                    $arrUser = array_merge($newUser->toArray(), $newInforUser->toArray());
 
                     $newUser->have_password = true;
                     if (!$newUser->password) {
                         $newUser->have_password = false;
                     } 
+
+                    $arrUser = array_merge($newUser->toArray(), $newInforUser->toArray());
                     return $this->responseOK(201, $arrUser, 'Đăng kí bằng google thành công !');
                 }
             }
