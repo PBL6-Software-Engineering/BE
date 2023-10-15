@@ -136,6 +136,7 @@ Route::prefix('article')->controller(ArticleController::class)->group(function (
     });
 
     Route::get('/', 'articleHome');
+    Route::post('/read-search/{id}', 'readSearch');
     Route::get('/detail/{id}', 'details');
 });
 
