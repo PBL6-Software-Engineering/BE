@@ -4,6 +4,9 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -38,4 +41,18 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+    // public function render($request, Throwable $exception)
+    // {
+    //     if ($exception instanceof NotFoundHttpException) { // 404 
+    //         return response()->json([
+    //             'message' => 'API not found !',
+    //         ], Response::HTTP_NOT_FOUND);
+    //     }
+    
+    //     return response()->json([ // các lỗi còn lại cho vào lỗi 500 
+    //         'message' => 'Internal Server Error !',
+    //     ], Response::HTTP_INTERNAL_SERVER_ERROR);
+    // }
+
 }
