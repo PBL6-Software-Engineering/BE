@@ -108,14 +108,19 @@ class UserRepository extends BaseRepository implements UserInterface
         return $data;
     }
 
+    
+    // leftjoin để nếu bác sĩ thuộc bệnh viện này và bác sĩ thuộc chuyên khoa A mà bệnh viện 
+    // này không có chuyên khoa A vẫn lấy ra được 
+    // vẫn lấy ra đầy đủ thông tin doctor còn hospital_departments thì null . rightjoin thì ngược lại 
     public static function doctorOfHospital($filter)
     {
         $filter = (object) $filter;
-        $data = (new self)->model->selectRaw('users.*, infor_doctors.*, departments.*,
+        $data = (new self)->model->selectRaw('users.*, infor_doctors.*, departments.*,hospital_departments.*,
         users.name as name_doctor, departments.name as name_department,
         infor_doctors.search_number as search_number_doctor, departments.search_number as search_number_department')
             ->join('infor_doctors', 'users.id', '=', 'infor_doctors.id_doctor')
             ->join('departments', 'departments.id', '=', 'infor_doctors.id_department')
+            ->leftjoin('hospital_departments', 'hospital_departments.id_department', '=', 'departments.id')
             ->when(!empty($filter->search), function ($q) use ($filter) {
                 $q->where(function ($query) use ($filter) {
                     $query->where('users.name', 'LIKE', '%' . $filter->search . '%')

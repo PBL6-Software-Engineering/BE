@@ -51,4 +51,16 @@ class InforHospitalController extends Controller
     public function changeConfirm(RequestChangeConfirmDoctor $request, $id) {
         return $this->inforHospitalService->changeConfirm($request, $id);
     }
+
+    public function allHospital(Request $request)
+    {
+        return $this->inforHospitalService->allHospital($request);
+    }
+
+    public function allDoctorHome(Request $request, $id)
+    {
+        return $this->inforHospitalService->allDoctorHome($request, $id);
+    }
+
+    
 }

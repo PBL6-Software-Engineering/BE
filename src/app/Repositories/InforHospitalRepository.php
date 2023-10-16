@@ -77,4 +77,32 @@ class InforHospitalRepository extends BaseRepository implements InforHospitalInt
             throw $e;
         }
     }
+
+    public static function searchHospital($filter)
+    {
+        $filter = (object) $filter;
+        $data = (new self)->model->selectRaw('users.*, infor_hospitals.*')
+            ->join('users', 'users.id', '=', 'infor_hospitals.id_hospital')
+            ->when(!empty($filter->search), function ($q) use ($filter) {
+                $q->where(function ($query) use ($filter) {
+                    $query->where('users.name', 'LIKE', '%' . $filter->search . '%')
+                        ->orWhere('users.address', 'LIKE', '%' . $filter->search . '%')
+                        ->orWhere('users.email', 'LIKE', '%' . $filter->search . '%')
+                        ->orWhere('users.phone', 'LIKE', '%' . $filter->search . '%')
+                        ->orWhere('users.username', 'LIKE', '%' . $filter->search . '%');
+                });
+            })
+            ->when(isset($filter->is_accept), function ($query) use ($filter) {
+                if ($filter->is_accept === 'both') {
+                } else {
+                    $query->where('users.is_accept', $filter->is_accept);
+                }
+            })
+            ->when(!empty($filter->orderBy), function ($query) use ($filter) {
+                $query->orderBy($filter->orderBy, $filter->orderDirection);
+            });
+
+        return $data;
+    }
+
 }

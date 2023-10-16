@@ -91,6 +91,8 @@ Route::prefix('infor-hospital')->controller(InforHospitalController::class)->gro
         Route::get('all-doctor', 'allDoctor');
         Route::post('change-confirm/{id}', 'changeConfirm');
     });
+    Route::get('all-hospital', 'allHospital');
+    Route::get('doctors-home/{id}', 'allDoctorHome');
     Route::get('view-profile/{id}', 'viewProfile');
 });
 

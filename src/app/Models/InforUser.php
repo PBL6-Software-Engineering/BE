@@ -18,6 +18,12 @@ class InforUser extends Model
         'gender',
     ];
 
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'token_verify_email',
+    ];
+
     public function notifies()
     {
         return $this->hasMany(Notify::class);

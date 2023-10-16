@@ -19,6 +19,12 @@ class InforHospital extends Model
         'search_number',
     ];
 
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'token_verify_email',
+    ];
+
     public function inforDoctors()
     {
         return $this->hasMany(InforDoctor::class);

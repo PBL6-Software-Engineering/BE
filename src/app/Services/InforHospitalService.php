@@ -10,6 +10,7 @@ use App\Http\Requests\RequestUpdateHospital;
 use App\Jobs\SendMailNotify;
 use App\Jobs\SendVerifyEmail;
 use App\Repositories\DepartmentRepository;
+use App\Repositories\HospitalDepartmentRepository;
 use App\Repositories\InforDoctorRepository;
 use App\Repositories\InforHospitalInterface;
 use App\Repositories\InforHospitalRepository;
@@ -182,6 +183,26 @@ class InforHospitalService
                 
                 $inforUser->infrastructure = json_decode($inforUser->infrastructure);
                 $inforUser->location = json_decode($inforUser->location);
+
+                // time work 
+                $filter = (object) [
+                    'id_hospital' => $user->id,
+                ];
+                $timeWork = TimeWorkRepository::getTimeWork($filter)->first();
+                $timeWork->times = json_decode($timeWork->times);
+                $inforUser->time_work = $timeWork;  
+
+                // department 
+                $listNames = [];
+                $filter = (object) [
+                    'id_hospital' => $id,
+                ];
+                $hospitalDepartments = HospitalDepartmentRepository::searchHospitalDepartment($filter)->get();
+                foreach($hospitalDepartments as $hospitalDepartment) {
+                    $listNames[] = $hospitalDepartment->name;
+                }
+                $inforUser->departments = $listNames;
+
                 $hospital = array_merge($user->toArray(), $inforUser->toArray());
     
                 return $this->responseOK(200, $hospital, 'Xem thông tin tài khoản thành công !');
@@ -361,6 +382,102 @@ class InforHospitalService
                 $allDoctor = UserRepository::doctorOfHospital($filter)->get();
 
                 return $this->responseOK(200, $allDoctor, 'Xem tất cả bác sĩ thành công !');
+            }
+        } catch (Throwable $e) {
+            return $this->responseError(400, $e->getMessage());
+        }
+    }
+
+    public function allDoctorHome(Request $request, $id)
+    {
+        try {
+
+            $user = UserRepository::findUserById($id);
+            if(empty($user) || $user->role != 'hospital') return $this->responseError(404, 'Không tìm thấy bệnh viện !');
+
+            $search = $request->search;
+            $orderBy = 'users.id';
+            $orderDirection = 'ASC';
+
+            if ($request->sortlatest == 'true') {
+                $orderBy = 'users.id';
+                $orderDirection = 'DESC';
+            }
+
+            if ($request->sortname == 'true') {
+                $orderBy = 'users.name';
+                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            }
+
+            $filter = (object) [
+                'search' => $search,
+                'role' => 'doctor',
+                'orderBy' => $orderBy,
+                'is_accept' => 1,
+                'is_confirm' => 1,
+                'name_department' => $request->name_department ?? '',
+                'id_hospital' => $id,
+                'orderDirection' => $orderDirection,
+            ];
+
+            if (!(empty($request->paginate))) {
+                $allDoctor = UserRepository::doctorOfHospital($filter)->paginate($request->paginate);
+
+                return $this->responseOK(200, $allDoctor, 'Xem tất cả bác sĩ của bệnh viện thành công !');
+            } else {
+                $allDoctor = UserRepository::doctorOfHospital($filter)->get();
+
+                return $this->responseOK(200, $allDoctor, 'Xem tất cả bác sĩ của bệnh viện thành công !');
+            }
+        } catch (Throwable $e) {
+            return $this->responseError(400, $e->getMessage());
+        }
+    }
+
+    public function allHospital(Request $request)
+    {
+        try {
+            $search = $request->search;
+            $orderBy = 'id';
+            $orderDirection = 'ASC';
+
+            if ($request->sortlatest == 'true') {
+                $orderBy = 'id';
+                $orderDirection = 'DESC';
+            }
+
+            if ($request->sortname == 'true') {
+                $orderBy = 'name';
+                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            }
+
+            // sắp xếp theo bài viết nổi bật 
+            if ($request->sort_search_number == 'true') {
+                $orderBy = 'infor_hospitals.search_number';
+                $orderDirection = 'DESC' ;
+            }
+
+            $filter = (object) [
+                'search' => $search,
+                'is_accept' => 1,
+                'orderBy' => $orderBy,
+                'orderDirection' => $orderDirection,
+            ];
+
+            if (!(empty($request->paginate))) {
+                $hospitals = InforHospitalRepository::searchHospital($filter)->paginate($request->paginate);
+                foreach($hospitals as $hospital) {
+                    $hospital->infrastructure = json_decode($hospital->infrastructure);
+                    $hospital->location = json_decode($hospital->location);
+                }
+                return $this->responseOK(200, $hospitals, 'Xem tất cả bệnh viện thành công !');
+            } else {
+                $hospitals = InforHospitalRepository::searchHospital($filter)->get();
+                foreach($hospitals as $hospital) {
+                    $hospital->infrastructure = json_decode($hospital->infrastructure);
+                    $hospital->location = json_decode($hospital->location);
+                }
+                return $this->responseOK(200, $hospitals, 'Xem tất cả bệnh viện thành công !');
             }
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());

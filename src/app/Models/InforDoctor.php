@@ -22,6 +22,12 @@ class InforDoctor extends Model
         'search_number',
     ];
 
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'token_verify_email',
+    ];
+
     public function workSchedules()
     {
         return $this->hasMany(WorkSchedule::class);
