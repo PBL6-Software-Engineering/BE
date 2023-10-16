@@ -450,30 +450,6 @@ class ArticleService
         }
     }
 
-    public function readSearch(Request $request, $id)
-    {
-        try {
-            $filter = (object) [
-                'id' => $id,
-                'is_accept' => 1,
-                'is_show' => 1,
-            ];
-            $article = $this->articleRepository->searchAll($filter)->first();
-            // dùng chính biến article để cập nhật thì không được 
-            if ($article) {
-                $_article = $this->articleRepository->findById($id);
-                $search_number = $article->search_number_article + 1;
-                $this->articleRepository->updateArticle($_article, ['search_number' => $search_number]);
-                $article->search_number_article = $search_number;
-                return $this->responseOK(200, $article, 'Tăng lượt tìm đọc cho bài viết thành công !');
-            } else {
-                return $this->responseError(404, 'Không tìm thấy bài viết !');
-            }
-        } catch (Throwable $e) {
-            return $this->responseError(400, $e->getMessage());
-        }
-    }
-
     public function detailPrivate(Request $request, $id)
     {
         try {

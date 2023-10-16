@@ -63,4 +63,18 @@ class InforHospitalRepository extends BaseRepository implements InforHospitalInt
             throw $e;
         }
     }
+
+    public static function updateHospital($result, $data)
+    {
+        DB::beginTransaction();
+        try {
+            $result->update($data);
+            DB::commit();
+
+            return $result;
+        } catch (Throwable $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
 }

@@ -107,4 +107,49 @@ class UserRepository extends BaseRepository implements UserInterface
 
         return $data;
     }
+
+    public static function doctorOfHospital($filter)
+    {
+        $filter = (object) $filter;
+        $data = (new self)->model->selectRaw('users.*, infor_doctors.*, departments.*,
+        users.name as name_doctor, departments.name as name_department,
+        infor_doctors.search_number as search_number_doctor, departments.search_number as search_number_department')
+            ->join('infor_doctors', 'users.id', '=', 'infor_doctors.id_doctor')
+            ->join('departments', 'departments.id', '=', 'infor_doctors.id_department')
+            ->when(!empty($filter->search), function ($q) use ($filter) {
+                $q->where(function ($query) use ($filter) {
+                    $query->where('users.name', 'LIKE', '%' . $filter->search . '%')
+                        ->orWhere('users.address', 'LIKE', '%' . $filter->search . '%')
+                        ->orWhere('users.email', 'LIKE', '%' . $filter->search . '%')
+                        ->orWhere('users.phone', 'LIKE', '%' . $filter->search . '%')
+                        ->orWhere('users.username', 'LIKE', '%' . $filter->search . '%');
+                });
+            })
+            ->when(!empty($filter->name_department), function ($query) use ($filter) {
+                return $query->where('departments.name', $filter->name_department);
+            })
+            ->when(!empty($filter->role), function ($query) use ($filter) {
+                return $query->where('users.role', 'LIKE', '%' . $filter->role . '%');
+            })
+            ->when(isset($filter->is_accept), function ($query) use ($filter) {
+                if ($filter->is_accept === 'both') {
+                } else {
+                    $query->where('users.is_accept', $filter->is_accept);
+                }
+            })
+            ->when(isset($filter->is_confirm), function ($query) use ($filter) {
+                if ($filter->is_confirm === 'both') {
+                } else {
+                    $query->where('infor_doctors.is_confirm', $filter->is_confirm);
+                }
+            })
+            ->when(!empty($filter->id_hospital), function ($query) use ($filter) {
+                return $query->where('infor_doctors.id_hospital',  $filter->id_hospital);
+            })
+            ->when(!empty($filter->orderBy), function ($query) use ($filter) {
+                $query->orderBy($filter->orderBy, $filter->orderDirection);
+            });
+
+        return $data;
+    }
 }

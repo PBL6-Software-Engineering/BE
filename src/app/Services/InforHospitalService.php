@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\UserEnum;
+use App\Http\Requests\RequestChangeConfirmDoctor;
 use App\Http\Requests\RequestCreateInforHospital;
 use App\Http\Requests\RequestCreateNewDoctor;
 use App\Http\Requests\RequestUpdateHospital;
@@ -25,6 +26,7 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
+use Illuminate\Support\Facades\Auth;
 
 class InforHospitalService
 {
@@ -296,4 +298,68 @@ class InforHospitalService
             return $this->responseError(400, $e->getMessage());
         }
     }
+
+    public function allDoctor(Request $request)
+    {
+        try {
+            $search = $request->search;
+            $orderBy = 'users.id';
+            $orderDirection = 'ASC';
+
+            if ($request->sortlatest == 'true') {
+                $orderBy = 'users.id';
+                $orderDirection = 'DESC';
+            }
+
+            if ($request->sortname == 'true') {
+                $orderBy = 'users.name';
+                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            }
+
+            $user = Auth::user();
+
+            $filter = (object) [
+                'search' => $search,
+                'role' => 'doctor',
+                'orderBy' => $orderBy,
+                'is_accept' => $request->is_accept ?? 'both',
+                'is_confirm' => $request->is_confirm ?? 'both',
+                'name_department' => $request->name_department ?? '',
+                'id_hospital' => $user->id,
+                'orderDirection' => $orderDirection,
+            ];
+
+            if (!(empty($request->paginate))) {
+                $allDoctor = UserRepository::doctorOfHospital($filter)->paginate($request->paginate);
+
+                return $this->responseOK(200, $allDoctor, 'Xem tất cả bác sĩ thành công !');
+            } else {
+                $allDoctor = UserRepository::doctorOfHospital($filter)->get();
+
+                return $this->responseOK(200, $allDoctor, 'Xem tất cả bác sĩ thành công !');
+            }
+        } catch (Throwable $e) {
+            return $this->responseError(400, $e->getMessage());
+        }
+    }
+
+    public function changeConfirm(RequestChangeConfirmDoctor $request, $id)
+    {
+        try {
+            $user = Auth::user();
+            $filter = [
+                'id_doctor' => $id,
+                'id_hospital' => $user->id
+            ];
+            $doctor = InforDoctorRepository::getInforDoctor($filter)->first();
+            if(empty($doctor)) return $this->responseError(404, 'Không tìm bác sĩ trong bệnh viện !');
+
+            $data = ['is_confirm' => $request->is_confirm];
+            $doctor = InforDoctorRepository::updateResult($doctor, $data);
+            return $this->responseOK(200, $doctor, 'Thay đổi trạng thái của bác sĩ thành công !');
+        } catch (Throwable $e) {
+            return $this->responseError(400, $e->getMessage());
+        }
+    }
+    
 }

@@ -22,4 +22,7 @@ interface UserInterface extends RepositoryInterface
     public static function createUser($data);
 
     public static function searchUser($filter);
+
+    public static function doctorOfHospital($filter);
 }
+

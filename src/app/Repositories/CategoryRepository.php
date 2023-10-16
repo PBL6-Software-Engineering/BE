@@ -13,6 +13,11 @@ class CategoryRepository extends BaseRepository implements CategoryInterface
         return Category::class;
     }
 
+    public static function findById($id)
+    {
+        return (new self)->model->find($id);
+    }
+    
     public static function getCategory($filter)
     {
         $filter = (object) $filter;
@@ -50,6 +55,20 @@ class CategoryRepository extends BaseRepository implements CategoryInterface
             DB::commit();
 
             return $category;
+        } catch (Throwable $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+
+    public static function updateResultCategory($result, $data)
+    {
+        DB::beginTransaction();
+        try {
+            $result->update($data);
+            DB::commit();
+
+            return $result;
         } catch (Throwable $e) {
             DB::rollback();
             throw $e;

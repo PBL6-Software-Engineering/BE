@@ -99,6 +99,9 @@ class UserService
             }
             if ($user->role == 'doctor') {
                 $inforUser = InforDoctorRepository::getInforDoctor(['id_doctor' => $user->id])->first();
+                if ($inforUser->is_confirm != 1) {
+                    return $this->responseError(400, 'Tài khoản của bạn chưa được phê duyệt !');
+                }
             }
 
             $user->access_token = $token;

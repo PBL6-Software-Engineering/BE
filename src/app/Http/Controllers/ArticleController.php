@@ -71,11 +71,6 @@ class ArticleController extends Controller
         return $this->articleService->details($request, $id);
     }
 
-    public function readSearch(Request $request, $id)
-    {
-        return $this->articleService->readSearch($request, $id);
-    }
-
     public function detailPrivate(Request $request, $id)
     {
         return $this->articleService->detailPrivate($request, $id);
