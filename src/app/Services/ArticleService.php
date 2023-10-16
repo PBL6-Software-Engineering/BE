@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Http\Requests\RequestCreateArticle;
 use App\Http\Requests\RequestUpdateArticle;
 use App\Repositories\ArticleInterface;
+use App\Repositories\ArticleRepository;
 use App\Repositories\CategoryRepository;
 use App\Repositories\InforDoctorRepository;
 use App\Repositories\UserRepository;
@@ -441,6 +442,14 @@ class ArticleService
             ];
             $article = $this->articleRepository->searchAll($filter)->first();
             if ($article) {
+
+                // search number 
+                $_article = ArticleRepository::findById($id);
+                $search_number = $article->search_number_article + 1;
+                ArticleRepository::updateArticle($_article, ['search_number' => $search_number]);
+                $article->search_number_article = $search_number;
+                // search number 
+
                 return $this->responseOK(200, $article, 'Xem bài viết chi tiết thành công !');
             } else {
                 return $this->responseError(404, 'Không tìm thấy bài viết !');

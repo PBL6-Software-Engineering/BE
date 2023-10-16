@@ -28,6 +28,11 @@ class InforHospitalController extends Controller
         return $this->inforHospitalService->profile();
     }
 
+    public function viewProfile(Request $request, $id)
+    {
+        return $this->inforHospitalService->viewProfile($request, $id);
+    }
+
     public function updateProfile(RequestUpdateHospital $request)
     {
         return $this->inforHospitalService->updateProfile($request);

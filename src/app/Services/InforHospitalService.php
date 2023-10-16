@@ -168,6 +168,30 @@ class InforHospitalService
         }
     }
 
+    public function viewProfile(Request $request, $id)
+    {
+        try {
+            $user = UserRepository::findUserById($id);
+            if(!empty($user) && $user->role == 'hospital' && $user->is_accept == 1) {
+                $inforUser = InforHospitalRepository::getInforHospital(['id_hospital' => $user->id])->first();
+    
+                // search number 
+                $search_number = $inforUser->search_number + 1;
+                $inforUser = InforHospitalRepository::updateHospital($inforUser, ['search_number' => $search_number]);
+                // search number 
+                
+                $inforUser->infrastructure = json_decode($inforUser->infrastructure);
+                $inforUser->location = json_decode($inforUser->location);
+                $hospital = array_merge($user->toArray(), $inforUser->toArray());
+    
+                return $this->responseOK(200, $hospital, 'Xem thông tin tài khoản thành công !');
+            } 
+            else return $this->responseError(400, 'Không tìm thấy tài khoản !');
+        } catch (Throwable $e) {
+            return $this->responseError(400, $e->getMessage());
+        }
+    }
+
     public function updateProfile(RequestUpdateHospital $request)
     {
         try {

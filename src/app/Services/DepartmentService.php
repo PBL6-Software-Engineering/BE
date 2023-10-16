@@ -6,6 +6,7 @@ use App\Http\Requests\RequestCreateDepartment;
 use App\Http\Requests\RequestUpdateDepartment;
 use App\Models\Department;
 use App\Repositories\DepartmentInterface;
+use App\Repositories\DepartmentRepository;
 use App\Repositories\HospitalDepartmentRepository;
 use App\Repositories\InforDoctorRepository;
 use Illuminate\Http\Request;
@@ -158,6 +159,12 @@ class DepartmentService
         try {
             $department = $this->departmentRepository->findById($id);
             if ($department) {
+
+                // search number 
+                $search_number = $department->search_number + 1;
+                $department = DepartmentRepository::updateDepartment($department, ['search_number' => $search_number]);
+                // search number 
+
                 return $this->responseOK(200, $department, 'Xem chi tiết khoa thành công !');
             } else {
                 return $this->responseError(404, 'Không tìm thấy khoa !');

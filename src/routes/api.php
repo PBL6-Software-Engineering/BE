@@ -91,6 +91,7 @@ Route::prefix('infor-hospital')->controller(InforHospitalController::class)->gro
         Route::get('all-doctor', 'allDoctor');
         Route::post('change-confirm/{id}', 'changeConfirm');
     });
+    Route::get('view-profile/{id}', 'viewProfile');
 });
 
 // Doctor Infor
@@ -100,6 +101,7 @@ Route::prefix('infor-doctor')->controller(InforDoctorController::class)->group(f
         Route::get('profile', 'profile');
         Route::post('add-doctor', 'addDoctor');
     });
+    Route::get('view-profile/{id}', 'viewProfile');
 });
 
 // Category

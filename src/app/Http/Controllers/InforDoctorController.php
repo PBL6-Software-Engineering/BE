@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RequestUpdateDoctor;
 use App\Services\InforDoctorService;
+use Illuminate\Http\Request;
 
 class InforDoctorController extends Controller
 {
@@ -17,6 +18,11 @@ class InforDoctorController extends Controller
     public function profile()
     {
         return $this->inforDoctorService->profile();
+    }
+
+    public function viewProfile(Request $request, $id)
+    {
+        return $this->inforDoctorService->viewProfile($request, $id);
     }
 
     public function updateProfile(RequestUpdateDoctor $request)

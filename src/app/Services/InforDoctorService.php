@@ -69,6 +69,29 @@ class InforDoctorService
         }
     }
 
+    public function viewProfile(Request $request, $id)
+    {
+        try {
+            $user = UserRepository::findUserById($id);
+            if(!empty($user) && $user->role == 'doctor' && $user->is_accept == 1) {
+                $inforUser = InforDoctorRepository::getInforDoctor(['id_doctor' => $user->id])->first();
+                if($inforUser->is_confirm == 1) {
+
+                    // search number 
+                    $search_number = $inforUser->search_number + 1;
+                    $inforUser = InforDoctorRepository::updateResult($inforUser, ['search_number' => $search_number]);
+                    // search number 
+
+                    $hospital = array_merge($user->toArray(), $inforUser->toArray());
+                    return $this->responseOK(200, $hospital, 'Xem thông tin tài khoản thành công !');
+                }
+            } 
+            return $this->responseError(400, 'Không tìm thấy tài khoản !');
+        } catch (Throwable $e) {
+            return $this->responseError(400, $e->getMessage());
+        }
+    }
+
     public function updateProfile(RequestUpdateDoctor $request)
     {
         try {
