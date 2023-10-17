@@ -46,8 +46,8 @@ class RequestCreateHealthInsuranceHospital extends FormRequest
             'message' => 'Validation errors',
             'data' => $errors,
             'errors' => $validator->errors(),
-            'status' => 400,
-        ], 400));
+            'status' => 422,
+        ], 422));
     }
 
     public function messages()
