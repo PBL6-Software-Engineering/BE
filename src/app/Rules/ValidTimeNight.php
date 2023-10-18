@@ -4,13 +4,13 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidTimeRange implements Rule
+class ValidTimeNight implements Rule
 {
     public function passes($attribute, $value)
     {
         $startTime = strtotime($value[0]);
         $endTime = strtotime($value[1]);
-        $minTime = strtotime('00:00');
+        $minTime = strtotime('18:00');
         $maxTime = strtotime('24:00');
 
         if ($startTime === false || $endTime === false) {

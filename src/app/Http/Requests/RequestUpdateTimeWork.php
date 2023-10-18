@@ -2,6 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidTimeAfternoon;
+use App\Rules\ValidTimeMorning;
+use App\Rules\ValidTimeNight;
 use App\Rules\ValidTimeRange;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,9 +32,9 @@ class RequestUpdateTimeWork extends FormRequest
         return [
             'times' => 'required',
             // 'times.*.*.time' => ['required', 'array', 'size:2', new ValidTimeRange],
-            'times.*.afternoon.time' => ['required', 'array',  new ValidTimeRange],
-            'times.*.morning.time' => ['required', 'array',  new ValidTimeRange],
-            'times.*.night.time' => ['required', 'array',  new ValidTimeRange],
+            'times.*.morning.time' => ['required', 'array',  new ValidTimeMorning],
+            'times.*.afternoon.time' => ['required', 'array',  new ValidTimeAfternoon],
+            'times.*.night.time' => ['required', 'array',  new ValidTimeNight],
             'enable' => 'required',
         ];
     }

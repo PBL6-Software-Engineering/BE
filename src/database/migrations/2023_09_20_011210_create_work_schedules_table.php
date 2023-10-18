@@ -18,10 +18,9 @@ return new class extends Migration
             $table->unsignedBigInteger('id_doctor');
             $table->unsignedBigInteger('id_user');
             $table->unsignedBigInteger('id_service')->nullable();
-            $table->timestamp('time');
+            $table->json('time');
             $table->text('content');
             $table->timestamps();
-
             $table->foreign('id_doctor')->references('id_doctor')->on('infor_doctors')->onDelete('cascade');
             $table->foreign('id_user')->references('id_user')->on('infor_users')->onDelete('cascade');
         });

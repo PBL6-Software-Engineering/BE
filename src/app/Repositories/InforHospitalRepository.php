@@ -98,6 +98,9 @@ class InforHospitalRepository extends BaseRepository implements InforHospitalInt
                     $query->where('users.is_accept', $filter->is_accept);
                 }
             })
+            ->when(isset($filter->province_code), function ($query) use ($filter) {
+                $query->where('infor_hospitals.province_code', $filter->province_code);
+            })
             ->when(!empty($filter->orderBy), function ($query) use ($filter) {
                 $query->orderBy($filter->orderBy, $filter->orderDirection);
             });

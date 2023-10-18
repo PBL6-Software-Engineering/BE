@@ -62,5 +62,9 @@ class InforHospitalController extends Controller
         return $this->inforHospitalService->allDoctorHome($request, $id);
     }
 
+    public function bookHospital(Request $request, $province_code)
+    {
+        return $this->inforHospitalService->bookHospital($request, $province_code);
+    }
     
 }

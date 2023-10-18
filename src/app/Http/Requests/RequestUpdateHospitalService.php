@@ -28,7 +28,7 @@ class RequestUpdateHospitalService extends FormRequest
         return [
             'id_hospital_department' => 'integer',
             'name' => 'string',
-            'time_advise' => 'integer',
+            'time_advise' => 'integer|max:240',
             'price' => 'numeric',
             // 'infor' => 'array',
         ];

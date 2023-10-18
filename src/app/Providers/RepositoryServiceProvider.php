@@ -26,10 +26,14 @@ use App\Repositories\InforHospitalInterface;
 use App\Repositories\InforHospitalRepository;
 use App\Repositories\InforUserInterface;
 use App\Repositories\InforUserRepository;
+use App\Repositories\ProvinceInterface;
+use App\Repositories\ProvinceRepository;
 use App\Repositories\TimeWorkInterface;
 use App\Repositories\TimeWorkRepository;
 use App\Repositories\UserInterface;
 use App\Repositories\UserRepository;
+use App\Repositories\WorkScheduleInterface;
+use App\Repositories\WorkScheduleRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -56,6 +60,8 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(HealthInsuranceInterface::class, HealthInsuranceRepository::class);
         $this->app->bind(HealthInsuranceHospitalInterface::class, HealthInsuranceHospitalRepository::class);
         $this->app->bind(TimeWorkInterface::class, TimeWorkRepository::class);
+        $this->app->bind(ProvinceInterface::class, ProvinceRepository::class);
+        $this->app->bind(WorkScheduleInterface::class, WorkScheduleRepository::class);
     }
 
     /**

@@ -8,6 +8,7 @@ use App\Jobs\SendMailNotify;
 use App\Jobs\SendVerifyEmail;
 use App\Models\InforHospital;
 use App\Models\User;
+use App\Repositories\HospitalDepartmentRepository;
 use App\Repositories\InforDoctorInterface;
 use App\Repositories\InforDoctorRepository;
 use App\Repositories\UserRepository;
@@ -87,6 +88,38 @@ class InforDoctorService
                 }
             } 
             return $this->responseError(400, 'Không tìm thấy tài khoản !');
+        } catch (Throwable $e) {
+            return $this->responseError(400, $e->getMessage());
+        }
+    }
+    
+    public function bookDoctor(Request $request, $id_hospital, $id_department)
+    {
+        try {
+
+            // hospital 
+            $user = UserRepository::findUserById($id_hospital);
+            if(empty($user) || $user->role != 'hospital') return $this->responseError(404, 'Không tìm thấy bệnh viện !');
+
+            // hospitalDepartment
+            $hospitalDepartment = HospitalDepartmentRepository::searchHospitalDepartment([
+                'id_department' => $id_department,
+                'id_hospital' => $id_hospital,
+            ])->first();
+
+            if (empty($hospitalDepartment)) {
+                return $this->responseError(404, 'Không tìm thấy khoa trong bệnh viện !');
+            }
+
+            $filter = (object) [
+                'role' => 'doctor',
+                'is_accept' => 1,
+                'is_confirm' => 1,
+                'id_department' => $id_department,
+                'id_hospital' => $id_hospital,
+            ];
+            $allDoctor = UserRepository::doctorOfHospital($filter)->get();
+            return $this->responseOK(200, $allDoctor, 'Xem tất cả bác sĩ của khoa trong bệnh viện thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }

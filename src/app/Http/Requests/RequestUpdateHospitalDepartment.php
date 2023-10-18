@@ -26,7 +26,7 @@ class RequestUpdateHospitalDepartment extends FormRequest
     public function rules()
     {
         return [
-            'time_advise' => 'integer',
+            'time_advise' => 'integer|max:240',
             'price' => 'numeric',
         ];
     }

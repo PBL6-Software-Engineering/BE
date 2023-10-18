@@ -15,6 +15,7 @@ use App\Http\Controllers\ProvinceController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\TimeWorkController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WorkScheduleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -94,6 +95,7 @@ Route::prefix('infor-hospital')->controller(InforHospitalController::class)->gro
     Route::get('all-hospital', 'allHospital');
     Route::get('doctors-home/{id}', 'allDoctorHome');
     Route::get('view-profile/{id}', 'viewProfile');
+    Route::get('book-hospital/{province_code}', 'bookHospital');
 });
 
 // Doctor Infor
@@ -104,6 +106,7 @@ Route::prefix('infor-doctor')->controller(InforDoctorController::class)->group(f
         Route::post('add-doctor', 'addDoctor');
     });
     Route::get('view-profile/{id}', 'viewProfile');
+    Route::get('book-doctor/{id_hospital}/{id_department}', 'bookDoctor');
 });
 
 // Category
@@ -207,8 +210,18 @@ Route::prefix('time-work')->controller(TimeWorkController::class)->group(functio
         Route::post('update', 'edit');
         Route::get('detail', 'detail');
     });
-    Route::get('/advise', 'advise');
-    Route::get('/service', 'service');
+    Route::get('/advise/{id_doctor}', 'advise');
+    Route::get('/service/{id_hospital_service}', 'service');
+});
+
+// WorkSchedule
+Route::prefix('work-schedule')->controller(WorkScheduleController::class)->group(function () {
+    Route::middleware(['auth:user_api', 'role:user'])->group(function () {
+        Route::post('add-advise', 'addAdvise');
+        Route::post('add-service', 'addService');
+        Route::delete('delete/{id}', 'delete');
+        Route::get('/', 'all');
+    });
 });
 
 Route::prefix('public')->controller(PublicController::class)->group(function () {

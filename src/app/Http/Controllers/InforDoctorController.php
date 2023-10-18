@@ -29,4 +29,10 @@ class InforDoctorController extends Controller
     {
         return $this->inforDoctorService->updateProfile($request);
     }
+
+    public function bookDoctor(Request $request, $id_hospital, $id_department)
+    {
+        return $this->inforDoctorService->bookDoctor($request, $id_hospital, $id_department);
+    }
+    
 }

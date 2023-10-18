@@ -35,7 +35,7 @@ class RequestCreateHospitalDepartment extends FormRequest
                 'integer',
                 new UniqueHospitalDepartmentRule($this->id_department, $id_hospital),
             ],
-            'time_advise' => 'required|integer',
+            'time_advise' => 'required|integer|max:240',
             'price' => 'required|numeric', // Sử dụng kiểu dữ liệu số thực
         ];
     }

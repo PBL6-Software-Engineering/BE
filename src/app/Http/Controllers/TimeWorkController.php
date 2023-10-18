@@ -23,4 +23,15 @@ class TimeWorkController extends Controller
     {
         return $this->timeWorkService->detail();
     }
+    
+    public function advise($id_doctor)
+    {
+        return $this->timeWorkService->advise($id_doctor);
+    }
+
+    public function service($id_hospital_service)
+    {
+        return $this->timeWorkService->service($id_hospital_service);
+    }
+
 }

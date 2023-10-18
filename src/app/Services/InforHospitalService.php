@@ -14,6 +14,7 @@ use App\Repositories\HospitalDepartmentRepository;
 use App\Repositories\InforDoctorRepository;
 use App\Repositories\InforHospitalInterface;
 use App\Repositories\InforHospitalRepository;
+use App\Repositories\ProvinceRepository;
 use App\Repositories\TimeWorkRepository;
 use App\Repositories\UserRepository;
 use Database\Factories\FakeImageFactory;
@@ -438,16 +439,16 @@ class InforHospitalService
     {
         try {
             $search = $request->search;
-            $orderBy = 'id';
+            $orderBy = 'users.id';
             $orderDirection = 'ASC';
 
             if ($request->sortlatest == 'true') {
-                $orderBy = 'id';
+                $orderBy = 'users.id';
                 $orderDirection = 'DESC';
             }
 
             if ($request->sortname == 'true') {
-                $orderBy = 'name';
+                $orderBy = 'users.name';
                 $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
             }
 
@@ -479,6 +480,24 @@ class InforHospitalService
                 }
                 return $this->responseOK(200, $hospitals, 'Xem tất cả bệnh viện thành công !');
             }
+        } catch (Throwable $e) {
+            return $this->responseError(400, $e->getMessage());
+        }
+    }
+
+    public function bookHospital(Request $request, $province_code)
+    {
+        try {
+            $province = ProvinceRepository::getProvince(['province_code' => $province_code])->get();
+            if(count($province) <= 0) return $this->responseError(404, 'Không tìm thấy mã tỉnh thành !'); 
+            // không dùng empty vì get rỗng cũng không phải empty  
+            $filter = (object) [
+                'province_code' => $province_code,
+                'is_accept' => 1,
+            ];
+            $hospitals = InforHospitalRepository::searchHospital($filter)->get();
+            if(count($hospitals) <= 0) return $this->responseError(200, 'Không tìm thấy bệnh viện trong tỉnh thành này !');
+            return $this->responseOK(200, $hospitals, 'Xem tất cả bệnh viện thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
