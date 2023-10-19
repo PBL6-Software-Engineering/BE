@@ -14,6 +14,7 @@ class WorkSchedule extends Model
         'id_doctor',
         'id_user',
         'id_service',
+        'price',
         'time',
         'content',
     ];

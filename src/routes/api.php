@@ -219,8 +219,18 @@ Route::prefix('work-schedule')->controller(WorkScheduleController::class)->group
     Route::middleware(['auth:user_api', 'role:user'])->group(function () {
         Route::post('add-advise', 'addAdvise');
         Route::post('add-service', 'addService');
-        Route::delete('delete/{id}', 'delete');
-        Route::get('/', 'all');
+
+        Route::get('/user', 'userBook');
+        Route::delete('/user-cancel/{id}', 'userCancel');
+    });
+
+    Route::middleware(['auth:user_api', 'role:hospital'])->group(function () {
+        Route::get('/hospital', 'hospitalWorkSchedule');
+        Route::delete('/hospital-cancel/{id}', 'hospitalCancel');
+    });
+
+    Route::middleware(['auth:user_api', 'role:doctor'])->group(function () {
+        Route::get('/doctor', 'doctorWorkSchedule');
     });
 });
 

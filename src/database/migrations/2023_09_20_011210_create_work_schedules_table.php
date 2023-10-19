@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_doctor');
             $table->unsignedBigInteger('id_user');
             $table->unsignedBigInteger('id_service')->nullable();
+            $table->double('price', 15, 2);
             $table->json('time');
             $table->text('content');
             $table->timestamps();
