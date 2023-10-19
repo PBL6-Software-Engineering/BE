@@ -389,6 +389,48 @@ class InforHospitalService
         }
     }
 
+    public function allDoctorCare(Request $request)
+    {
+        try {
+
+            $search = $request->search;
+            $orderBy = 'users.id';
+            $orderDirection = 'ASC';
+
+            if ($request->sortlatest == 'true') {
+                $orderBy = 'users.id';
+                $orderDirection = 'DESC';
+            }
+
+            if ($request->sortname == 'true') {
+                $orderBy = 'users.name';
+                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            }
+
+            $filter = (object) [
+                'search' => $search,
+                'role' => 'doctor',
+                'orderBy' => $orderBy,
+                'is_accept' => 1,
+                'is_confirm' => 1,
+                'name_department' => $request->name_department ?? '',
+                'orderDirection' => $orderDirection,
+            ];
+
+            if (!(empty($request->paginate))) {
+                $allDoctor = UserRepository::doctorOfHospital($filter)->paginate($request->paginate);
+
+                return $this->responseOK(200, $allDoctor, 'Xem tất cả bác sĩ thành công !');
+            } else {
+                $allDoctor = UserRepository::doctorOfHospital($filter)->get();
+
+                return $this->responseOK(200, $allDoctor, 'Xem tất cả bác sĩ thành công !');
+            }
+        } catch (Throwable $e) {
+            return $this->responseError(400, $e->getMessage());
+        }
+    }
+
     public function allDoctorHome(Request $request, $id)
     {
         try {

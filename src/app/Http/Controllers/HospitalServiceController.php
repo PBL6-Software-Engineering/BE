@@ -40,4 +40,10 @@ class HospitalServiceController extends Controller
     {
         return $this->hospitalServiceService->details($request, $id);
     }
+
+    public function all(Request $request)
+    {
+        return $this->hospitalServiceService->all($request);
+    }
+    
 }

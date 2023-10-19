@@ -93,6 +93,7 @@ Route::prefix('infor-hospital')->controller(InforHospitalController::class)->gro
         Route::post('change-confirm/{id}', 'changeConfirm');
     });
     Route::get('all-hospital', 'allHospital');
+    Route::get('all-doctor-care', 'allDoctorCare');
     Route::get('doctors-home/{id}', 'allDoctorHome');
     Route::get('view-profile/{id}', 'viewProfile');
     Route::get('book-hospital/{province_code}', 'bookHospital');
@@ -179,6 +180,7 @@ Route::prefix('hospital-service')->controller(HospitalServiceController::class)-
         Route::delete('/{id}', 'delete');
     });
     Route::get('/hospital/{id}', 'serviceOfHospital');
+    Route::get('/all', 'all');
     Route::get('/detail/{id}', 'details');
 });
 

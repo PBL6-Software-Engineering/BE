@@ -187,4 +187,46 @@ class HospitalServiceService
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
+
+    public function all(Request $request)
+    {
+        try {
+
+            $search = $request->search;
+            $orderBy = 'id_hospital_service';
+            $orderDirection = 'ASC';
+
+            if ($request->sortlatest == 'true') {
+                $orderBy = 'id_hospital_service';
+                $orderDirection = 'DESC';
+            }
+
+            if ($request->sortname == 'true') {
+                $orderBy = 'name';
+                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            }
+
+            $filter = (object) [
+                'search' => $search,
+                'orderBy' => $orderBy,
+                'orderDirection' => $orderDirection,
+            ];
+
+            if (!empty($request->paginate)) {
+                $hospitalServices = $this->hospitalService->searchAll($filter)->paginate($request->paginate);
+                foreach ($hospitalServices as $index => $hospitalService) {
+                    $hospitalService->infor = json_decode($hospitalService->infor);
+                }
+            } else { 
+                $hospitalServices = $this->hospitalService->searchAll($filter)->get();
+                foreach ($hospitalServices as $index => $hospitalService) {
+                    $hospitalService->infor = json_decode($hospitalService->infor);
+                }
+            }
+
+            return $this->responseOK(200, $hospitalServices, 'Xem tất cả dịch vụ thành công !');
+        } catch (Throwable $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
 }
