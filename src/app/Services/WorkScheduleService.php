@@ -213,8 +213,10 @@ class WorkScheduleService
                 $filter = (object) [
                     'search' => $search,
                     'department_name' => $request->department_name ?? '',
-                    'doctors_id' => $idDoctorHospitals,
-                    'is_service' => $request->is_service ?? '', 
+                    'doctors_id' => $request->doctors_id ?? $idDoctorHospitals,
+                    'is_service' => $request->is_service ?? '',
+                    'start_date' => $request->start_date ?? '',
+                    'end_date' => $request->end_date ?? '',
                     'orderBy' => $orderBy,
                     'orderDirection' => $orderDirection,
                     'role' => 'hospital',

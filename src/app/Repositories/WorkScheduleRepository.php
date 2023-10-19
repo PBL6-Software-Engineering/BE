@@ -72,7 +72,7 @@ class WorkScheduleRepository extends BaseRepository implements WorkScheduleInter
             departments.name as department_name, departments.description as department_description, departments.thumbnail as department_thumbnail,
             hospital_services.name as hospital_service_name, hospital_services.time_advise as hospital_service_time_advise,
             hospital_services.price as hospital_service_price , hospital_services.infor as hospital_service_infor,
-            hospital_departments.price as hospital_department_price , work_schedules.id as work_schedule_id 
+            hospital_departments.price as hospital_department_price , hospital_departments.time_advise as hospital_department_time_advise , work_schedules.id as work_schedule_id 
             
             ')
             ->join('infor_doctors', 'infor_doctors.id_doctor', '=', 'work_schedules.id_doctor')
@@ -123,7 +123,12 @@ class WorkScheduleRepository extends BaseRepository implements WorkScheduleInter
             ->when(!empty($filter->department_name), function ($query) use ($filter) { 
                 $query->where('departments.name', $filter->department_name);
             })
-
+            ->when(!empty($filter->start_date), function ($query) use ($filter) {
+                $query->whereRaw('JSON_UNQUOTE(JSON_EXTRACT(work_schedules.time, "$.date")) >= ?', [$filter->start_date]);
+            })
+            ->when(!empty($filter->end_date), function ($query) use ($filter) {
+                $query->whereRaw('JSON_UNQUOTE(JSON_EXTRACT(work_schedules.time, "$.date")) <= ?', [$filter->end_date]);
+            })
             ->when(isset($filter->is_service), function ($query) use ($filter) {
                 return $query->where(function ($query) use ($filter) {
                     if ($filter->is_service === 'advise') {
