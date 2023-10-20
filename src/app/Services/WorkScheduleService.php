@@ -207,7 +207,7 @@ class WorkScheduleService
                 
                 if ($request->sortprice == 'true') {
                     $orderBy = 'work_schedules.price';
-                    $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+                    $orderDirection = 'DESC';
                 }
 
                 if($request->sorttime == 'true') {
@@ -253,7 +253,60 @@ class WorkScheduleService
     public function doctorWorkSchedule(Request $request)
     {
         try {
+            $user = UserRepository::findUserById(auth('user_api')->user()->id);
+            $idDoctorHospitals = [];
+            $idDoctorHospitals[] = $user->id;
 
+            $search = $request->search;
+
+            $orderBy = 'work_schedules.id';
+            $orderDirection = 'ASC';
+            
+            if ($request->sortlatest == 'true') {
+                $orderBy = 'work_schedules.id';
+                $orderDirection = 'DESC';
+            }
+            
+            if ($request->sortname == 'true') {
+                $orderBy = 'users_user.name';
+                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            }
+            
+            if ($request->sortprice == 'true') {
+                $orderBy = 'work_schedules.price';
+                $orderDirection = 'DESC';
+            }
+
+            if($request->sorttime == 'true') {
+                $orderBy = 'time->date'; // mặc định là sắp xếp thời gian gần nhất lên đầu 
+                $orderDirection = 'ASC';
+            }
+
+            $filter = (object) [
+                'search' => $search,
+                'doctors_id' => $idDoctorHospitals,
+                'is_service' => $request->is_service ?? '',
+                'start_date' => $request->start_date ?? '',
+                'end_date' => $request->end_date ?? '',
+                'orderBy' => $orderBy,
+                'orderDirection' => $orderDirection,
+                'role' => 'doctor',
+            ];
+
+            if (!(empty($request->paginate))) {
+                $workSchedules = $this->workScheduleRepository->searchWorkSchedule($filter)->paginate($request->paginate);
+            } else {
+                $workSchedules = $this->workScheduleRepository->searchWorkSchedule($filter)->get();
+            }
+
+            foreach($workSchedules as $workSchedule) {
+                $workSchedule->time = json_decode($workSchedule->time);
+                $workSchedule->infrastructure = json_decode($workSchedule->infrastructure);
+                $workSchedule->infor = json_decode($workSchedule->infor);
+                $workSchedule->hospital_service_infor = json_decode($workSchedule->hospital_service_infor);
+            }
+
+            return $this->responseOK(200, $workSchedules, 'Xem tất cả lịch tư vấn và dịch vụ thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -262,7 +315,58 @@ class WorkScheduleService
     public function userBook(Request $request)
     {
         try {
+            $user = UserRepository::findUserById(auth('user_api')->user()->id);
+
+            $search = $request->search;
+
+            $orderBy = 'work_schedules.id';
+            $orderDirection = 'ASC';
             
+            if ($request->sortlatest == 'true') {
+                $orderBy = 'work_schedules.id';
+                $orderDirection = 'DESC';
+            }
+            
+            if ($request->sortname == 'true') {
+                $orderBy = 'users_user.name';
+                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            }
+            
+            if ($request->sortprice == 'true') {
+                $orderBy = 'work_schedules.price';
+                $orderDirection = 'DESC';
+            }
+
+            if($request->sorttime == 'true') {
+                $orderBy = 'time->date'; // mặc định là sắp xếp thời gian gần nhất lên đầu 
+                $orderDirection = 'ASC';
+            }
+
+            $filter = (object) [
+                'search' => $search,
+                'user_id' => $user->id,
+                'is_service' => $request->is_service ?? '',
+                'start_date' => $request->start_date ?? '',
+                'end_date' => $request->end_date ?? '',
+                'orderBy' => $orderBy,
+                'orderDirection' => $orderDirection,
+                'role' => 'user',
+            ];
+
+            if (!(empty($request->paginate))) {
+                $workSchedules = $this->workScheduleRepository->searchWorkSchedule($filter)->paginate($request->paginate);
+            } else {
+                $workSchedules = $this->workScheduleRepository->searchWorkSchedule($filter)->get();
+            }
+
+            foreach($workSchedules as $workSchedule) {
+                $workSchedule->time = json_decode($workSchedule->time);
+                $workSchedule->infrastructure = json_decode($workSchedule->infrastructure);
+                $workSchedule->infor = json_decode($workSchedule->infor);
+                $workSchedule->hospital_service_infor = json_decode($workSchedule->hospital_service_infor);
+            }
+
+            return $this->responseOK(200, $workSchedules, 'Xem tất cả lịch tư vấn và dịch vụ thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -338,6 +442,98 @@ class WorkScheduleService
             return $this->responseOK(200, null, 'Hủy bỏ lịch tư vấn , dịch vụ thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
+        }
+    }
+    
+    public function hospitalCancelMany(Request $request)
+    {
+        try {
+            $list_id = $request->list_id ?? [0];
+            $user = Auth::user();
+            $filter = [
+                'list_id' => $list_id,
+                'hospital_id' => $user->id,
+            ];
+            $doctors = InforDoctorRepository::getInforDoctor(['id_hospital' => $user->id])->get();
+            $idDoctorHospitals = [];
+            foreach ($doctors as $doctor) {
+                $idDoctorHospitals[] = $doctor->id_doctor;
+            }
+            $workSchedules = $this->workScheduleRepository->searchWorkSchedule($filter)->get();
+            if(count($workSchedules) > 0) {
+                foreach ($workSchedules as $workSchedule) {
+                    $hospital = Auth::user();
+                    if(!in_array($workSchedule->id_doctor, $idDoctorHospitals)) continue;
+                    
+                    $doctor = UserRepository::doctorOfHospital(['id_doctor' => $workSchedule->id_doctor])->first();
+                    $user = UserRepository::findUserById($workSchedule->id_user);
+        
+                    // gửi mail đến bác sĩ , bệnh viện , người dùng 
+                    $workSchedule->time = json_decode($workSchedule->time);
+                    $startTime = $workSchedule->time->interval[0];
+                    $endTime = $workSchedule->time->interval[1];
+                    $day = $workSchedule->time->date;
+        
+                    $contentDoctor = "Lịch làm việc giữa bạn và $user->name trong khoảng thời gian từ $startTime đến $endTime vào ngày $day đã bị hủy bởi bệnh viện !";
+                    $contentHospital = "Lịch làm việc giữa bác sĩ $doctor->name_doctor và khách hàng $user->name trong khoảng thời gian từ $startTime đến $endTime vào ngày $day đã được hủy !";
+                    $contentUser = "Lịch làm việc giữa bạn và $doctor->name_doctor trong khoảng thời gian từ $startTime đến $endTime vào ngày $day đã bị hủy bởi bệnh viện !";
+        
+                    Queue::push(new SendMailNotify($doctor->email, $contentDoctor));
+                    Queue::push(new SendMailNotify($hospital->email, $contentHospital));
+                    Queue::push(new SendMailNotify($user->email, $contentUser));
+
+                    $workSchedule = $this->workScheduleRepository->findById($workSchedule->work_schedule_id);
+                    $workSchedule->delete();
+                }
+            }
+            else {
+                return $this->responseError(200, 'Không tìm thấy lịch nào !');
+            }
+            return $this->responseOK(200, null, 'Hủy nhiều lịch thành công !');
+        } catch (Throwable $e) {
+            return $this->responseError(404, $e->getMessage());
+        }
+    }
+
+    public function userCancelMany(Request $request)
+    {
+        try {
+            $list_id = $request->list_id ?? [0];
+            $user = Auth::user();
+            $filter = [
+                'list_id' => $list_id,
+                'user_id' => $user->id,
+            ];
+            $workSchedules = $this->workScheduleRepository->searchWorkSchedule($filter)->get();
+            if(count($workSchedules) > 0) {
+                foreach ($workSchedules as $workSchedule) {
+                    $doctor = UserRepository::doctorOfHospital(['id_doctor' => $workSchedule->id_doctor])->first();
+                    $hospital = UserRepository::findUserById($doctor->id_hospital);
+        
+                    // gửi mail đến bác sĩ , bệnh viện , người dùng 
+                    $workSchedule->time = json_decode($workSchedule->time);
+                    $startTime = $workSchedule->time->interval[0];
+                    $endTime = $workSchedule->time->interval[1];
+                    $day = $workSchedule->time->date;
+        
+                    $contentDoctor = "Lịch làm việc giữa bạn và $user->name trong khoảng thời gian từ $startTime đến $endTime vào ngày $day đã bị bởi người dùng !";
+                    $contentHospital = "Lịch làm việc giữa bác sĩ $doctor->name_doctor và khách hàng $user->name trong khoảng thời gian từ $startTime đến $endTime vào ngày $day đã bị bởi người dùng !";
+                    $contentUser = "Lịch làm việc giữa bạn và $doctor->name_doctor trong khoảng thời gian từ $startTime đến $endTime vào ngày $day đã được hủy thành công !";
+        
+                    Queue::push(new SendMailNotify($doctor->email, $contentDoctor));
+                    Queue::push(new SendMailNotify($hospital->email, $contentHospital));
+                    Queue::push(new SendMailNotify($user->email, $contentUser));
+        
+                    $workSchedule = $this->workScheduleRepository->findById($workSchedule->work_schedule_id);
+                    $workSchedule->delete();
+                }
+            }
+            else {
+                return $this->responseError(200, 'Không tìm thấy lịch nào !');
+            }
+            return $this->responseOK(200, null, 'Hủy nhiều lịch thành công !');
+        } catch (Throwable $e) {
+            return $this->responseError(404, $e->getMessage());
         }
     }
 

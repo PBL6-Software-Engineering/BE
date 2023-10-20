@@ -73,7 +73,8 @@ class WorkScheduleRepository extends BaseRepository implements WorkScheduleInter
             hospital_services.name as hospital_service_name, hospital_services.time_advise as hospital_service_time_advise,
             hospital_services.price as hospital_service_price , hospital_services.infor as hospital_service_infor,
             hospital_departments.price as hospital_department_price , hospital_departments.time_advise as hospital_department_time_advise , 
-            work_schedules.id as work_schedule_id , work_schedules.price as work_schedule_price
+            work_schedules.id as work_schedule_id , work_schedules.price as work_schedule_price,
+            infor_users.date_of_birth as infor_user_date_of_birth
             
             ')
             ->join('infor_doctors', 'infor_doctors.id_doctor', '=', 'work_schedules.id_doctor')
@@ -117,6 +118,12 @@ class WorkScheduleRepository extends BaseRepository implements WorkScheduleInter
             ->when(!empty($filter->user_id), function ($query) use ($filter) { // user
                 $query->where('users_user.id', '=', $filter->user_id);
             })
+            ->when(!empty($filter->hospital_id), function ($query) use ($filter) { // hospital delete Many 
+                $query->where('users_hospital.id', $filter->hospital_id);
+            })
+            ->when(!empty($filter->list_id), function ($query) use ($filter) {
+                $query->whereIn('work_schedules.id', $filter->list_id);
+            })
             ->when(!empty($filter->doctors_id), function ($query) use ($filter) {  // doctor hoặc hospital 
                 $query->whereIn('users_doctor.id', $filter->doctors_id);
             })
@@ -152,6 +159,8 @@ class WorkScheduleRepository extends BaseRepository implements WorkScheduleInter
             ->when(!empty($filter->work_schedule_id), function ($query) use ($filter) {
                 $query->where('work_schedules.id', $filter->work_schedule_id);
             });
+
+
 
         return $data;
     }

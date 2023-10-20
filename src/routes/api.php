@@ -224,11 +224,13 @@ Route::prefix('work-schedule')->controller(WorkScheduleController::class)->group
 
         Route::get('/user', 'userBook');
         Route::delete('/user-cancel/{id}', 'userCancel');
+        Route::delete('/user-cancel-many', 'userCancelMany');
     });
 
     Route::middleware(['auth:user_api', 'role:hospital'])->group(function () {
         Route::get('/hospital', 'hospitalWorkSchedule');
         Route::delete('/hospital-cancel/{id}', 'hospitalCancel');
+        Route::delete('/hospital-cancel-many', 'hospitalCancelMany');
     });
 
     Route::middleware(['auth:user_api', 'role:doctor'])->group(function () {
