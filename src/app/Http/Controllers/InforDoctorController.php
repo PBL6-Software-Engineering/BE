@@ -34,5 +34,4 @@ class InforDoctorController extends Controller
     {
         return $this->inforDoctorService->bookDoctor($request, $id_hospital, $id_department);
     }
-    
 }

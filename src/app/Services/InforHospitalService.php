@@ -21,6 +21,7 @@ use Database\Factories\FakeImageFactory;
 use Faker\Factory;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -28,7 +29,6 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
-use Illuminate\Support\Facades\Auth;
 
 class InforHospitalService
 {
@@ -174,41 +174,42 @@ class InforHospitalService
     {
         try {
             $user = UserRepository::findUserById($id);
-            if(!empty($user) && $user->role == 'hospital' && $user->is_accept == 1) {
+            if (!empty($user) && $user->role == 'hospital' && $user->is_accept == 1) {
                 $inforUser = InforHospitalRepository::getInforHospital(['id_hospital' => $user->id])->first();
-    
-                // search number 
+
+                // search number
                 $search_number = $inforUser->search_number + 1;
                 $inforUser = InforHospitalRepository::updateHospital($inforUser, ['search_number' => $search_number]);
-                // search number 
-                
+                // search number
+
                 $inforUser->infrastructure = json_decode($inforUser->infrastructure);
                 $inforUser->location = json_decode($inforUser->location);
 
-                // time work 
+                // time work
                 $filter = (object) [
                     'id_hospital' => $user->id,
                 ];
                 $timeWork = TimeWorkRepository::getTimeWork($filter)->first();
                 $timeWork->times = json_decode($timeWork->times);
-                $inforUser->time_work = $timeWork;  
+                $inforUser->time_work = $timeWork;
 
-                // department 
+                // department
                 $listNames = [];
                 $filter = (object) [
                     'id_hospital' => $id,
                 ];
                 $hospitalDepartments = HospitalDepartmentRepository::searchHospitalDepartment($filter)->get();
-                foreach($hospitalDepartments as $hospitalDepartment) {
+                foreach ($hospitalDepartments as $hospitalDepartment) {
                     $listNames[] = $hospitalDepartment->name;
                 }
                 $inforUser->departments = $listNames;
 
                 $hospital = array_merge($user->toArray(), $inforUser->toArray());
-    
+
                 return $this->responseOK(200, $hospital, 'Xem thông tin tài khoản thành công !');
-            } 
-            else return $this->responseError(400, 'Không tìm thấy tài khoản !');
+            } else {
+                return $this->responseError(400, 'Không tìm thấy tài khoản !');
+            }
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -392,7 +393,6 @@ class InforHospitalService
     public function allDoctorCare(Request $request)
     {
         try {
-
             $search = $request->search;
             $orderBy = 'users.id';
             $orderDirection = 'ASC';
@@ -419,13 +419,11 @@ class InforHospitalService
 
             if (!(empty($request->paginate))) {
                 $allDoctor = UserRepository::doctorOfHospital($filter)->paginate($request->paginate);
-
-                return $this->responseOK(200, $allDoctor, 'Xem tất cả bác sĩ thành công !');
             } else {
                 $allDoctor = UserRepository::doctorOfHospital($filter)->get();
-
-                return $this->responseOK(200, $allDoctor, 'Xem tất cả bác sĩ thành công !');
             }
+
+            return $this->responseOK(200, $allDoctor, 'Xem tất cả bác sĩ thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
@@ -434,9 +432,10 @@ class InforHospitalService
     public function allDoctorHome(Request $request, $id)
     {
         try {
-
             $user = UserRepository::findUserById($id);
-            if(empty($user) || $user->role != 'hospital') return $this->responseError(404, 'Không tìm thấy bệnh viện !');
+            if (empty($user) || $user->role != 'hospital') {
+                return $this->responseError(404, 'Không tìm thấy bệnh viện !');
+            }
 
             $search = $request->search;
             $orderBy = 'users.id';
@@ -494,10 +493,10 @@ class InforHospitalService
                 $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
             }
 
-            // sắp xếp theo bài viết nổi bật 
+            // sắp xếp theo bài viết nổi bật
             if ($request->sort_search_number == 'true') {
                 $orderBy = 'infor_hospitals.search_number';
-                $orderDirection = 'DESC' ;
+                $orderDirection = 'DESC';
             }
 
             $filter = (object) [
@@ -509,17 +508,19 @@ class InforHospitalService
 
             if (!(empty($request->paginate))) {
                 $hospitals = InforHospitalRepository::searchHospital($filter)->paginate($request->paginate);
-                foreach($hospitals as $hospital) {
+                foreach ($hospitals as $hospital) {
                     $hospital->infrastructure = json_decode($hospital->infrastructure);
                     $hospital->location = json_decode($hospital->location);
                 }
+
                 return $this->responseOK(200, $hospitals, 'Xem tất cả bệnh viện thành công !');
             } else {
                 $hospitals = InforHospitalRepository::searchHospital($filter)->get();
-                foreach($hospitals as $hospital) {
+                foreach ($hospitals as $hospital) {
                     $hospital->infrastructure = json_decode($hospital->infrastructure);
                     $hospital->location = json_decode($hospital->location);
                 }
+
                 return $this->responseOK(200, $hospitals, 'Xem tất cả bệnh viện thành công !');
             }
         } catch (Throwable $e) {
@@ -531,14 +532,19 @@ class InforHospitalService
     {
         try {
             $province = ProvinceRepository::getProvince(['province_code' => $province_code])->get();
-            if(count($province) <= 0) return $this->responseError(404, 'Không tìm thấy mã tỉnh thành !'); 
-            // không dùng empty vì get rỗng cũng không phải empty  
+            if (count($province) <= 0) {
+                return $this->responseError(404, 'Không tìm thấy mã tỉnh thành !');
+            }
+            // không dùng empty vì get rỗng cũng không phải empty
             $filter = (object) [
                 'province_code' => $province_code,
                 'is_accept' => 1,
             ];
             $hospitals = InforHospitalRepository::searchHospital($filter)->get();
-            if(count($hospitals) <= 0) return $this->responseError(200, 'Không tìm thấy bệnh viện trong tỉnh thành này !');
+            if (count($hospitals) <= 0) {
+                return $this->responseError(200, 'Không tìm thấy bệnh viện trong tỉnh thành này !');
+            }
+
             return $this->responseOK(200, $hospitals, 'Xem tất cả bệnh viện thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
@@ -551,17 +557,19 @@ class InforHospitalService
             $user = Auth::user();
             $filter = [
                 'id_doctor' => $id,
-                'id_hospital' => $user->id
+                'id_hospital' => $user->id,
             ];
             $doctor = InforDoctorRepository::getInforDoctor($filter)->first();
-            if(empty($doctor)) return $this->responseError(404, 'Không tìm bác sĩ trong bệnh viện !');
+            if (empty($doctor)) {
+                return $this->responseError(404, 'Không tìm bác sĩ trong bệnh viện !');
+            }
 
             $data = ['is_confirm' => $request->is_confirm];
             $doctor = InforDoctorRepository::updateResult($doctor, $data);
+
             return $this->responseOK(200, $doctor, 'Thay đổi trạng thái của bác sĩ thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
     }
-    
 }

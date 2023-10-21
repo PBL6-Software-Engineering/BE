@@ -191,7 +191,6 @@ class HospitalServiceService
     public function all(Request $request)
     {
         try {
-
             $search = $request->search;
             $orderBy = 'id_hospital_service';
             $orderDirection = 'ASC';
@@ -214,14 +213,12 @@ class HospitalServiceService
 
             if (!empty($request->paginate)) {
                 $hospitalServices = $this->hospitalService->searchAll($filter)->paginate($request->paginate);
-                foreach ($hospitalServices as $index => $hospitalService) {
-                    $hospitalService->infor = json_decode($hospitalService->infor);
-                }
-            } else { 
+            } else {
                 $hospitalServices = $this->hospitalService->searchAll($filter)->get();
-                foreach ($hospitalServices as $index => $hospitalService) {
-                    $hospitalService->infor = json_decode($hospitalService->infor);
-                }
+            }
+
+            foreach ($hospitalServices as $index => $hospitalService) {
+                $hospitalService->infor = json_decode($hospitalService->infor);
             }
 
             return $this->responseOK(200, $hospitalServices, 'Xem tất cả dịch vụ thành công !');

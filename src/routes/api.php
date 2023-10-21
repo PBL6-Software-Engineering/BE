@@ -244,4 +244,3 @@ Route::prefix('public')->controller(PublicController::class)->group(function () 
 
 // Seeder Value
 Route::get('province', [ProvinceController::class, 'all']);
-

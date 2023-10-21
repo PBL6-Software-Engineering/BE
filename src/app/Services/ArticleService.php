@@ -112,6 +112,7 @@ class ArticleService
                 $article = $this->articleRepository->updateArticle($article, $request->all());
             }
             $article = $this->articleRepository->getRawArticle(['id' => $id])->first();
+
             return $this->responseOK(200, $article, 'Cập nhật bài viết thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
@@ -150,21 +151,24 @@ class ArticleService
             $list_id = $request->list_id ?? [0];
             $user = Auth::user();
             $filter = [
-                'list_id' => $list_id 
+                'list_id' => $list_id,
             ];
-            if (in_array($user->role, ['doctor', 'hospital'])) $filter['id_user'] = $user->id;
-            else $filter['id_user'] = 'admin';
+            if (in_array($user->role, ['doctor', 'hospital'])) {
+                $filter['id_user'] = $user->id;
+            } else {
+                $filter['id_user'] = 'admin';
+            }
             $articles = $this->articleRepository->getRawArticle($filter)->get();
 
-            if(count($articles) > 0) {
+            if (count($articles) > 0) {
                 foreach ($articles as $article) {
                     File::delete($article->thumbnail_article);
                     $article = $this->articleRepository->findById($article->id_article)->delete();
                 }
-            }
-            else {
+            } else {
                 return $this->responseError(200, 'Không tìm thấy bài viết nào !');
             }
+
             return $this->responseOK(200, null, 'Xóa nhiều bài viết thành công !');
         } catch (Throwable $e) {
             return $this->responseError(404, $e->getMessage());
@@ -405,10 +409,10 @@ class ArticleService
                 $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
             }
 
-            // sắp xếp theo bài viết nổi bật 
+            // sắp xếp theo bài viết nổi bật
             if ($request->sort_search_number == 'true') {
                 $orderBy = 'articles.search_number';
-                $orderDirection = 'DESC' ;
+                $orderDirection = 'DESC';
             }
 
             $filter = (object) [
@@ -442,13 +446,12 @@ class ArticleService
             ];
             $article = $this->articleRepository->searchAll($filter)->first();
             if ($article) {
-
-                // search number 
+                // search number
                 $_article = ArticleRepository::findById($id);
                 $search_number = $article->search_number_article + 1;
                 ArticleRepository::updateArticle($_article, ['search_number' => $search_number]);
                 $article->search_number_article = $search_number;
-                // search number 
+                // search number
 
                 return $this->responseOK(200, $article, 'Xem bài viết chi tiết thành công !');
             } else {

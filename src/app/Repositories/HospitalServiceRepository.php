@@ -67,8 +67,15 @@ class HospitalServiceRepository extends BaseRepository implements HospitalServic
             hospital_services.time_advise as time_advise_hospital_service, 
             hospital_departments.time_advise as time_advise_hospital_departments,
             hospital_services.price as price_hospital_service, 
-            hospital_departments.price as price_hospital_departments')
+            hospital_departments.price as price_hospital_departments,
+            
+            users_hospital.name as name_hospital, departments.name as name_department,
+            departments.thumbnail as thumbnail_department
+            
+            ')
             ->join('hospital_departments', 'hospital_departments.id', '=', 'hospital_services.id_hospital_department')
+            ->join('users as users_hospital', 'users_hospital.id', '=', 'hospital_departments.id_hospital')
+            ->join('departments', 'departments.id', '=', 'hospital_departments.id_department')
 
             ->when(!empty($filter->search), function ($q) use ($filter) {
                 $q->where(function ($query) use ($filter) {

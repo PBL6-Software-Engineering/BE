@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-use App\Models\Example;
 use App\Models\Province;
 
 class ProvinceRepository extends BaseRepository implements ProvinceInterface

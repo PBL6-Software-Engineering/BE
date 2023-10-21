@@ -18,5 +18,4 @@ class PublicController extends Controller
     {
         return $this->publicService->readSearch($request, $name, $id);
     }
-
 }

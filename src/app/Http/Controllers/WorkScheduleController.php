@@ -55,10 +55,9 @@ class WorkScheduleController extends Controller
     {
         return $this->workScheduleService->userCancelMany($request);
     }
-    
+
     public function hospitalCancelMany(Request $request)
     {
         return $this->workScheduleService->hospitalCancelMany($request);
     }
-
 }

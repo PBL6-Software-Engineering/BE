@@ -74,32 +74,34 @@ class InforDoctorService
     {
         try {
             $user = UserRepository::findUserById($id);
-            if(!empty($user) && $user->role == 'doctor' && $user->is_accept == 1) {
+            if (!empty($user) && $user->role == 'doctor' && $user->is_accept == 1) {
                 $inforUser = InforDoctorRepository::getInforDoctor(['id_doctor' => $user->id])->first();
-                if($inforUser->is_confirm == 1) {
-
-                    // search number 
+                if ($inforUser->is_confirm == 1) {
+                    // search number
                     $search_number = $inforUser->search_number + 1;
                     $inforUser = InforDoctorRepository::updateResult($inforUser, ['search_number' => $search_number]);
-                    // search number 
+                    // search number
 
                     $hospital = array_merge($user->toArray(), $inforUser->toArray());
+
                     return $this->responseOK(200, $hospital, 'Xem thông tin tài khoản thành công !');
                 }
-            } 
+            }
+
             return $this->responseError(400, 'Không tìm thấy tài khoản !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
     }
-    
+
     public function bookDoctor(Request $request, $id_hospital, $id_department)
     {
         try {
-
-            // hospital 
+            // hospital
             $user = UserRepository::findUserById($id_hospital);
-            if(empty($user) || $user->role != 'hospital') return $this->responseError(404, 'Không tìm thấy bệnh viện !');
+            if (empty($user) || $user->role != 'hospital') {
+                return $this->responseError(404, 'Không tìm thấy bệnh viện !');
+            }
 
             // hospitalDepartment
             $hospitalDepartment = HospitalDepartmentRepository::searchHospitalDepartment([
@@ -119,6 +121,7 @@ class InforDoctorService
                 'id_hospital' => $id_hospital,
             ];
             $allDoctor = UserRepository::doctorOfHospital($filter)->get();
+
             return $this->responseOK(200, $allDoctor, 'Xem tất cả bác sĩ của khoa trong bệnh viện thành công !');
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());

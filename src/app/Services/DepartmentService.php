@@ -159,11 +159,10 @@ class DepartmentService
         try {
             $department = $this->departmentRepository->findById($id);
             if ($department) {
-
-                // search number 
+                // search number
                 $search_number = $department->search_number + 1;
                 $department = DepartmentRepository::updateDepartment($department, ['search_number' => $search_number]);
-                // search number 
+                // search number
 
                 return $this->responseOK(200, $department, 'Xem chi tiết khoa thành công !');
             } else {

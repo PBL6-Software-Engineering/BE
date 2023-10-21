@@ -323,9 +323,10 @@ class InforUserService
                     $user->have_password = true;
                     if (!$user->password) {
                         $user->have_password = false;
-                    } 
+                    }
 
                     $arrUser = array_merge($user->toArray(), $inforUser->toArray());
+
                     return $this->responseOK(200, $arrUser, 'Đăng nhập bằng google thành công !');
                 }
             } else {
@@ -354,9 +355,10 @@ class InforUserService
                         $findEmail->have_password = true;
                         if (!$findEmail->password) {
                             $findEmail->have_password = false;
-                        } 
+                        }
 
                         $arrUser = array_merge($findEmail->toArray(), $inforUser->toArray());
+
                         return $this->responseOK(200, $arrUser, 'Đăng nhập bằng google thành công !');
                     }
                 } else {
@@ -384,9 +386,10 @@ class InforUserService
                     $newUser->have_password = true;
                     if (!$newUser->password) {
                         $newUser->have_password = false;
-                    } 
+                    }
 
                     $arrUser = array_merge($newUser->toArray(), $newInforUser->toArray());
+
                     return $this->responseOK(201, $arrUser, 'Đăng kí bằng google thành công !');
                 }
             }

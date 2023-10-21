@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-use App\Models\Category;
 use App\Models\WorkSchedule;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -46,12 +45,13 @@ class WorkScheduleRepository extends BaseRepository implements WorkScheduleInter
             ->when(!empty($filter->time), function ($q) use ($filter) {
                 $q->whereJsonContains('time', [
                     'date' => $filter->time['date'],
-                    'interval' => $filter->time['interval']
+                    'interval' => $filter->time['interval'],
                 ]);
             })
             ->when(isset($filter->id_service), function ($query) use ($filter) {
                 $query->where('id_service', $filter->id_service === 'advise' ? null : $filter->id_service);
             });
+
         return $data;
     }
 
@@ -78,9 +78,9 @@ class WorkScheduleRepository extends BaseRepository implements WorkScheduleInter
             
             ')
             ->join('infor_doctors', 'infor_doctors.id_doctor', '=', 'work_schedules.id_doctor')
-            ->join('hospital_departments', function($join) { // join với 2 điều kiện 
+            ->join('hospital_departments', function ($join) { // join với 2 điều kiện
                 $join->on('hospital_departments.id_department', '=', 'infor_doctors.id_department')
-                     ->on('hospital_departments.id_hospital', '=', 'infor_doctors.id_hospital');
+                    ->on('hospital_departments.id_hospital', '=', 'infor_doctors.id_hospital');
             })
             ->join('infor_hospitals', 'infor_hospitals.id_hospital', '=', 'infor_doctors.id_hospital')
             ->join('users as users_hospital', 'users_hospital.id', '=', 'infor_hospitals.id_hospital')
@@ -91,7 +91,7 @@ class WorkScheduleRepository extends BaseRepository implements WorkScheduleInter
             ->leftJoin('hospital_services', 'work_schedules.id_service', '=', 'hospital_services.id')
 
             ->when(!empty($filter->search), function ($q) use ($filter) {
-                if($filter->role == 'user') {
+                if ($filter->role == 'user') {
                     $q->where(function ($query) use ($filter) {
                         $query->where('users_doctor.name', 'LIKE', '%' . $filter->search . '%')
                             ->orWhere('users_hospital.name', 'LIKE', '%' . $filter->search . '%')
@@ -103,8 +103,7 @@ class WorkScheduleRepository extends BaseRepository implements WorkScheduleInter
                             ->orWhere('departments.description', 'LIKE', '%' . $filter->search . '%')
                             ->orWhere('hospital_services.name', 'LIKE', '%' . $filter->search . '%');
                     });
-                } 
-                else {
+                } else {
                     $q->where(function ($query) use ($filter) {
                         $query->where('users_user.name', 'LIKE', '%' . $filter->search . '%')
                             ->orWhere('users_user.address', 'LIKE', '%' . $filter->search . '%')
@@ -113,22 +112,21 @@ class WorkScheduleRepository extends BaseRepository implements WorkScheduleInter
                             ->orWhere('hospital_services.name', 'LIKE', '%' . $filter->search . '%');
                     });
                 }
-
             })
             ->when(!empty($filter->user_id), function ($query) use ($filter) { // user
                 $query->where('users_user.id', '=', $filter->user_id);
             })
-            ->when(!empty($filter->hospital_id), function ($query) use ($filter) { // hospital delete Many 
+            ->when(!empty($filter->hospital_id), function ($query) use ($filter) { // hospital delete Many
                 $query->where('users_hospital.id', $filter->hospital_id);
             })
             ->when(!empty($filter->list_id), function ($query) use ($filter) {
                 $query->whereIn('work_schedules.id', $filter->list_id);
             })
-            ->when(!empty($filter->doctors_id), function ($query) use ($filter) {  // doctor hoặc hospital 
+            ->when(!empty($filter->doctors_id), function ($query) use ($filter) {  // doctor hoặc hospital
                 $query->whereIn('users_doctor.id', $filter->doctors_id);
             })
 
-            ->when(!empty($filter->department_name), function ($query) use ($filter) { 
+            ->when(!empty($filter->department_name), function ($query) use ($filter) {
                 $query->where('departments.name', $filter->department_name);
             })
             ->when(!empty($filter->start_date), function ($query) use ($filter) {
@@ -146,7 +144,7 @@ class WorkScheduleRepository extends BaseRepository implements WorkScheduleInter
                     }
                 });
             })
-            
+
             ->when(!empty($filter->orderBy), function ($query) use ($filter) {
                 if ($filter->orderBy === 'time->date') {
                     $query->orderByRaw("time->'$.date' $filter->orderDirection, JSON_UNQUOTE(JSON_EXTRACT(time, '$.interval[0]')) $filter->orderDirection");
@@ -155,12 +153,10 @@ class WorkScheduleRepository extends BaseRepository implements WorkScheduleInter
                 }
             })
 
-            // detail 
+            // detail
             ->when(!empty($filter->work_schedule_id), function ($query) use ($filter) {
                 $query->where('work_schedules.id', $filter->work_schedule_id);
             });
-
-
 
         return $data;
     }

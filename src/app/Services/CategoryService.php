@@ -179,11 +179,10 @@ class CategoryService
         try {
             $category = CategoryRepository::getCategory(['id' => $id])->first();
             if ($category) {
-
-                // search number 
+                // search number
                 $search_number = $category->search_number + 1;
                 $category = CategoryRepository::updateResultCategory($category, ['search_number' => $search_number]);
-                // search number 
+                // search number
 
                 return $this->responseOK(200, $category, 'Xem danh mục chi tiết thành công !');
             } else {

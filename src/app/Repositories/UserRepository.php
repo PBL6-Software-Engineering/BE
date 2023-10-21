@@ -108,19 +108,24 @@ class UserRepository extends BaseRepository implements UserInterface
         return $data;
     }
 
-    
-    // leftjoin để nếu bác sĩ thuộc bệnh viện này và bác sĩ thuộc chuyên khoa A mà bệnh viện 
-    // này không có chuyên khoa A vẫn lấy ra được 
-    // vẫn lấy ra đầy đủ thông tin doctor còn hospital_departments thì null . rightjoin thì ngược lại 
+    // leftjoin để nếu bác sĩ thuộc bệnh viện này và bác sĩ thuộc chuyên khoa A mà bệnh viện
+    // này không có chuyên khoa A vẫn lấy ra được
+    // vẫn lấy ra đầy đủ thông tin doctor còn hospital_departments thì null . rightjoin thì ngược lại
     public static function doctorOfHospital($filter)
     {
         $filter = (object) $filter;
         $data = (new self)->model->selectRaw('users.*, infor_doctors.*, departments.*,hospital_departments.*,
         users.name as name_doctor, departments.name as name_department,
-        infor_doctors.search_number as search_number_doctor, departments.search_number as search_number_department')
+        infor_doctors.search_number as search_number_doctor, departments.search_number as search_number_department,
+        users_hospital.name as name_hospital
+        
+        ')
+
             ->join('infor_doctors', 'users.id', '=', 'infor_doctors.id_doctor')
             ->join('departments', 'departments.id', '=', 'infor_doctors.id_department')
             ->leftjoin('hospital_departments', 'hospital_departments.id_department', '=', 'departments.id')
+            ->join('users as users_hospital', 'users_hospital.id', '=', 'infor_doctors.id_hospital')
+
             ->when(!empty($filter->search), function ($q) use ($filter) {
                 $q->where(function ($query) use ($filter) {
                     $query->where('users.name', 'LIKE', '%' . $filter->search . '%')
@@ -149,13 +154,13 @@ class UserRepository extends BaseRepository implements UserInterface
                 }
             })
             ->when(!empty($filter->id_hospital), function ($query) use ($filter) {
-                return $query->where('infor_doctors.id_hospital',  $filter->id_hospital);
+                return $query->where('infor_doctors.id_hospital', $filter->id_hospital);
             })
             ->when(!empty($filter->id_doctor), function ($query) use ($filter) {
-                return $query->where('infor_doctors.id_doctor',  $filter->id_doctor);
+                return $query->where('infor_doctors.id_doctor', $filter->id_doctor);
             })
             ->when(!empty($filter->id_department), function ($query) use ($filter) {
-                return $query->where('infor_doctors.id_department',  $filter->id_department);
+                return $query->where('infor_doctors.id_department', $filter->id_department);
             })
             ->when(!empty($filter->orderBy), function ($query) use ($filter) {
                 $query->orderBy($filter->orderBy, $filter->orderDirection);

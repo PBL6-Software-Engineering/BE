@@ -107,5 +107,4 @@ class InforHospitalRepository extends BaseRepository implements InforHospitalInt
 
         return $data;
     }
-
 }

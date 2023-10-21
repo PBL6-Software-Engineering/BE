@@ -45,5 +45,4 @@ class HospitalServiceController extends Controller
     {
         return $this->hospitalServiceService->all($request);
     }
-    
 }

@@ -70,24 +70,24 @@ class ArticleRepository extends BaseRepository implements ArticleInterface
         articles.updated_at AS updated_at_article, categories.updated_at AS updated_at_category,
         users.name as name_user,users.role as role_user,
         categories.name as name_category')
-        ->leftJoin('categories', 'articles.id_category', '=', 'categories.id')
-        ->leftJoin('users', 'articles.id_user', '=', 'users.id')
-        
-        ->when(!empty($filter->id), function ($query) use ($filter) {
-            return $query->where('articles.id', $filter->id);
-        })
+            ->leftJoin('categories', 'articles.id_category', '=', 'categories.id')
+            ->leftJoin('users', 'articles.id_user', '=', 'users.id')
+            ->when(!empty($filter->id), function ($query) use ($filter) {
+                return $query->where('articles.id', $filter->id);
+            })
 
-        // delete many 
-        ->when(!empty($filter->list_id), function ($q) use ($filter) {
-            $q->whereIn('articles.id', $filter->list_id);
-        })
-        ->when(!empty($filter->id_user), function ($query) use ($filter) {
-            if ($filter->id_user === 'admin') {
-                $query->where('articles.id_user', null);
-            } else {
-                $query->where('articles.id_user', $filter->id_user);
-            }
-        });
+        // delete many
+            ->when(!empty($filter->list_id), function ($q) use ($filter) {
+                $q->whereIn('articles.id', $filter->list_id);
+            })
+            ->when(!empty($filter->id_user), function ($query) use ($filter) {
+                if ($filter->id_user === 'admin') {
+                    $query->where('articles.id_user', null);
+                } else {
+                    $query->where('articles.id_user', $filter->id_user);
+                }
+            });
+
         return $data;
     }
 

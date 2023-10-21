@@ -25,4 +25,3 @@ interface UserInterface extends RepositoryInterface
 
     public static function doctorOfHospital($filter);
 }
-

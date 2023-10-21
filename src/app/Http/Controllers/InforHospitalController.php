@@ -53,7 +53,8 @@ class InforHospitalController extends Controller
         return $this->inforHospitalService->allDoctorCare($request);
     }
 
-    public function changeConfirm(RequestChangeConfirmDoctor $request, $id) {
+    public function changeConfirm(RequestChangeConfirmDoctor $request, $id)
+    {
         return $this->inforHospitalService->changeConfirm($request, $id);
     }
 
@@ -71,5 +72,4 @@ class InforHospitalController extends Controller
     {
         return $this->inforHospitalService->bookHospital($request, $province_code);
     }
-    
 }

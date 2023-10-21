@@ -17,7 +17,7 @@ class CategoryRepository extends BaseRepository implements CategoryInterface
     {
         return (new self)->model->find($id);
     }
-    
+
     public static function getCategory($filter)
     {
         $filter = (object) $filter;
