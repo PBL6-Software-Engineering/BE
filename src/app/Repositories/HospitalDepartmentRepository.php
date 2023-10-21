@@ -40,6 +40,16 @@ class HospitalDepartmentRepository extends BaseRepository implements HospitalDep
         $filter = (object) $filter;
         $data = (new self)->model
             ->join('departments', 'hospital_departments.id_department', '=', 'departments.id')
+
+            ->when(!empty($filter->search), function ($q) use ($filter) {
+                $q->where(function ($query) use ($filter) {
+                    $query->where('name', 'LIKE', '%' . $filter->search . '%');
+                });
+            })
+            ->when(!empty($filter->orderBy), function ($query) use ($filter) {
+                $query->orderBy($filter->orderBy, $filter->orderDirection);
+            })
+
             ->when(!empty($filter->id_hospital), function ($q) use ($filter) {
                 $q->where('hospital_departments.id_hospital', $filter->id_hospital);
             })

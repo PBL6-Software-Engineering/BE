@@ -110,15 +110,31 @@ class HospitalDepartmentService
             if (empty($hospital)) {
                 return $this->responseError(404, 'Không tìm thấy bệnh viện !');
             }
+
+            $orderBy = 'hospital_departments.id';
+            $orderDirection = 'ASC';
+
+            if ($request->sortlatest == 'true') {
+                $orderBy = 'hospital_departments.id';
+                $orderDirection = 'DESC';
+            }
+
+            if ($request->sortname == 'true') {
+                $orderBy = 'departments.name';
+                $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
+            }
+
             $filter = (object) [
+                'search' => $request->search ?? '',
                 'id_hospital' => $id,
+                'orderBy' => $orderBy,
+                'orderDirection' => $orderDirection,
             ];
-            $hospitalDepartments = $this->hospitalDepartment->searchHospitalDepartment($filter)->get();
 
             if (!(empty($request->paginate))) {
                 $hospitalDepartments = $this->hospitalDepartment->searchHospitalDepartment($filter)->paginate($request->paginate);
             } else {
-                $hospitalDepartments = $this->hospitalDepartment->searchHospitalDepartment($filter)-get();
+                $hospitalDepartments = $this->hospitalDepartment->searchHospitalDepartment($filter)->get();
             }
 
             return $this->responseOK(200, $hospitalDepartments, 'Xem tất cả khoa của bệnh viện thành công !');
