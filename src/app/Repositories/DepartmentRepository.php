@@ -58,6 +58,9 @@ class DepartmentRepository extends BaseRepository implements DepartmentInterface
             })
             ->when(!empty($filter->orderBy), function ($query) use ($filter) {
                 $query->orderBy($filter->orderBy, $filter->orderDirection);
+            })
+            ->when(!empty($filter->id_departments), function ($query) use ($filter) {
+                $query->whereNotIn('departments.id', $filter->id_departments);
             });
 
         return $data;
