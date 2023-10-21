@@ -8,6 +8,7 @@ use App\Repositories\DepartmentRepository;
 use App\Repositories\HospitalDepartmentInterface;
 use App\Repositories\HospitalServiceRepository;
 use App\Repositories\InforHospitalRepository;
+use Illuminate\Http\Request;
 use Throwable;
 
 class HospitalDepartmentService
@@ -102,7 +103,7 @@ class HospitalDepartmentService
         }
     }
 
-    public function departmentOfHospital($id)
+    public function departmentOfHospital(Request $request, $id)
     {
         try {
             $hospital = InforHospitalRepository::getInforHospital(['id_hospital' => $id])->first();
@@ -113,6 +114,12 @@ class HospitalDepartmentService
                 'id_hospital' => $id,
             ];
             $hospitalDepartments = $this->hospitalDepartment->searchHospitalDepartment($filter)->get();
+
+            if (!(empty($request->paginate))) {
+                $hospitalDepartments = $this->hospitalDepartment->searchHospitalDepartment($filter)->paginate($request->paginate);
+            } else {
+                $hospitalDepartments = $this->hospitalDepartment->searchHospitalDepartment($filter)-get();
+            }
 
             return $this->responseOK(200, $hospitalDepartments, 'Xem tất cả khoa của bệnh viện thành công !');
         } catch (Throwable $e) {

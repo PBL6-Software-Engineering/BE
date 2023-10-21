@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\RequestCreateHospitalDepartment;
 use App\Http\Requests\RequestUpdateHospitalDepartment;
 use App\Services\HospitalDepartmentService;
+use Illuminate\Http\Request;
 
 class HospitalDepartmentController extends Controller
 {
@@ -30,9 +31,9 @@ class HospitalDepartmentController extends Controller
         return $this->hospitalDepartmentService->delete($id);
     }
 
-    public function departmentOfHospital($id)
+    public function departmentOfHospital(Request $request, $id)
     {
-        return $this->hospitalDepartmentService->departmentOfHospital($id);
+        return $this->hospitalDepartmentService->departmentOfHospital($request, $id);
     }
 
     public function details($id)
