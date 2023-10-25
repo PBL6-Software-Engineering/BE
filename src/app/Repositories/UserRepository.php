@@ -123,9 +123,11 @@ class UserRepository extends BaseRepository implements UserInterface
 
             ->join('infor_doctors', 'users.id', '=', 'infor_doctors.id_doctor')
             ->join('departments', 'departments.id', '=', 'infor_doctors.id_department')
-            ->leftjoin('hospital_departments', 'hospital_departments.id_department', '=', 'departments.id')
+            ->join('hospital_departments', function ($join) { // join với 2 điều kiện
+                $join->on('hospital_departments.id_department', '=', 'infor_doctors.id_department')
+                    ->on('hospital_departments.id_hospital', '=', 'infor_doctors.id_hospital');
+            })
             ->join('users as users_hospital', 'users_hospital.id', '=', 'infor_doctors.id_hospital')
-
             ->when(!empty($filter->search), function ($q) use ($filter) {
                 $q->where(function ($query) use ($filter) {
                     $query->where('users.name', 'LIKE', '%' . $filter->search . '%')
