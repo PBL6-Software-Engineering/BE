@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Requests\RequestCalculatorBMI;
 use App\Repositories\ArticleRepository;
 use App\Repositories\CategoryRepository;
 use App\Repositories\DepartmentRepository;
@@ -120,5 +121,31 @@ class PublicService
         } catch (Throwable $e) {
             return $this->responseError(400, $e->getMessage());
         }
+    }
+
+    public function calculatorBMI(RequestCalculatorBMI $request) {
+        $height = $request->height;
+        $weight = $request->weight;
+
+        $bmi = round($weight / ($height/100 * $height/100),1);
+
+        $data = (object) [
+            'bmi' => $bmi,
+            'age' => $request->age,
+            'gender' => $request->gender,
+            'height' => $height,
+            'weight' => $weight,
+        ];
+
+        if($bmi <= 18.4) $condition = 'Thiếu cân' ;
+        if(18.5 <= $bmi && $bmi <= 22.9) $condition = 'Khỏe mạnh' ;
+        if(23 <= $bmi && $bmi <= 24.9) $condition = 'Thừa cân' ;
+        if(23 <= $bmi && $bmi <= 24.9) $condition = 'Thừa cân' ;
+        if(25 <= $bmi && $bmi <= 29.9) $condition = 'Béo phí độ 1' ;
+        if($bmi >= 30) $condition = 'Béo phí độ 2' ;
+
+        $data->condition = $condition;
+        
+        return $this->responseOK(200, $data, 'Tính chỉ số BMI thành công !');
     }
 }
