@@ -140,7 +140,7 @@ class HospitalServiceService
             }
 
             if ($request->sortname == 'true') {
-                $orderBy = 'name';
+                $orderBy = 'hospital_services.name';
                 $orderDirection = ($request->sortlatest == 'true') ? 'DESC' : 'ASC';
             }
 

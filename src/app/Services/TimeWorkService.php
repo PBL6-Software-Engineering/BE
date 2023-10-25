@@ -164,7 +164,7 @@ class TimeWorkService
             // loại bỏ đi các ngày mà bác sĩ bận trong work_chedule
             foreach ($daysOfWeek as $dayOfWeek) {
                 if ($timeWork->times->$dayOfWeek->enable == false) {
-                    $timeWork->times->$dayOfWeek = null; // bỏ ngày đó ra khỏi lịch luôn
+                    // $timeWork->times->$dayOfWeek = null; // bỏ ngày đó ra khỏi lịch luôn
                 } else {
                     $time = [];
                     $time['date'] = $timeWork->times->$dayOfWeek->date;
@@ -223,7 +223,7 @@ class TimeWorkService
 
             // bổ sung một số thông tin khác . space = còn chỗ của ngày đó
             foreach ($daysOfWeek as $dayOfWeek) {
-                if ($timeWork->times->$dayOfWeek != null) {
+                if ($timeWork->times->$dayOfWeek != null && $timeWork->times->$dayOfWeek->enable != false) {
                     $timeWork->times->$dayOfWeek->space =
                     count($timeWork->times->$dayOfWeek->morning->divided_times) +
                     count($timeWork->times->$dayOfWeek->afternoon->divided_times) +
@@ -299,7 +299,7 @@ class TimeWorkService
 
             foreach ($daysOfWeek as $dayOfWeek) {
                 if ($timeWork->times->$dayOfWeek->enable == false) {
-                    $timeWork->times->$dayOfWeek = null;
+                    // $timeWork->times->$dayOfWeek = null;
                 }
             }
 
