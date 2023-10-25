@@ -111,6 +111,10 @@ class WorkScheduleService
                 'id_hospital' => $hospitalServices->id_hospital,
             ];
             $allDoctor = UserRepository::doctorOfHospital($filter)->get();
+            if (count($allDoctor) == 0) {
+                return $this->responseError(400, 'Rất tiếc ! . Hiện tại chuyên khoa chứa dịch vụ này không có bác sĩ !');
+            }
+
             $listIdDoctor = [];
             foreach ($allDoctor as $index => $doctor) {
                 $listIdDoctor[] = $doctor->id_doctor;
